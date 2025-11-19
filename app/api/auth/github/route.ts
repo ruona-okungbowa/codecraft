@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     provider: "github",
     options: {
       redirectTo: `${origin}/api/auth/callback`,
+      scopes: "read:user user:email repo", // Request access to repos
     },
   });
 
