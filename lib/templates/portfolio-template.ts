@@ -131,7 +131,7 @@ export function generatePortfolioHTML(
 
       .project-card:hover {
         background: 
-          linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.6) 100%),
+          linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%),
           repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(59, 130, 246, 0.05) 10px, rgba(59, 130, 246, 0.05) 20px);
         box-shadow: 
           0 20px 25px -5px rgba(59, 130, 246, 0.2),
