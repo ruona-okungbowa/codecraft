@@ -29,26 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthContextProvider>
-          {/* Header */}
-          <header className="border-b border-gray-200">
-            <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-              {/* Logo */}
-              <Link href="/" className="text-2xl font-bold">
-                GitStory
-              </Link>
-
-              {/* User Menu */}
-              <UserMenu />
-            </div>
-          </header>
-
-          {/* Main Content */}
           <main>{children}</main>
-
-          {/* Footer (optional) */}
-          <footer className="border-t border-gray-200 py-8 text-center text-sm text-gray-600">
-            <p>© 2025 GitStory</p>
-          </footer>
         </AuthContextProvider>
       </body>
     </html>
