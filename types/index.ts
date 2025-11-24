@@ -166,6 +166,11 @@ export interface ProjectRow {
   analysed_at?: string;
   created_at: string;
   updated_at: string;
+  // Enriched fields from API
+  has_story?: boolean;
+  has_bullets?: boolean;
+  has_readme?: boolean;
+  content_count?: number;
 }
 
 // Helper type to convert DB rows to app types

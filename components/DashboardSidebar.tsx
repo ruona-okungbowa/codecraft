@@ -1,812 +1,343 @@
 "use client";
 
-import {
-  Box,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-  Button,
-  Paper,
-  Avatar,
-  alpha,
-  IconButton,
-  Tooltip,
-  Chip,
-} from "@mui/material";
-import {
-  Lightbulb,
-  Description,
-  TrendingUp,
-  WorkOutline,
-  Language,
-  Mic,
-  GitHub,
-  Settings,
-  Logout,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-} from "@mui/icons-material";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import {
+  Home,
+  Folder,
+  Target,
+  BarChart3,
+  Mic,
+  FileText,
+  Settings,
+  ChevronDown,
+  LogOut,
+  HelpCircle,
+  Globe,
+  RefreshCw,
+  Lightbulb,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface User {
-  user_metadata?: {
-    avatar_url?: string;
-    user_name?: string;
-  };
-  email?: string;
-}
-
-interface DashboardSidebarProps {
-  user: User;
-  mobileOpen: boolean;
-  onDrawerToggle: () => void;
-  onLogout: () => void;
-  drawerWidth: number;
-  collapsed: boolean;
-  onToggleCollapse: () => void;
-  collapsedWidth: number;
-  currentPath?: string;
-}
-
-const navigationItems = [
+const navItems = [
+  { icon: Home, label: "Dashboard", href: "/dashboard" },
+  { icon: Folder, label: "Projects", href: "/projects" },
+  { icon: Globe, label: "Portfolio", href: "/portfolio" },
+  { icon: Target, label: "Skill Gap", href: "/skill-gap" },
   {
-    text: "Dashboard",
-    icon: <GitHub />,
-    href: "/dashboard",
-    category: "main",
-  },
-  {
-    text: "Project Recommendations",
-    icon: <Lightbulb />,
+    icon: Lightbulb,
+    label: "Recommendations",
     href: "/project-recommendations",
-    category: "ai-tools",
-    badge: "AI",
   },
-  {
-    text: "Generate Resume",
-    icon: <Description />,
-    href: "/generate-resume",
-    category: "ai-tools",
-    badge: "AI",
-  },
-  {
-    text: "Skill Gap Analysis",
-    icon: <TrendingUp />,
-    href: "/skill-gap",
-    category: "analysis",
-  },
-  {
-    text: "Job Match Scoring",
-    icon: <WorkOutline />,
-    href: "/job-match",
-    category: "analysis",
-  },
-  {
-    text: "Portfolio Website",
-    icon: <Language />,
-    href: "/portfolio",
-    category: "showcase",
-  },
-  {
-    text: "Mock Interview",
-    icon: <Mic />,
-    href: "/mock-interview",
-    category: "practice",
-    badge: "NEW",
-  },
-  {
-    text: "Settings",
-    icon: <Settings />,
-    href: "/settings",
-    category: "account",
-  },
+  { icon: BarChart3, label: "Job Match", href: "/job-match" },
+  { icon: Mic, label: "Mock Interview", href: "/mock-interview" },
+  { icon: FileText, label: "Resume", href: "/generate-resume" },
 ];
 
-export default function DashboardSidebar({
-  user,
-  mobileOpen,
-  onDrawerToggle,
-  onLogout,
-  drawerWidth,
-  collapsed,
-  onToggleCollapse,
-  collapsedWidth,
-  currentPath = "/dashboard",
-}: DashboardSidebarProps) {
-  const drawer = (isCollapsed: boolean = false) => (
-    <Box
-      sx={{
-        height: "100%",
-        bgcolor: "#0f0f0f",
-        borderRight: `1px solid ${alpha("#667eea", 0.2)}`,
-        display: "flex",
-        flexDirection: "column",
-        width: isCollapsed ? collapsedWidth : drawerWidth,
-        transition: "width 0.3s ease",
-      }}
-    >
-      {/* Header Section with Toggle */}
-      <Box sx={{ p: isCollapsed ? 1 : 3, mb: 2 }}>
-        {/* Toggle Button - Top Right */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            mb: 1,
-          }}
-        >
-          <IconButton
-            onClick={onToggleCollapse}
-            size="small"
-            sx={{
-              color: "#667eea",
-              bgcolor: alpha("#667eea", 0.1),
-              width: 32,
-              height: 32,
-              "&:hover": {
-                bgcolor: alpha("#667eea", 0.2),
-              },
-            }}
-          >
-            {isCollapsed ? (
-              <ChevronRight sx={{ fontSize: 18 }} />
-            ) : (
-              <ChevronLeft sx={{ fontSize: 18 }} />
-            )}
-          </IconButton>
-        </Box>
+interface UserData {
+  name: string;
+  email: string;
+  avatar_url?: string;
+}
 
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            mb: isCollapsed ? 1 : 2,
-            justifyContent: isCollapsed ? "center" : "flex-start",
-          }}
-        >
-          <Avatar
-            src={user?.user_metadata?.avatar_url}
-            alt={user?.user_metadata?.user_name || "User"}
-            sx={{
-              mr: isCollapsed ? 0 : 1.5,
-              width: 40,
-              height: 40,
-              border: `2px solid ${alpha("#667eea", 0.3)}`,
-            }}
-          >
-            <GitHub sx={{ color: "#667eea", fontSize: 24 }} />
-          </Avatar>
-          {!isCollapsed && (
-            <Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 800,
-                  background:
-                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  fontSize: "1.3rem",
-                  lineHeight: 1.2,
-                }}
-              >
-                GitStory
-              </Typography>
-              <Typography
-                variant="caption"
-                color="#808080"
-                sx={{ fontSize: "0.75rem" }}
-              >
-                Dashboard
-              </Typography>
-            </Box>
-          )}
-        </Box>
+export default function DashboardSidebar() {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [projectCount, setProjectCount] = useState(0);
+  const [syncing, setSyncing] = useState(false);
+  const pathname = usePathname();
 
-        {!isCollapsed && (
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              borderRadius: 2,
-              bgcolor: alpha("#667eea", 0.08),
-              border: `1px solid ${alpha("#667eea", 0.2)}`,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mb: 1,
-              }}
-            >
-              <Typography
-                variant="caption"
-                color="#b0b0b0"
-                sx={{
-                  fontSize: "0.7rem",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                }}
-              >
-                Logged in as
-              </Typography>
-              <Chip
-                label="PRO"
-                size="small"
-                sx={{
-                  height: 16,
-                  fontSize: "0.6rem",
-                  bgcolor: alpha("#667eea", 0.3),
-                  color: "#667eea",
-                  fontWeight: 700,
-                }}
-              />
-            </Box>
-            <Typography
-              variant="body2"
-              color="#ffffff"
-              fontWeight={600}
-              sx={{ mb: 2 }}
-            >
-              {user?.user_metadata?.user_name || user?.email?.split("@")[0]}
-            </Typography>
+  useEffect(() => {
+    async function fetchUserData() {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Star sx={{ fontSize: 14, color: "#ffd700" }} />
-              <Typography
-                variant="caption"
-                color="#c0c0c0"
-                sx={{ fontSize: "0.7rem" }}
-              >
-                12 projects analyzed
-              </Typography>
-            </Box>
-          </Paper>
-        )}
-      </Box>
+        if (user) {
+          setUserData({
+            name:
+              user.user_metadata?.name || user.email?.split("@")[0] || "User",
+            email: user.email || "",
+            avatar_url: user.user_metadata?.avatar_url,
+          });
+        }
 
-      <Box sx={{ flexGrow: 1, overflowY: "auto", overflowX: "hidden" }}>
-        <List sx={{ px: isCollapsed ? 1 : 2, py: 1 }}>
-          {/* Main Navigation */}
-          {navigationItems
-            .filter((item) => item.category === "main")
-            .map((item) => {
-              const isActive = currentPath === item.href;
-              return (
-                <ListItem key={item.text} disablePadding sx={{ mb: 1.5 }}>
-                  {isCollapsed ? (
-                    <Tooltip title={item.text} placement="right">
-                      <ListItemButton
-                        component={Link}
-                        href={item.href}
-                        sx={{
-                          borderRadius: 3,
-                          color: isActive ? "#ffffff" : "#c0c0c0",
-                          py: 2,
-                          px: 1,
-                          minHeight: 56,
-                          justifyContent: "center",
-                          bgcolor: isActive
-                            ? alpha("#667eea", 0.2)
-                            : "transparent",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            bgcolor: alpha("#667eea", 0.12),
-                            color: "#ffffff",
-                            "& .MuiListItemIcon-root": {
-                              color: "#667eea",
-                              transform: "scale(1.1)",
-                            },
-                          },
-                        }}
-                      >
-                        <ListItemIcon
-                          sx={{
-                            color: isActive ? "#667eea" : "inherit",
-                            minWidth: "auto",
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              fontSize: 28,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {item.icon}
-                          </Box>
-                        </ListItemIcon>
-                      </ListItemButton>
-                    </Tooltip>
-                  ) : (
-                    <ListItemButton
-                      component={Link}
-                      href={item.href}
-                      sx={{
-                        borderRadius: 3,
-                        color: isActive ? "#ffffff" : "#c0c0c0",
-                        py: 2,
-                        px: 2.5,
-                        bgcolor: isActive
-                          ? alpha("#667eea", 0.2)
-                          : "transparent",
-                        transition: "all 0.2s ease",
-                        position: "relative",
-                        overflow: "hidden",
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: 4,
-                          bgcolor: "#667eea",
-                          transform: isActive ? "scaleY(1)" : "scaleY(0)",
-                          transition: "transform 0.2s ease",
-                        },
-                        "&:hover": {
-                          bgcolor: alpha("#667eea", 0.12),
-                          color: "#ffffff",
-                          transform: "translateX(4px)",
-                          "&::before": {
-                            transform: "scaleY(1)",
-                          },
-                          "& .MuiListItemIcon-root": {
-                            color: "#667eea",
-                            transform: "scale(1.1)",
-                          },
-                        },
-                      }}
-                    >
-                      <ListItemIcon
-                        sx={{
-                          color: isActive ? "#667eea" : "inherit",
-                          minWidth: 48,
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            fontSize: 28,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          {item.icon}
-                        </Box>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={item.text}
-                        primaryTypographyProps={{
-                          fontSize: "0.85rem",
-                          fontWeight: isActive ? 700 : 600,
-                          letterSpacing: 0.2,
-                        }}
-                      />
-                    </ListItemButton>
-                  )}
-                </ListItem>
-              );
-            })}
-        </List>
+        // Fetch project count
+        const projectsRes = await fetch("/api/projects");
+        if (projectsRes.ok) {
+          const projectsData = await projectsRes.json();
+          setProjectCount(projectsData.projects?.length || 0);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    }
 
-        <List sx={{ px: isCollapsed ? 1 : 2, py: 1 }}>
-          {navigationItems
-            .filter((item) => item.category === "ai-tools")
-            .map((item) => {
-              const isActive = currentPath === item.href;
-              return (
-                <ListItem key={item.text} disablePadding sx={{ mb: 1.5 }}>
-                  {isCollapsed ? (
-                    <Tooltip
-                      title={`${item.text} ${item.badge ? `(${item.badge})` : ""}`}
-                      placement="right"
-                    >
-                      <ListItemButton
-                        component={Link}
-                        href={item.href}
-                        sx={{
-                          borderRadius: 3,
-                          color: isActive ? "#ffffff" : "#c0c0c0",
-                          py: 2,
-                          px: 1,
-                          minHeight: 56,
-                          justifyContent: "center",
-                          bgcolor: isActive
-                            ? alpha("#667eea", 0.2)
-                            : "transparent",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            bgcolor: alpha("#667eea", 0.12),
-                            color: "#ffffff",
-                            "& .MuiListItemIcon-root": {
-                              color: "#667eea",
-                              transform: "scale(1.1)",
-                            },
-                          },
-                        }}
-                      >
-                        <ListItemIcon
-                          sx={{
-                            color: isActive ? "#667eea" : "inherit",
-                            minWidth: "auto",
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              fontSize: 28,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {item.icon}
-                          </Box>
-                        </ListItemIcon>
-                      </ListItemButton>
-                    </Tooltip>
-                  ) : (
-                    <ListItemButton
-                      component={Link}
-                      href={item.href}
-                      sx={{
-                        borderRadius: 3,
-                        color: isActive ? "#ffffff" : "#c0c0c0",
-                        py: 2,
-                        px: 2.5,
-                        bgcolor: isActive
-                          ? alpha("#667eea", 0.2)
-                          : "transparent",
-                        transition: "all 0.2s ease",
-                        position: "relative",
-                        overflow: "hidden",
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: 4,
-                          bgcolor: "#667eea",
-                          transform: isActive ? "scaleY(1)" : "scaleY(0)",
-                          transition: "transform 0.2s ease",
-                        },
-                        "&:hover": {
-                          bgcolor: alpha("#667eea", 0.12),
-                          color: "#ffffff",
-                          transform: "translateX(4px)",
-                          "&::before": {
-                            transform: "scaleY(1)",
-                          },
-                          "& .MuiListItemIcon-root": {
-                            color: "#667eea",
-                            transform: "scale(1.1)",
-                          },
-                        },
-                      }}
-                    >
-                      <ListItemIcon
-                        sx={{
-                          color: isActive ? "#667eea" : "inherit",
-                          minWidth: 48,
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            fontSize: 28,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          {item.icon}
-                        </Box>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <span>{item.text}</span>
-                            {item.badge && (
-                              <Chip
-                                label={item.badge}
-                                size="small"
-                                sx={{
-                                  height: 18,
-                                  fontSize: "0.6rem",
-                                  bgcolor:
-                                    item.badge === "NEW"
-                                      ? alpha("#4caf50", 0.3)
-                                      : alpha("#667eea", 0.3),
-                                  color:
-                                    item.badge === "NEW"
-                                      ? "#4caf50"
-                                      : "#667eea",
-                                  fontWeight: 700,
-                                }}
-                              />
-                            )}
-                          </Box>
-                        }
-                        primaryTypographyProps={{
-                          fontSize: "0.85rem",
-                          fontWeight: isActive ? 700 : 600,
-                          letterSpacing: 0.2,
-                        }}
-                      />
-                    </ListItemButton>
-                  )}
-                </ListItem>
-              );
-            })}
-        </List>
+    fetchUserData();
+  }, []);
 
-        <List sx={{ px: isCollapsed ? 1 : 2, py: 1 }}>
-          {navigationItems
-            .filter((item) => !["main", "ai-tools"].includes(item.category))
-            .map((item) => {
-              const isActive = currentPath === item.href;
-              return (
-                <ListItem key={item.text} disablePadding sx={{ mb: 1.5 }}>
-                  {isCollapsed ? (
-                    <Tooltip
-                      title={`${item.text} ${item.badge ? `(${item.badge})` : ""}`}
-                      placement="right"
-                    >
-                      <ListItemButton
-                        component={Link}
-                        href={item.href}
-                        sx={{
-                          borderRadius: 3,
-                          color: isActive ? "#ffffff" : "#c0c0c0",
-                          py: 2,
-                          px: 1,
-                          minHeight: 56,
-                          justifyContent: "center",
-                          bgcolor: isActive
-                            ? alpha("#667eea", 0.2)
-                            : "transparent",
-                          transition: "all 0.2s ease",
-                          "&:hover": {
-                            bgcolor: alpha("#667eea", 0.12),
-                            color: "#ffffff",
-                            "& .MuiListItemIcon-root": {
-                              color: "#667eea",
-                              transform: "scale(1.1)",
-                            },
-                          },
-                        }}
-                      >
-                        <ListItemIcon
-                          sx={{
-                            color: isActive ? "#667eea" : "inherit",
-                            minWidth: "auto",
-                            transition: "all 0.2s ease",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              fontSize: 28,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {item.icon}
-                          </Box>
-                        </ListItemIcon>
-                      </ListItemButton>
-                    </Tooltip>
-                  ) : (
-                    <ListItemButton
-                      component={Link}
-                      href={item.href}
-                      sx={{
-                        borderRadius: 3,
-                        color: isActive ? "#ffffff" : "#c0c0c0",
-                        py: 2,
-                        px: 2.5,
-                        bgcolor: isActive
-                          ? alpha("#667eea", 0.2)
-                          : "transparent",
-                        transition: "all 0.2s ease",
-                        position: "relative",
-                        overflow: "hidden",
-                        "&::before": {
-                          content: '""',
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: 4,
-                          bgcolor: "#667eea",
-                          transform: isActive ? "scaleY(1)" : "scaleY(0)",
-                          transition: "transform 0.2s ease",
-                        },
-                        "&:hover": {
-                          bgcolor: alpha("#667eea", 0.12),
-                          color: "#ffffff",
-                          transform: "translateX(4px)",
-                          "&::before": {
-                            transform: "scaleY(1)",
-                          },
-                          "& .MuiListItemIcon-root": {
-                            color: "#667eea",
-                            transform: "scale(1.1)",
-                          },
-                        },
-                      }}
-                    >
-                      <ListItemIcon
-                        sx={{
-                          color: isActive ? "#667eea" : "inherit",
-                          minWidth: 48,
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            fontSize: 28,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          {item.icon}
-                        </Box>
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <span>{item.text}</span>
-                            {item.badge && (
-                              <Chip
-                                label={item.badge}
-                                size="small"
-                                sx={{
-                                  height: 18,
-                                  fontSize: "0.6rem",
-                                  bgcolor:
-                                    item.badge === "NEW"
-                                      ? alpha("#4caf50", 0.3)
-                                      : alpha("#667eea", 0.3),
-                                  color:
-                                    item.badge === "NEW"
-                                      ? "#4caf50"
-                                      : "#667eea",
-                                  fontWeight: 700,
-                                }}
-                              />
-                            )}
-                          </Box>
-                        }
-                        primaryTypographyProps={{
-                          fontSize: "0.85rem",
-                          fontWeight: isActive ? 700 : 600,
-                          letterSpacing: 0.2,
-                        }}
-                      />
-                    </ListItemButton>
-                  )}
-                </ListItem>
-              );
-            })}
-        </List>
-      </Box>
-
-      {/* Logout Button */}
-      <Box sx={{ mt: "auto", p: isCollapsed ? 1 : 2 }}>
-        {isCollapsed ? (
-          <Tooltip title="Logout" placement="right">
-            <IconButton
-              onClick={onLogout}
-              sx={{
-                width: "100%",
-                height: 48,
-                borderRadius: 3,
-                border: `2px solid ${alpha("#f44336", 0.5)}`,
-                color: "#f44336",
-                "&:hover": {
-                  borderColor: "#f44336",
-                  bgcolor: alpha("#f44336", 0.1),
-                },
-              }}
-            >
-              <Logout />
-            </IconButton>
-          </Tooltip>
-        ) : (
-          <Button
-            fullWidth
-            variant="outlined"
-            startIcon={<Logout />}
-            onClick={onLogout}
-            sx={{
-              borderRadius: 3,
-              py: 1.5,
-              fontWeight: 600,
-              borderWidth: 2,
-              borderColor: alpha("#f44336", 0.5),
-              color: "#f44336",
-              "&:hover": {
-                borderWidth: 2,
-                borderColor: "#f44336",
-                bgcolor: alpha("#f44336", 0.1),
-              },
-            }}
-          >
-            Logout
-          </Button>
-        )}
-      </Box>
-    </Box>
-  );
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
-    <Box
-      component="nav"
-      sx={{
-        width: { sm: collapsed ? collapsedWidth : drawerWidth },
-        flexShrink: { sm: 0 },
-        transition: "width 0.3s ease",
-      }}
+    <motion.aside
+      initial={{ width: 72 }}
+      animate={{ width: isExpanded ? 240 : 72 }}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+      className="fixed left-0 top-0 h-screen bg-white border-r border-gray-200 shadow-sm z-40 transition-all duration-200"
     >
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={onDrawerToggle}
-        ModalProps={{ keepMounted: true }}
-        sx={{
-          display: { xs: "block", sm: "none" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: drawerWidth,
-            bgcolor: "#0f0f0f",
-          },
-        }}
-      >
-        {drawer(false)}
-      </Drawer>
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: "none", sm: "block" },
-          "& .MuiDrawer-paper": {
-            boxSizing: "border-box",
-            width: collapsed ? collapsedWidth : drawerWidth,
-            bgcolor: "#0f0f0f",
-            borderRight: "none",
-            transition: "width 0.3s ease",
-          },
-        }}
-        open
-      >
-        {drawer(collapsed)}
-      </Drawer>
-    </Box>
+      {/* Logo Section */}
+      <div className="h-[72px] flex items-center justify-center border-b border-gray-200 px-4">
+        <Image
+          src="/icon-logo.png"
+          alt="CodeCraft"
+          width={40}
+          height={40}
+          className="shrink-0"
+        />
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.15 }}
+              className="ml-3 text-xl font-bold text-gray-900 whitespace-nowrap"
+            >
+              CodeCraft
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Navigation Section */}
+      <nav className="p-2 flex flex-col gap-1">
+        {navItems.map((item, index) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+          const showBadge = item.href === "/projects" && projectCount > 0;
+
+          return (
+            <Link
+              key={index}
+              href={item.href}
+              className={`
+                relative flex items-center gap-3 h-12 px-4 rounded-lg transition-all duration-150
+                ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }
+              `}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute left-0 w-1 h-8 bg-blue-600 rounded-r"
+                  transition={{ duration: 0.2 }}
+                />
+              )}
+              <Icon size={20} className="shrink-0" />
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.15 }}
+                    className="text-sm font-medium whitespace-nowrap"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+              {showBadge && isExpanded && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+                >
+                  {projectCount}
+                </motion.span>
+              )}
+            </Link>
+          );
+        })}
+
+        {/* Divider */}
+        <div className="my-4 h-px bg-gray-200" />
+
+        {/* Sync Button */}
+        <button
+          onClick={async () => {
+            setSyncing(true);
+            try {
+              const response = await fetch("/api/github/repos", {
+                method: "POST",
+              });
+              if (response.ok) {
+                // Refresh project count
+                const projectsRes = await fetch("/api/projects");
+                if (projectsRes.ok) {
+                  const projectsData = await projectsRes.json();
+                  setProjectCount(projectsData.projects?.length || 0);
+                }
+                // Reload the page to show updated data
+                window.location.reload();
+              }
+            } catch (error) {
+              console.error("Error syncing:", error);
+            } finally {
+              setSyncing(false);
+            }
+          }}
+          disabled={syncing}
+          className={`flex items-center gap-3 h-12 px-4 rounded-lg transition-all duration-150 ${
+            syncing
+              ? "bg-blue-50 text-blue-600 cursor-not-allowed"
+              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+          }`}
+        >
+          <RefreshCw
+            size={20}
+            className={`shrink-0 ${syncing ? "animate-spin" : ""}`}
+          />
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.15 }}
+                className="text-sm font-medium whitespace-nowrap"
+              >
+                {syncing ? "Syncing..." : "Sync GitHub"}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+
+        {/* Settings */}
+        <Link
+          href="/settings"
+          className="flex items-center gap-3 h-12 px-4 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all duration-150"
+        >
+          <Settings size={20} className="shrink-0" />
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.15 }}
+                className="text-sm font-medium whitespace-nowrap"
+              >
+                Settings
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Link>
+      </nav>
+
+      {/* User Section */}
+      <div className="absolute bottom-0 w-full border-t border-gray-200 bg-white p-4">
+        <button
+          onClick={() => setShowUserMenu(!showUserMenu)}
+          className="flex items-center gap-3 w-full hover:bg-gray-50 rounded-lg p-2 transition-colors"
+        >
+          {userData?.avatar_url ? (
+            <Image
+              src={userData.avatar_url}
+              alt={userData.name}
+              width={40}
+              height={40}
+              className="rounded-full shrink-0"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold shrink-0">
+              {userData ? getInitials(userData.name) : "U"}
+            </div>
+          )}
+          <AnimatePresence>
+            {isExpanded && userData && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.15 }}
+                className="flex-1 text-left overflow-hidden"
+              >
+                <div className="text-sm font-medium text-gray-900 truncate">
+                  {userData.name}
+                </div>
+                <div className="text-xs text-gray-500 truncate">
+                  {userData.email}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {isExpanded && (
+            <ChevronDown size={16} className="text-gray-400 shrink-0" />
+          )}
+        </button>
+
+        {/* User Dropdown Menu */}
+        <AnimatePresence>
+          {showUserMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute bottom-20 left-2 right-2 bg-white rounded-lg shadow-xl border border-gray-200 p-2"
+            >
+              <Link
+                href="/settings"
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                onClick={() => setShowUserMenu(false)}
+              >
+                <Settings size={16} className="text-gray-600" />
+                <span className="text-sm text-gray-700">Settings</span>
+              </Link>
+              <Link
+                href="/help"
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                onClick={() => setShowUserMenu(false)}
+              >
+                <HelpCircle size={16} className="text-gray-600" />
+                <span className="text-sm text-gray-700">Help & Support</span>
+              </Link>
+              <div className="my-2 h-px bg-gray-200" />
+              <button
+                onClick={async () => {
+                  const { createClient } = await import(
+                    "@/lib/supabase/client"
+                  );
+                  const supabase = createClient();
+                  await supabase.auth.signOut();
+                  window.location.href = "/";
+                }}
+                className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors w-full text-left"
+              >
+                <LogOut size={16} className="text-red-600" />
+                <span className="text-sm text-red-600">Sign Out</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.aside>
   );
 }

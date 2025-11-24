@@ -7,12 +7,6 @@ import {
 } from "@/lib/analysis/calculateSkillGaps";
 import type { Role } from "@/types/skills";
 
-/**
- * POST /api/analysis/skill-gaps
- * Analyze skill gaps for a user's portfolio against target role
- *
- * Requirements: 4.1, 4.2, 4.3
- */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
