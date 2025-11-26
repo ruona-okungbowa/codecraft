@@ -218,7 +218,7 @@ export default function HowItWorksSection() {
             whileTap={{ scale: 0.95 }}
             className="bg-[#87d498] hover:bg-[#72b681] text-white font-bold px-8 py-4 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all duration-200 mb-3"
           >
-            <Link href="/login">Start with GitHub (it&apos;s free)</Link>
+            <Link href="/login">Get Started</Link>
           </motion.button>
         </motion.div>
       </div>

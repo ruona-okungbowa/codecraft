@@ -18,13 +18,14 @@ import {
   Globe,
   RefreshCw,
   Lightbulb,
+  BookOpen,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { icon: Home, label: "Dashboard", href: "/dashboard" },
   { icon: Folder, label: "Projects", href: "/projects" },
-  { icon: Globe, label: "Portfolio", href: "/portfolio" },
+  { icon: Globe, label: "Portfolio Website", href: "/portfolio" },
   { icon: Target, label: "Skill Gap", href: "/skill-gap" },
   {
     icon: Lightbulb,
@@ -34,6 +35,7 @@ const navItems = [
   { icon: BarChart3, label: "Job Match", href: "/job-match" },
   { icon: Mic, label: "Mock Interview", href: "/mock-interview" },
   { icon: FileText, label: "Resume", href: "/generate-resume" },
+  { icon: BookOpen, label: "README Generator", href: "/readme-generator" },
 ];
 
 interface UserData {
@@ -150,7 +152,7 @@ export default function DashboardSidebar() {
                   transition={{ duration: 0.2 }}
                 />
               )}
-              <Icon size={20} className="shrink-0" />
+              <Icon size={18} className="shrink-0" />
               <AnimatePresence>
                 {isExpanded && (
                   <motion.span
@@ -212,7 +214,7 @@ export default function DashboardSidebar() {
           }`}
         >
           <RefreshCw
-            size={20}
+            size={18}
             className={`shrink-0 ${syncing ? "animate-spin" : ""}`}
           />
           <AnimatePresence>
@@ -235,7 +237,7 @@ export default function DashboardSidebar() {
           href="/settings"
           className="flex items-center gap-3 h-12 px-4 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-all duration-150"
         >
-          <Settings size={20} className="shrink-0" />
+          <Settings size={18} className="shrink-0" />
           <AnimatePresence>
             {isExpanded && (
               <motion.span
