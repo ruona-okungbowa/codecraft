@@ -42,15 +42,15 @@ export async function POST(request: NextRequest) {
       .select("*")
       .eq("user_id", user.id)
       .eq("target_role", targetRole)
-      .order("analyzed_at", { ascending: false })
+      .order("analysed_at", { ascending: false })
       .limit(1)
       .single();
 
     if (existingAnalysis) {
-      const analyzedAt = new Date(existingAnalysis.analyzed_at);
+      const analysedAt = new Date(existingAnalysis.analysed_at);
       const now = new Date();
       const hoursSinceAnalysis =
-        (now.getTime() - analyzedAt.getTime()) / (1000 * 60 * 60);
+        (now.getTime() - analysedAt.getTime()) / (1000 * 60 * 60);
 
       if (hoursSinceAnalysis < 24) {
         const analysis = calculateSkillGaps(
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
           analysis,
           summary,
           cached: true,
-          analyzedAt: existingAnalysis.analyzed_at,
+          analysedAt: existingAnalysis.analysed_at,
         });
       }
     }
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         preferred: analysis.missingSkills.preferred,
         niceToHave: analysis.missingSkills.niceToHave,
       },
-      analyzed_at: new Date().toISOString(),
+      // analyzed_at will be set automatically by DEFAULT NOW() in database
     });
 
     if (insertError) {
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       analysis,
       summary,
       cached: false,
-      analyzedAt: new Date().toISOString(),
+      analysedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Error analyzing skill gaps:", error);

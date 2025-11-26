@@ -173,7 +173,7 @@ export default function DashboardPage() {
               <p
                 className={`text-sm text-gray-600 mb-4 ${sansation.className}`}
               >
-                Repos Analyzed
+                GitHub Repositories
               </p>
               <div className="space-y-2 mb-4">
                 {loading ? (

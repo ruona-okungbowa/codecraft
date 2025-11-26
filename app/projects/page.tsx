@@ -23,6 +23,8 @@ import {
   X,
   BarChart3,
   Briefcase,
+  Sparkles,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { Newsreader, Sansation } from "next/font/google";
@@ -759,6 +761,21 @@ export default function ProjectsPage() {
                                 transition={{ duration: 0.1 }}
                                 className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
                               >
+                                <Link
+                                  href={`/readme-generator?projectId=${project.id}`}
+                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                >
+                                  <Sparkles size={14} />
+                                  <span>Generate README</span>
+                                </Link>
+                                <Link
+                                  href={`/projects/${project.id}`}
+                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                >
+                                  <BookOpen size={14} />
+                                  <span>Generate Story</span>
+                                </Link>
+                                <div className="border-t border-gray-200" />
                                 <a
                                   href={project.url}
                                   target="_blank"
@@ -769,16 +786,8 @@ export default function ProjectsPage() {
                                   <span>View on GitHub</span>
                                 </a>
                                 <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                  <FileText size={14} />
-                                  <span>Edit Details</span>
-                                </button>
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                   <Star size={14} />
                                   <span>Add to Portfolio</span>
-                                </button>
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                  <RefreshCw size={14} />
-                                  <span>Regenerate Story</span>
                                 </button>
                                 <div className="border-t border-gray-200" />
                                 <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
@@ -923,6 +932,21 @@ export default function ProjectsPage() {
                                 transition={{ duration: 0.1 }}
                                 className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50"
                               >
+                                <Link
+                                  href={`/readme-generator?projectId=${project.id}`}
+                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                >
+                                  <Sparkles size={14} />
+                                  <span>Generate README</span>
+                                </Link>
+                                <Link
+                                  href={`/projects/${project.id}`}
+                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                                >
+                                  <BookOpen size={14} />
+                                  <span>Generate Story</span>
+                                </Link>
+                                <div className="border-t border-gray-200" />
                                 <a
                                   href={project.url}
                                   target="_blank"
@@ -933,16 +957,8 @@ export default function ProjectsPage() {
                                   <span>View on GitHub</span>
                                 </a>
                                 <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                  <FileText size={14} />
-                                  <span>Edit Details</span>
-                                </button>
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                   <Star size={14} />
                                   <span>Add to Portfolio</span>
-                                </button>
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                  <RefreshCw size={14} />
-                                  <span>Regenerate Story</span>
                                 </button>
                                 <div className="border-t border-gray-200" />
                                 <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
