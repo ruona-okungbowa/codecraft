@@ -29,7 +29,8 @@ export function generateRecommendations(
     );
 
     if (scoreResult.gapsFilled.length === 0) {
-      continue;
+      scoreResult.priority = "low";
+      scoreResult.score = 1;
     }
 
     const skillMatches = matchSkills(
@@ -49,5 +50,6 @@ export function generateRecommendations(
     recommendations.push(recommendation);
   }
   recommendations.sort((a, b) => b.priorityScore - a.priorityScore);
+
   return recommendations;
 }

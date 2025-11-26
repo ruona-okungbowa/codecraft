@@ -10,7 +10,7 @@ import ProjectSelector from "@/components/readme/ProjectSelector";
 import Editor from "@/components/readme/Editor";
 import Preview from "@/components/readme/Preview";
 import DeploymentDialog from "@/components/readme/DeploymentDialog";
-import { ReadmeTemplate } from "@/lib/readme/types";
+import { ReadmeTemplate } from "@/types/readme";
 import { Project } from "@/types";
 
 export default function ReadmeGeneratorPage() {

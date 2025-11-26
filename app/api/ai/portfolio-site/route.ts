@@ -6,6 +6,7 @@ import {
   generateProjectDescription,
 } from "@/lib/openai/generatePortfolio";
 import { generatePortfolioHTML } from "@/lib/templates/portfolio-template";
+import { generatePortfolioReadme } from "@/lib/templates/portfolio-readme";
 import { deployToGitHubPages } from "@/lib/github/deployPortfolio";
 
 export async function POST() {
@@ -25,7 +26,9 @@ export async function POST() {
 
     const { data: userData } = await supabase
       .from("users")
-      .select("github_username, target_role, email, avatar_url")
+      .select(
+        "github_username, target_role, email, avatar_url, github_token, token_updated_at, first_name, last_name"
+      )
       .eq("id", user.id)
       .single();
 
@@ -40,6 +43,7 @@ export async function POST() {
       .from("projects")
       .select("*")
       .eq("user_id", user.id)
+      .eq("in_portfolio", true)
       .order("stars", { ascending: false })
       .limit(6);
 
@@ -53,7 +57,10 @@ export async function POST() {
 
     if (!projects || projects.length === 0) {
       return NextResponse.json(
-        { error: "No projects found. Please analyze some projects first." },
+        {
+          error:
+            "No projects selected for portfolio. Please add projects to your portfolio from the Projects page.",
+        },
         { status: 404 }
       );
     }
@@ -81,8 +88,14 @@ export async function POST() {
     const skills = Array.from(skillsSet);
 
     console.log("Generating portfolio HTML...");
+    // Use full name if available, otherwise fall back to GitHub username
+    const displayName =
+      userData.first_name && userData.last_name
+        ? `${userData.first_name} ${userData.last_name}`
+        : userData.github_username;
+
     const htmlContent = generatePortfolioHTML(
-      userData.github_username,
+      displayName,
       bio,
       userData.github_username,
       projectsWithDescriptions,
@@ -92,25 +105,41 @@ export async function POST() {
     );
 
     console.log("Deploying to GitHub Pages...");
-    const { data: session } = await supabase.auth.getSession();
-    const githubToken = session.session?.provider_token;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const githubToken =
+      sessionData.session?.provider_token || sessionData.session?.access_token;
 
     if (!githubToken) {
+      console.error("Session data:", sessionData);
       return NextResponse.json(
         {
           error:
-            "GitHub token not found. Please reconnect your GitHub account.",
+            "GitHub token not found. Please log out and log back in to reconnect your GitHub account.",
+          details:
+            "The GitHub access token is missing from your session. This may happen if you logged in before we added GitHub repository access.",
         },
         { status: 401 }
       );
     }
+
+    console.log("Generating README...");
+    const portfolioUrl = `https://${userData.github_username}.github.io/portfolio-website`;
+    const readmeContent = generatePortfolioReadme(
+      displayName, // Use full name in README too
+      userData.github_username,
+      portfolioUrl,
+      projects.length
+    );
 
     const octokit = createGitHubClient(githubToken);
     const deployResult = await deployToGitHubPages(
       userData.github_username,
       githubToken,
       htmlContent,
-      octokit
+      octokit,
+      readmeContent,
+      userData.github_username,
+      projects.length
     );
 
     return NextResponse.json({

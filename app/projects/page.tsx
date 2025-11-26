@@ -71,6 +71,9 @@ export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [togglingPortfolio, setTogglingPortfolio] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     fetchProjects();
@@ -101,6 +104,30 @@ export default function ProjectsPage() {
       console.error("Error syncing:", error);
     } finally {
       setSyncing(false);
+    }
+  }
+
+  async function togglePortfolio(projectId: string, currentStatus: boolean) {
+    setTogglingPortfolio(projectId);
+    try {
+      const response = await fetch(`/api/projects/${projectId}/portfolio`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inPortfolio: !currentStatus }),
+      });
+
+      if (response.ok) {
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.id === projectId ? { ...p, in_portfolio: !currentStatus } : p
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling portfolio:", error);
+    } finally {
+      setTogglingPortfolio(null);
+      setDropdownOpen(null);
     }
   }
 
@@ -249,9 +276,7 @@ export default function ProjectsPage() {
         getProjectStatus(p) === "needs-review" ||
         getProjectStatus(p) === "draft"
     ).length,
-    inPortfolio: projects.filter(
-      (p) => p.complexity_score && p.complexity_score > 70
-    ).length,
+    inPortfolio: projects.filter((p) => p.in_portfolio === true).length,
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -615,13 +640,12 @@ export default function ProjectsPage() {
                       <div className="text-white text-6xl opacity-20 font-mono font-bold">
                         {languages[0]?.slice(0, 2).toUpperCase() || "{}"}
                       </div>
-                      {project.complexity_score &&
-                        project.complexity_score > 70 && (
-                          <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full shadow-sm">
-                            <Star size={12} fill="white" />
-                            <span>In Portfolio</span>
-                          </div>
-                        )}
+                      {project.in_portfolio && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full shadow-sm">
+                          <Star size={12} fill="white" />
+                          <span>In Portfolio</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Card Content */}
@@ -785,9 +809,40 @@ export default function ProjectsPage() {
                                   <ExternalLink size={14} />
                                   <span>View on GitHub</span>
                                 </a>
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                  <Star size={14} />
-                                  <span>Add to Portfolio</span>
+                                <button
+                                  onClick={() =>
+                                    togglePortfolio(
+                                      project.id,
+                                      project.in_portfolio || false
+                                    )
+                                  }
+                                  disabled={togglingPortfolio === project.id}
+                                  className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors ${
+                                    project.in_portfolio
+                                      ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                                      : "text-gray-700 hover:bg-gray-100"
+                                  }`}
+                                >
+                                  {togglingPortfolio === project.id ? (
+                                    <Loader2
+                                      size={14}
+                                      className="animate-spin"
+                                    />
+                                  ) : (
+                                    <Star
+                                      size={14}
+                                      fill={
+                                        project.in_portfolio
+                                          ? "currentColor"
+                                          : "none"
+                                      }
+                                    />
+                                  )}
+                                  <span>
+                                    {project.in_portfolio
+                                      ? "Remove from Portfolio"
+                                      : "Add to Portfolio"}
+                                  </span>
                                 </button>
                                 <div className="border-t border-gray-200" />
                                 <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
@@ -842,13 +897,12 @@ export default function ProjectsPage() {
                           >
                             {project.name}
                           </h3>
-                          {project.complexity_score &&
-                            project.complexity_score > 70 && (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full flex-shrink-0">
-                                <Star size={10} fill="currentColor" />
-                                <span>Portfolio</span>
-                              </div>
-                            )}
+                          {project.in_portfolio && (
+                            <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full flex-shrink-0">
+                              <Star size={10} fill="currentColor" />
+                              <span>Portfolio</span>
+                            </div>
+                          )}
                         </div>
                         <p
                           className={`text-sm text-gray-600 mb-3 line-clamp-1 ${sansation.className}`}
@@ -956,9 +1010,40 @@ export default function ProjectsPage() {
                                   <ExternalLink size={14} />
                                   <span>View on GitHub</span>
                                 </a>
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                  <Star size={14} />
-                                  <span>Add to Portfolio</span>
+                                <button
+                                  onClick={() =>
+                                    togglePortfolio(
+                                      project.id,
+                                      project.in_portfolio || false
+                                    )
+                                  }
+                                  disabled={togglingPortfolio === project.id}
+                                  className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors ${
+                                    project.in_portfolio
+                                      ? "text-blue-600 bg-blue-50 hover:bg-blue-100"
+                                      : "text-gray-700 hover:bg-gray-100"
+                                  }`}
+                                >
+                                  {togglingPortfolio === project.id ? (
+                                    <Loader2
+                                      size={14}
+                                      className="animate-spin"
+                                    />
+                                  ) : (
+                                    <Star
+                                      size={14}
+                                      fill={
+                                        project.in_portfolio
+                                          ? "currentColor"
+                                          : "none"
+                                      }
+                                    />
+                                  )}
+                                  <span>
+                                    {project.in_portfolio
+                                      ? "Remove from Portfolio"
+                                      : "Add to Portfolio"}
+                                  </span>
                                 </button>
                                 <div className="border-t border-gray-200" />
                                 <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">

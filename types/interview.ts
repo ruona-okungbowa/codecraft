@@ -1,5 +1,3 @@
-// Interview types for voice interview simulator
-
 export interface Interview {
   id: string;
   userId: string;
@@ -21,7 +19,6 @@ export interface InterviewQuestion {
   expectedAnswer?: string;
 }
 
-// Database row type (snake_case to match Supabase)
 export interface InterviewRow {
   id: string;
   user_id: string;
@@ -35,7 +32,6 @@ export interface InterviewRow {
   updated_at: string;
 }
 
-// Request/Response types
 export interface CreateInterviewRequest {
   role: string;
   type: string;
@@ -48,4 +44,13 @@ export interface CreateInterviewResponse {
   success: boolean;
   interview?: Interview;
   error?: string;
+}
+
+export interface AgentProps {
+  userName: string;
+  userId?: string;
+  interviewId?: string;
+  feedbackId?: string;
+  type: "generate" | "interview";
+  questions?: string[];
 }

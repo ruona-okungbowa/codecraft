@@ -104,6 +104,27 @@ export interface MockInterview {
   completedAt: Date;
 }
 
+export interface Interview {
+  id: string;
+  user_id: string;
+  role: string;
+  type: string;
+  level: string;
+  techstack: string[];
+  questions: InterviewQuestion[];
+  finalised: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface InterviewQuestion {
+  question: string;
+  type?: string;
+  difficulty?: string;
+  expectedAnswer?: string;
+  hints?: string[];
+}
+
 export interface JobMatch {
   id: string;
   userId: string;
@@ -133,6 +154,10 @@ export interface UserRow {
   email?: string;
   avatar_url?: string;
   target_role?: string;
+  first_name?: string;
+  last_name?: string;
+  github_token?: string;
+  token_updated_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -152,6 +177,7 @@ export interface ProjectRow {
   analysed_at?: string;
   created_at: string;
   updated_at: string;
+  in_portfolio?: boolean;
   // Enriched fields from API
   has_story?: boolean;
   has_bullets?: boolean;

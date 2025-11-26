@@ -17,13 +17,24 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser();
 
+      // Get the session to extract the provider token
+      const { data: sessionData } = await supabase.auth.getSession();
+      const githubToken = sessionData.session?.provider_token;
+
       if (user) {
         console.log("User logged in:", user.id);
+        if (githubToken) {
+          console.log("GitHub token found, storing in database");
+        } else {
+          console.warn("GitHub token not found in session");
+        }
+
         const { data: existingUser } = await supabase
           .from("users")
           .select("id")
           .eq("id", user.id)
           .single();
+
         if (!existingUser) {
           console.log("Creating new user in database...");
           const { error: insertError } = await supabase.from("users").insert({
@@ -34,6 +45,8 @@ export async function GET(request: Request) {
               user.user_metadata.preferred_username,
             email: user.email,
             avatar_url: user.user_metadata.avatar_url,
+            github_token: githubToken || null,
+            token_updated_at: githubToken ? new Date().toISOString() : null,
           });
 
           if (insertError) {
@@ -43,6 +56,28 @@ export async function GET(request: Request) {
           }
         } else {
           console.log("User already exists in database");
+          // Update the GitHub token for existing users
+          if (githubToken) {
+            const { error: updateError } = await supabase
+              .from("users")
+              .update({
+                github_token: githubToken,
+                token_updated_at: new Date().toISOString(),
+                // Also update other fields in case they changed
+                github_username:
+                  user.user_metadata.user_name ||
+                  user.user_metadata.preferred_username,
+                email: user.email,
+                avatar_url: user.user_metadata.avatar_url,
+              })
+              .eq("id", user.id);
+
+            if (updateError) {
+              console.error("Error updating user token:", updateError);
+            } else {
+              console.log("User token updated successfully!");
+            }
+          }
         }
       }
 

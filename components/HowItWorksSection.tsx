@@ -123,9 +123,7 @@ export default function HowItWorksSection() {
             transition={{ duration: 0.4 }}
             className="grid md:grid-cols-2 gap-12 items-center bg-gray-50 rounded-3xl p-8 md:p-12"
           >
-            {/* Left: Content */}
             <div>
-              {/* Icon */}
               <div
                 className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
                 style={{
@@ -135,21 +133,18 @@ export default function HowItWorksSection() {
                 <Icon size={40} style={{ color: currentStep.color }} />
               </div>
 
-              {/* Title */}
               <h3
                 className={`text-4xl font-bold text-gray-900 mb-4 ${newsreader.className}`}
               >
                 {currentStep.title}
               </h3>
 
-              {/* Description */}
               <p
                 className={`text-lg text-gray-600 leading-relaxed mb-6 ${sansation.className}`}
               >
                 {currentStep.description}
               </p>
 
-              {/* Progress Indicator */}
               <div className="flex gap-2">
                 {steps.map((_, index) => (
                   <div
@@ -182,7 +177,6 @@ export default function HowItWorksSection() {
               </div>
             </div>
 
-            {/* Right: Screenshot/Visual */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}

@@ -26,10 +26,7 @@ export async function updateSession(request: NextRequest) {
       },
     }
   );
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getClaims(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-  // IMPORTANT: Don't remove getClaims()
+
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
   // Public routes that don't require authentication
