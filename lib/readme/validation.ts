@@ -1,13 +1,9 @@
-// lib/readme/validation.ts
+import {
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+} from "@/types/readme";
 
-import { ValidationResult, ValidationError, ValidationWarning } from "./types";
-
-/**
- * Validates README markdown content for quality and completeness
- * @param content - The markdown content to validate
- * @param type - Whether this is a project or profile README
- * @returns ValidationResult with score, errors, warnings, and suggestions
- */
 export function validateMarkdown(
   content: string,
   type: "project" | "profile"

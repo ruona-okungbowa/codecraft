@@ -1,5 +1,3 @@
-// lib/readme/types.ts
-
 import { Project } from "@/types";
 
 // Template types for README styles

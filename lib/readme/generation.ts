@@ -1,24 +1,14 @@
-// lib/readme/generation.ts
-
 import { Project, User } from "@/types";
 import {
   GeneratedReadme,
   ReadmeTemplate,
   ReadmeResearch,
   ProfileReadmeData,
-} from "./types";
+} from "@/types/readme";
 import { validateMarkdown } from "./validation";
 import { openai } from "@/lib/openai/client";
 import { selectTopProjects } from "./ranking";
 
-/**
- * Generates a project README using OpenAI with researched context
- * @param project - The project to generate README for
- * @param template - Template style to use
- * @param research - Research data from MCP or fallback
- * @param githubToken - Optional GitHub token for fetching existing README
- * @returns Generated README with metadata and validation
- */
 export async function generateProjectReadme(
   project: Project,
   template: ReadmeTemplate,

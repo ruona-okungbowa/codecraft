@@ -1,16 +1,6 @@
-// lib/readme/deployment.ts
-
 import { Octokit } from "octokit";
-import { DeploymentResult } from "./types";
+import { DeploymentResult } from "@/types/readme";
 
-/**
- * Deploys a project README to GitHub repository
- * @param repoOwner - Repository owner username
- * @param repoName - Repository name
- * @param content - README markdown content
- * @param githubToken - GitHub access token
- * @returns Deployment result with URL and commit SHA
- */
 export async function deployProjectReadme(
   repoOwner: string,
   repoName: string,

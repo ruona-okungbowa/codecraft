@@ -9,6 +9,12 @@ export interface Requirements {
 
 export type skillCategory = "essential" | "preferred" | "niceToHave";
 
+export interface MissingSkills {
+  essential: string[];
+  preferred: string[];
+  niceToHave: string[];
+}
+
 export interface UserSkills {
   userId: string;
   skills: string[];
@@ -18,10 +24,9 @@ export interface UserSkills {
 export interface SkillAnalysis {
   role: Role;
   presentSkills: string[];
-  missingSkills: {
-    essential: string[];
-    preferred: string[];
-    niceToHave: string[];
-  };
+  missingSkills: MissingSkills;
   coveragePercentage: number;
 }
+
+// Alias for consistency with API responses
+export type SkillGapAnalysis = SkillAnalysis;

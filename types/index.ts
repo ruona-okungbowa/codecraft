@@ -1,8 +1,5 @@
-// Database Types for GitStory
-
-// User (matches your users table structure)
 export interface User {
-  id: string; // Supabase Auth user ID (primary key, references auth.users)
+  id: string;
   githubId: number;
   githubUsername: string;
   email?: string;
@@ -11,26 +8,23 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// Project (matches your projects table)
 export interface Project {
   id: string;
-  userId: string; // References users.id
+  userId: string;
   githubRepoId: number;
   name: string;
   description?: string;
   url: string;
-  languages: Record<string, number>; // language: percentage
+  languages: Record<string, number>;
   stars: number;
   forks: number;
   lastCommitDate?: Date;
   complexityScore?: number;
-  analysedAt?: Date; // British spelling to match DB column
+  analysedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-// Generated Content
 export interface GeneratedContent {
   id: string;
   projectId: string;
@@ -44,11 +38,10 @@ export interface GeneratedContent {
   createdAt: Date;
 }
 
-// Portfolio Score (matches your portfolio_scores table)
 export interface PortfolioScore {
   id: string;
-  userId: string; // References users.id
-  overallScore: number; // 0-100
+  userId: string;
+  overallScore: number;
   projectQualityScore?: number;
   techDiversityScore?: number;
   documentationScore?: number;
@@ -61,7 +54,6 @@ export interface PortfolioScore {
   calculatedAt: Date;
 }
 
-// Skill Gap
 export interface SkillGap {
   id: string;
   userId: string;
@@ -76,7 +68,6 @@ export interface SkillGap {
   analyzedAt: Date;
 }
 
-// Project Recommendation
 export interface ProjectRecommendation {
   id: string;
   userId: string;
@@ -96,7 +87,6 @@ export interface ProjectRecommendation {
   createdAt: Date;
 }
 
-// Mock Interview
 export interface MockInterview {
   id: string;
   userId: string;
@@ -114,7 +104,6 @@ export interface MockInterview {
   completedAt: Date;
 }
 
-// Job Match
 export interface JobMatch {
   id: string;
   userId: string;
@@ -124,11 +113,10 @@ export interface JobMatch {
   matchPercentage: number;
   matchedSkills: string[];
   missingSkills: string[];
-  recommendedProjects: string[]; // Project IDs to highlight
+  recommendedProjects: string[];
   createdAt: Date;
 }
 
-// API Error Response
 export interface ErrorResponse {
   error: {
     code: string;
@@ -138,10 +126,8 @@ export interface ErrorResponse {
   };
 }
 
-// Database row types (snake_case to match actual DB columns)
-// Use these when working directly with Supabase queries
 export interface UserRow {
-  id: string; // Supabase Auth user ID
+  id: string;
   github_id: number;
   github_username: string;
   email?: string;
@@ -173,7 +159,6 @@ export interface ProjectRow {
   content_count?: number;
 }
 
-// Helper type to convert DB rows to app types
 export type DbToApp<T> = {
   [K in keyof T as K extends string
     ? K extends `${infer Start}_${infer Rest}`

@@ -1,12 +1,5 @@
-// lib/readme/ranking.ts
-
 import { Project } from "@/types";
 
-/**
- * Calculates a complexity score for a project based on various metrics
- * @param project - The project to score
- * @returns A score between 0-100
- */
 export function calculateProjectScore(project: Project): number {
   let score = 0;
 

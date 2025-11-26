@@ -1,15 +1,7 @@
-// lib/readme/analysis.ts
-
 import { Octokit } from "octokit";
 import { Project } from "@/types";
-import { ProjectAnalysis } from "./types";
+import { ProjectAnalysis } from "@/types/readme";
 
-/**
- * Analyzes a GitHub project to extract technologies and metadata
- * @param project - The project to analyze
- * @param githubToken - GitHub access token
- * @returns ProjectAnalysis with extracted data
- */
 export async function analyzeProject(
   project: Project,
   githubToken: string

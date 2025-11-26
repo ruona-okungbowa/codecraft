@@ -1,11 +1,4 @@
-// lib/readme/templates.ts
-
-import { ReadmeResearch } from "./types";
-
-/**
- * Fallback templates for when MCP is unavailable
- * These provide default README structures based on project type
- */
+import { ReadmeResearch } from "@/types/readme";
 
 export function getProjectFallbackTemplate(
   projectType: string = "general"
