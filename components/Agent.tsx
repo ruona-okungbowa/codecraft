@@ -3,7 +3,7 @@
 import { AgentProps } from "@/types/interview";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { Phone, PhoneOff } from "lucide-react";
+import { Phone, PhoneOff, User } from "lucide-react";
 import { useRouter } from "next/router";
 import { vapi } from "@/lib/vapi/vapi.sdk";
 
@@ -59,7 +59,7 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
 
   useEffect(() => {
     if (callStatus === CallStatus.FINISHED) router.push("/dashboard");
-  }, [messages, callStatus, type, userId]);
+  }, [messages, callStatus, type, userId, router]);
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
@@ -117,14 +117,8 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
         {/* User Card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[320px] shadow-sm">
           <div className="relative mb-4">
-            <div className="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-              <Image
-                src="/user-avatar.png"
-                alt={userName}
-                width={128}
-                height={128}
-                className="object-cover w-full h-full"
-              />
+            <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+              <User size={64} className="text-gray-400" />
             </div>
             {callStatus === CallStatus.ACTIVE && (
               <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white flex items-center justify-center">
