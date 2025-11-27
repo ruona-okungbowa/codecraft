@@ -5,17 +5,53 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    const authHeader = request.headers.get("authorization");
+    const isVapiRequest = authHeader?.startsWith("Bearer ");
+
+    let userId: string | null = null;
+    if (isVapiRequest) {
+      const token = authHeader?.replace("Bearer ", "");
+      const expectedToken = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
+
+      if (!expectedToken) {
+        console.error("VAPI_API_SECRET not configured");
+        return NextResponse.json(
+          { error: "Server configuration error" },
+          { status: 500 }
+        );
+      }
+
+      if (token !== expectedToken) {
+        console.error("Invalid VAPI token");
+        return NextResponse.json(
+          { error: "Unauthorized - Invalid token" },
+          { status: 401 }
+        );
+      }
+
+      const body = await request.json();
+      userId = body.userId;
+
+      if (!userId) {
+        return NextResponse.json(
+          { error: "userId is required for VAPI requests" },
+          { status: 400 }
+        );
+      }
+    } else {
+      const supabase = await createClient();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+      }
+      userId = user.id;
     }
 
     const body = await request.json();
-    const { type, role, level, techstack, amount, userId } = body;
+    const { type, role, level, techstack, amount } = body;
 
     const { text: questions } = await generateText({
       model: openai("gpt-4o-mini"),
@@ -30,24 +66,25 @@ export async function POST(request: Request) {
     });
 
     const interview = {
+      user_id: userId, // Use user.id from auth, not userId from body
       role,
       type,
       level,
-      techstack: techstack.split(","),
+      techstack: techstack.split(",").map((tech: string) => tech.trim()),
       questions: JSON.parse(questions),
-      userId: userId,
       finalised: true,
-      createdAt: new Date().toISOString(),
     };
+
+    const supabase = await createClient();
 
     const { data: userInterview, error: insertError } = await supabase
       .from("interviews")
-      .select("*")
-      .eq("user_id", user.id)
+      .insert(interview)
+      .select()
       .single();
 
     if (insertError) {
-      console.error("Error inserting user interview:", insertError);
+      console.error("Error inserting interview:", insertError);
       return NextResponse.json(
         { error: "Failed to save interview", details: insertError.message },
         { status: 500 }

@@ -1,8 +1,11 @@
 "use client";
+
 import { AgentProps } from "@/types/interview";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Phone, PhoneOff } from "lucide-react";
+import { useRouter } from "next/router";
+import { vapi } from "@/lib/vapi/vapi.sdk";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -11,37 +14,74 @@ enum CallStatus {
   FINISHED = "FINISHED",
 }
 
-const Agent = ({ userName }: AgentProps) => {
+interface SavedMessage {
+  role: "user" | "system" | "assistant";
+  content: string;
+}
+
+const Agent = ({ userName, userId, type }: AgentProps) => {
+  const router = useRouter();
+
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
-  const [messages, setMessages] = useState<string[]>([]);
-  const lastMessage = messages[messages.length - 1];
+  const [messages, setMessages] = useState<SavedMessage[]>([]);
 
-  const handleCall = () => {
-    if (
-      callStatus === CallStatus.INACTIVE ||
-      callStatus === CallStatus.FINISHED
-    ) {
-      setCallStatus(CallStatus.CONNECTING);
-      setTimeout(() => {
-        setCallStatus(CallStatus.ACTIVE);
-        setMessages(["Hello! Nice to meet you. Let's begin the interview."]);
-        setIsSpeaking(true);
-      }, 2000);
-    }
+  useEffect(() => {
+    const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
+    const onCallEnd = () => setCallStatus(CallStatus.FINISHED);
+
+    const onMessage = (message: Message) => {
+      if (message.type === "transcript" && message.transcriptType === "final") {
+        const newMessage = { role: message.role, content: message.transcript };
+        setMessages((prev) => [...prev, newMessage]);
+      }
+    };
+    const onSpeechStart = () => setIsSpeaking(true);
+    const onSpeechEnd = () => setIsSpeaking(false);
+    const onError = (error: Error) => console.log("Error", error);
+
+    vapi.on("call-start", onCallStart);
+    vapi.on("call-end", onCallEnd);
+    vapi.on("message", onMessage);
+    vapi.on("speech-end", onSpeechEnd);
+    vapi.on("speech-start", onSpeechStart);
+    vapi.on("error", onError);
+
+    return () => {
+      vapi.off("call-start", onCallStart);
+      vapi.off("call-end", onCallEnd);
+      vapi.off("message", onMessage);
+      vapi.off("speech-end", onSpeechEnd);
+      vapi.off("speech-start", onSpeechStart);
+      vapi.off("error", onError);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (callStatus === CallStatus.FINISHED) router.push("/dashboard");
+  }, [messages, callStatus, type, userId]);
+
+  const handleCall = async () => {
+    setCallStatus(CallStatus.CONNECTING);
+    await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+      variableValues: {
+        username: userName,
+        userid: userId,
+      },
+    });
   };
-
-  const handleEndCall = () => {
+  const handleDisconnect = async () => {
     setCallStatus(CallStatus.FINISHED);
-    setMessages([]);
-    setIsSpeaking(false);
+    vapi.stop();
   };
+
+  const latestMessage = messages[messages.length - 1]?.content;
+  const isCallINactiveOrFinished =
+    callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-5xl mx-auto">
-      {/* Two Cards Side by Side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        {/* AI Interviewer Card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[320px] shadow-sm">
           <div className="relative mb-4">
             <div className="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center relative">
@@ -104,10 +144,10 @@ const Agent = ({ userName }: AgentProps) => {
       </div>
 
       {/* Message Display */}
-      {messages.length > 0 && lastMessage && (
+      {messages.length > 0 && latestMessage && (
         <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
           <p className="text-gray-800 text-center text-base animate-fade-in">
-            {lastMessage}
+            {latestMessage}
           </p>
         </div>
       )}
@@ -125,12 +165,12 @@ const Agent = ({ userName }: AgentProps) => {
             )}
             <Phone size={24} className="relative z-10" />
             <span className="relative z-10">
-              {callStatus === CallStatus.CONNECTING ? "Connecting..." : "Call"}
+              {isCallINactiveOrFinished ? "Call" : ". . ."}
             </span>
           </button>
         ) : (
           <button
-            onClick={handleEndCall}
+            onClick={handleDisconnect}
             className="inline-flex items-center gap-2 px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
           >
             <PhoneOff size={24} />
