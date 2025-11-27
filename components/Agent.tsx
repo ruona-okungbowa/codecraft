@@ -38,7 +38,15 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     };
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
-    const onError = (error: Error) => console.log("Error", error);
+    const onError = (error: unknown) => {
+      console.error("Vapi Error:", error);
+      if (error.type === "start-method-error") {
+        console.error(
+          "Failed to start call. Check your Vapi workflow configuration."
+        );
+        setCallStatus(CallStatus.INACTIVE);
+      }
+    };
 
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
@@ -63,13 +71,29 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
-    console.log("Starting call");
-    vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-      variableValues: {
-        username: userName,
-        userid: userId,
-      },
-    });
+
+    const workflowId = process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID;
+
+    if (!workflowId) {
+      console.error("VAPI_WORKFLOW_ID is not configured");
+      setCallStatus(CallStatus.INACTIVE);
+      return;
+    }
+
+    console.log("Starting call with workflow:", workflowId);
+    console.log("Variables:", { username: userName, userid: userId });
+
+    try {
+      await vapi.start(workflowId, {
+        variableValues: {
+          username: userName,
+          userid: userId,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to start call:", error);
+      setCallStatus(CallStatus.INACTIVE);
+    }
   };
   const handleDisconnect = async () => {
     setCallStatus(CallStatus.FINISHED);
