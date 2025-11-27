@@ -17,6 +17,7 @@ import Link from "next/link";
 import { Newsreader, Sansation } from "next/font/google";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { ProjectRow } from "@/types";
+import { createClient } from "@/lib/supabase/client";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -62,7 +63,6 @@ export default function DashboardPage() {
         }
 
         // Get user info from Supabase
-        const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();
         const {
           data: { user },

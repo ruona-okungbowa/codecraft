@@ -63,3 +63,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error }, { status: 500 });
   }
 }
+
+export async function GET() {
+  return NextResponse.json(
+    { success: true, data: "Thank you!" },
+    { status: 200 }
+  );
+}
