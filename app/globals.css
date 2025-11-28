@@ -1,120 +1,99 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary Purple Scale */
-  --color-primary-50: oklch(0.97 0.02 290);
-  --color-primary-100: oklch(0.94 0.05 290);
-  --color-primary-200: oklch(0.88 0.1 290);
-  --color-primary-300: oklch(0.8 0.15 290);
-  --color-primary-400: oklch(0.72 0.2 290);
-  --color-primary-500: oklch(0.64 0.25 290);
-  --color-primary-600: oklch(0.55 0.25 290);
-  --color-primary-700: oklch(0.47 0.22 290);
-  --color-primary-800: oklch(0.39 0.18 290);
-  --color-primary-900: oklch(0.32 0.14 290);
-  --color-primary-950: oklch(0.24 0.1 290);
+  /* CodeCraft Design System Colors */
 
-  /* Secondary Pink Scale */
-  --color-secondary-50: oklch(0.97 0.02 340);
-  --color-secondary-100: oklch(0.94 0.05 340);
-  --color-secondary-200: oklch(0.88 0.1 340);
-  --color-secondary-300: oklch(0.8 0.15 340);
-  --color-secondary-400: oklch(0.72 0.2 340);
-  --color-secondary-500: oklch(0.64 0.24 340);
-  --color-secondary-600: oklch(0.55 0.24 340);
-  --color-secondary-700: oklch(0.47 0.21 340);
-  --color-secondary-800: oklch(0.39 0.17 340);
-  --color-secondary-900: oklch(0.32 0.13 340);
-  --color-secondary-950: oklch(0.24 0.09 340);
+  /* Primary Blue - Trust & GitHub Connection */
+  --color-primary-50: #f0f4ff;
+  --color-primary-100: #e0e9ff;
+  --color-primary-200: #c7d7fe;
+  --color-primary-300: #a3b2f3;
+  --color-primary-400: #667fea;
+  --color-primary-500: #5568d3;
+  --color-primary-600: #4451b8;
+  --color-primary-700: #3a3f95;
+  --color-primary-800: #2f3478;
+  --color-primary-900: #252b5c;
 
-  /* Background Slate Scale */
-  --color-bg-50: oklch(0.98 0.005 240);
-  --color-bg-100: oklch(0.95 0.008 240);
-  --color-bg-200: oklch(0.89 0.01 240);
-  --color-bg-300: oklch(0.81 0.012 240);
-  --color-bg-400: oklch(0.65 0.015 240);
-  --color-bg-500: oklch(0.52 0.015 240);
-  --color-bg-600: oklch(0.42 0.013 240);
-  --color-bg-700: oklch(0.34 0.011 240);
-  --color-bg-800: oklch(0.26 0.009 240);
-  --color-bg-900: oklch(0.19 0.007 240);
-  --color-bg-950: oklch(0.13 0.005 240);
+  /* Growth Green - Achievement & Progress */
+  --color-growth-50: #f0fdf4;
+  --color-growth-100: #dcfce7;
+  --color-growth-200: #bbf7d0;
+  --color-growth-300: #86efac;
+  --color-growth-400: #4ade80;
+  --color-growth-500: #22c55e;
+  --color-growth-600: #16a34a;
+  --color-growth-700: #15803d;
+  --color-growth-800: #166534;
+  --color-growth-900: #14532d;
 
-  /* Text Slate Scale */
-  --color-text-50: oklch(0.98 0.005 240);
-  --color-text-100: oklch(0.95 0.008 240);
-  --color-text-200: oklch(0.89 0.01 240);
-  --color-text-300: oklch(0.81 0.012 240);
-  --color-text-400: oklch(0.65 0.015 240);
-  --color-text-500: oklch(0.52 0.015 240);
-  --color-text-600: oklch(0.42 0.013 240);
-  --color-text-700: oklch(0.34 0.011 240);
-  --color-text-800: oklch(0.26 0.009 240);
-  --color-text-900: oklch(0.19 0.007 240);
-  --color-text-950: oklch(0.13 0.005 240);
+  /* Energy Orange - Warmth & Creativity */
+  --color-energy-50: #fff7ed;
+  --color-energy-100: #ffedd5;
+  --color-energy-200: #fed7aa;
+  --color-energy-300: #fdba74;
+  --color-energy-400: #fb923c;
+  --color-energy-500: #f97316;
+  --color-energy-600: #ea580c;
+  --color-energy-700: #c2410c;
+  --color-energy-800: #9a3412;
+  --color-energy-900: #7c2d12;
 
-  /* Success Green Scale */
-  --color-success-50: oklch(0.97 0.02 150);
-  --color-success-100: oklch(0.93 0.05 150);
-  --color-success-200: oklch(0.87 0.1 150);
-  --color-success-300: oklch(0.79 0.15 150);
-  --color-success-400: oklch(0.7 0.18 150);
-  --color-success-500: oklch(0.62 0.2 150);
-  --color-success-600: oklch(0.53 0.19 150);
-  --color-success-700: oklch(0.45 0.16 150);
-  --color-success-800: oklch(0.38 0.13 150);
-  --color-success-900: oklch(0.31 0.1 150);
-  --color-success-950: oklch(0.23 0.07 150);
+  /* Joy Pink/Purple - Playful & Inclusive */
+  --color-joy-50: #fdf4ff;
+  --color-joy-100: #fae8ff;
+  --color-joy-200: #f5d0fe;
+  --color-joy-300: #f0abfc;
+  --color-joy-400: #e879f9;
+  --color-joy-500: #d946ef;
+  --color-joy-600: #c026d3;
+  --color-joy-700: #a21caf;
+  --color-joy-800: #86198f;
+  --color-joy-900: #701a75;
 
-  /* Warning Amber Scale */
-  --color-warning-50: oklch(0.97 0.02 80);
-  --color-warning-100: oklch(0.94 0.05 80);
-  --color-warning-200: oklch(0.89 0.1 80);
-  --color-warning-300: oklch(0.82 0.15 80);
-  --color-warning-400: oklch(0.75 0.18 80);
-  --color-warning-500: oklch(0.68 0.2 80);
-  --color-warning-600: oklch(0.58 0.19 80);
-  --color-warning-700: oklch(0.48 0.16 80);
-  --color-warning-800: oklch(0.4 0.13 80);
-  --color-warning-900: oklch(0.33 0.1 80);
-  --color-warning-950: oklch(0.25 0.07 80);
+  /* Coral - Warm Accent */
+  --color-coral-50: #fff1f2;
+  --color-coral-100: #ffe4e6;
+  --color-coral-200: #fecdd3;
+  --color-coral-300: #fda4af;
+  --color-coral-400: #fb7185;
+  --color-coral-500: #f43f5e;
+  --color-coral-600: #e11d48;
+  --color-coral-700: #be123c;
+  --color-coral-800: #9f1239;
+  --color-coral-900: #881337;
 
-  /* Error Red Scale */
-  --color-error-50: oklch(0.97 0.02 25);
-  --color-error-100: oklch(0.94 0.05 25);
-  --color-error-200: oklch(0.89 0.1 25);
-  --color-error-300: oklch(0.82 0.15 25);
-  --color-error-400: oklch(0.73 0.2 25);
-  --color-error-500: oklch(0.64 0.23 25);
-  --color-error-600: oklch(0.55 0.23 25);
-  --color-error-700: oklch(0.46 0.2 25);
-  --color-error-800: oklch(0.39 0.16 25);
-  --color-error-900: oklch(0.32 0.13 25);
-  --color-error-950: oklch(0.24 0.09 25);
+  /* Neutral - Warm Grays */
+  --color-neutral-50: #fafaf9;
+  --color-neutral-100: #f5f5f4;
+  --color-neutral-200: #e7e5e4;
+  --color-neutral-300: #d6d3d1;
+  --color-neutral-400: #a8a29e;
+  --color-neutral-500: #78716c;
+  --color-neutral-600: #57534e;
+  --color-neutral-700: #44403c;
+  --color-neutral-800: #292524;
+  --color-neutral-900: #1c1917;
+  --color-neutral-950: #0c0a09;
 
-  /* Info Blue Scale */
-  --color-info-50: oklch(0.97 0.02 240);
-  --color-info-100: oklch(0.94 0.05 240);
-  --color-info-200: oklch(0.88 0.1 240);
-  --color-info-300: oklch(0.8 0.15 240);
-  --color-info-400: oklch(0.7 0.19 240);
-  --color-info-500: oklch(0.61 0.22 240);
-  --color-info-600: oklch(0.52 0.22 240);
-  --color-info-700: oklch(0.44 0.19 240);
-  --color-info-800: oklch(0.37 0.15 240);
-  --color-info-900: oklch(0.3 0.12 240);
-  --color-info-950: oklch(0.23 0.08 240);
+  /* Semantic Colors */
+  --color-success: #22c55e;
+  --color-warning: #f97316;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
 
   /* Font Families */
-  --font-sans: var(--font-geist-sans);
+  --font-heading: var(--font-newsreader);
+  --font-body: var(--font-dm-sans);
+  --font-accent: var(--font-caveat);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--color-bg-950);
-  color: var(--color-text-300);
+  background: var(--color-neutral-50);
+  color: var(--color-neutral-700);
   font-family:
-    var(--font-sans),
+    var(--font-body),
     system-ui,
     -apple-system,
     sans-serif;
