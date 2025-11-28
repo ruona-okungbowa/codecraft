@@ -123,7 +123,7 @@ function InterviewContent() {
 
         <form onSubmit={handleGenerateInterview} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-black mb-2">
               Job Role
             </label>
             <input
@@ -140,7 +140,7 @@ function InterviewContent() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-black mb-2">
                 Experience Level
               </label>
               <select
@@ -150,6 +150,7 @@ function InterviewContent() {
                 }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
+                <option value="entry">Entry</option>
                 <option value="junior">Junior</option>
                 <option value="mid">Mid-Level</option>
                 <option value="senior">Senior</option>
@@ -157,7 +158,7 @@ function InterviewContent() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-sm font-semibold text-black mb-2">
                 Interview Type
               </label>
               <select
@@ -169,13 +170,14 @@ function InterviewContent() {
               >
                 <option value="technical">Technical</option>
                 <option value="behavioral">Behavioral</option>
+                <option value="system-design">System Design</option>
                 <option value="mixed">Mixed</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-black mb-2">
               Tech Stack
             </label>
             <input
@@ -194,7 +196,7 @@ function InterviewContent() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label className="block text-sm font-semibold text-black mb-2">
               Number of Questions
             </label>
             <select
