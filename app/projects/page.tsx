@@ -268,7 +268,10 @@ export default function ProjectsPage() {
       case "recent":
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
-        return new Date(project.updated_at) > weekAgo;
+        const projectDate = new Date(
+          project.last_commit_date || project.updated_at
+        );
+        return projectDate > weekAgo;
       default:
         return true;
     }
@@ -287,7 +290,8 @@ export default function ProjectsPage() {
         return (b.complexity_score || 0) - (a.complexity_score || 0);
       default:
         return (
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          new Date(b.last_commit_date || b.updated_at).getTime() -
+          new Date(a.last_commit_date || a.updated_at).getTime()
         );
     }
   });
@@ -778,7 +782,9 @@ export default function ProjectsPage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock size={14} />
-                          {formatTimeAgo(project.updated_at)}
+                          {formatTimeAgo(
+                            project.last_commit_date || project.updated_at
+                          )}
                         </span>
                       </div>
 
@@ -983,7 +989,9 @@ export default function ProjectsPage() {
                       <div className="flex flex-col gap-1 text-xs text-gray-500 flex-shrink-0">
                         <span className="flex items-center gap-1">
                           <Clock size={12} />
-                          {formatTimeAgo(project.updated_at)}
+                          {formatTimeAgo(
+                            project.last_commit_date || project.updated_at
+                          )}
                         </span>
                         <span className="flex items-center gap-1">
                           <Star size={12} />
