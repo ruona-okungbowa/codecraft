@@ -131,6 +131,32 @@ export default function ProjectsPage() {
     }
   }
 
+  async function handleDeleteProject(projectId: string, projectName: string) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${projectName}"? This will remove it from your portfolio.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setProjects((prev) => prev.filter((p) => p.id !== projectId));
+        setDropdownOpen(null);
+      } else {
+        alert("Failed to delete project");
+      }
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      alert("Failed to delete project");
+    }
+  }
+
   const getLanguageGradient = (
     languages: Record<string, number> | null | undefined
   ) => {
@@ -845,7 +871,15 @@ export default function ProjectsPage() {
                                   </span>
                                 </button>
                                 <div className="border-t border-gray-200" />
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                <button
+                                  onClick={() =>
+                                    handleDeleteProject(
+                                      project.id,
+                                      project.name
+                                    )
+                                  }
+                                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                >
                                   <XCircle size={14} />
                                   <span>Delete</span>
                                 </button>
@@ -1046,7 +1080,15 @@ export default function ProjectsPage() {
                                   </span>
                                 </button>
                                 <div className="border-t border-gray-200" />
-                                <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                <button
+                                  onClick={() =>
+                                    handleDeleteProject(
+                                      project.id,
+                                      project.name
+                                    )
+                                  }
+                                  className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                >
                                   <XCircle size={14} />
                                   <span>Delete</span>
                                 </button>

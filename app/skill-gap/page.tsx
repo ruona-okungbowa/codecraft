@@ -489,7 +489,19 @@ export default function SkillGapPage() {
                   Re-analyze Skills
                 </button>
 
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
+                <button
+                  onClick={() => {
+                    const content = `# Skill Gap Analysis Report\n\nRole: ${roleDefinitions.find((r) => r.id === analysis.analysis.role)?.title}\nDate: ${new Date().toLocaleDateString()}\nMatch Score: ${analysis.analysis.coveragePercentage}%\n\n## Current Skills (${analysis.analysis.presentSkills.length})\n${analysis.analysis.presentSkills.map((s) => `- ${s}`).join("\n")}\n\n## Essential Skills to Learn (${analysis.analysis.missingSkills.essential.length})\n${analysis.analysis.missingSkills.essential.map((s) => `- ${s}`).join("\n")}\n\n## Preferred Skills (${analysis.analysis.missingSkills.preferred.length})\n${analysis.analysis.missingSkills.preferred.map((s) => `- ${s}`).join("\n")}\n\n## Nice-to-Have Skills (${analysis.analysis.missingSkills.niceToHave.length})\n${analysis.analysis.missingSkills.niceToHave.map((s) => `- ${s}`).join("\n")}`;
+                    const blob = new Blob([content], { type: "text/markdown" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "skill-gap-report.md";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+                >
                   <Download size={18} />
                   Export Report
                 </button>
@@ -1255,9 +1267,12 @@ export default function SkillGapPage() {
                           ))}
                       </div>
 
-                      <button className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                      <Link
+                        href="/project-recommendations"
+                        className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-center block"
+                      >
                         Start Phase 1
-                      </button>
+                      </Link>
                     </div>
                   </div>
 
@@ -1387,12 +1402,33 @@ export default function SkillGapPage() {
                 </div>
 
                 <div className="flex gap-3 mt-8">
-                  <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700">
+                  <button
+                    onClick={() => {
+                      const content = `# Learning Plan for ${roleDefinitions.find((r) => r.id === analysis.analysis.role)?.title}\n\nGenerated: ${new Date().toLocaleDateString()}\n\n## Phase 1: Essential Skills\n${analysis.analysis.missingSkills.essential.map((s) => `- ${s}`).join("\n")}\n\n## Phase 2: Preferred Skills\n${analysis.analysis.missingSkills.preferred.map((s) => `- ${s}`).join("\n")}\n\n## Phase 3: Nice-to-Have Skills\n${analysis.analysis.missingSkills.niceToHave.map((s) => `- ${s}`).join("\n")}`;
+                      const blob = new Blob([content], {
+                        type: "text/markdown",
+                      });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = "learning-plan.md";
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700"
+                  >
                     <Download size={18} />
                     Download Learning Plan
                   </button>
 
-                  <button className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700">
+                  <button
+                    onClick={() =>
+                      alert(
+                        "Timeline adjustment coming soon! You can customize your learning pace."
+                      )
+                    }
+                    className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700"
+                  >
                     <Clock size={18} />
                     Adjust Timeline
                   </button>

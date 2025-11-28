@@ -214,7 +214,7 @@ export default function DashboardPage() {
             >
               What would you like to do today?
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 items-center md:grid-cols-2 lg:grid-cols-4 gap-5">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 className="rounded-xl p-6 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
