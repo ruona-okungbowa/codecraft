@@ -111,7 +111,12 @@ export default function StoryGeneratorPage({
 
   const copyStory = () => {
     if (!story) return;
-    const text = `STAR Story: ${project?.name}\n\nSituation: ${story.situation}\n\nTask: ${story.task}\n\nAction: ${story.action}\n\nResult: ${story.result}\n\nTalking Points:\n${story.talkingPoints.map((p) => `• ${p}`).join("\n")}`;
+    let text = `STAR Story: ${project?.name}\n\nSituation: ${story.situation}\n\nTask: ${story.task}\n\nAction: ${story.action}\n\nResult: ${story.result}`;
+
+    if (story.talkingPoints && story.talkingPoints.length > 0) {
+      text += `\n\nTalking Points:\n${story.talkingPoints.map((p) => `• ${p}`).join("\n")}`;
+    }
+
     navigator.clipboard.writeText(text);
     setCopiedStory(true);
     setTimeout(() => setCopiedStory(false), 2000);
@@ -277,22 +282,24 @@ export default function StoryGeneratorPage({
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                        Interview Talking Points
-                      </h3>
-                      <ul className="space-y-2">
-                        {story.talkingPoints.map((point, index) => (
-                          <li
-                            key={index}
-                            className="flex items-start gap-2 text-gray-700"
-                          >
-                            <span className="text-blue-600 mt-1">•</span>
-                            <span>{point}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    {story.talkingPoints && story.talkingPoints.length > 0 && (
+                      <div className="pt-4 border-t border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                          Interview Talking Points
+                        </h3>
+                        <ul className="space-y-2">
+                          {story.talkingPoints.map((point, index) => (
+                            <li
+                              key={index}
+                              className="flex items-start gap-2 text-gray-700"
+                            >
+                              <span className="text-blue-600 mt-1">•</span>
+                              <span>{point}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               )}

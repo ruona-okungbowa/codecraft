@@ -46,10 +46,16 @@ export async function POST(request: Request) {
 
     if (cachedStory) {
       console.log("Returning cached story for project:", project.name);
-      return NextResponse.json({
-        story: cachedStory,
-        cached: true,
-      });
+      try {
+        const parsedCached = JSON.parse(cachedStory);
+        return NextResponse.json({
+          story: parsedCached,
+          cached: true,
+        });
+      } catch {
+        // If cache is in old format, regenerate
+        console.log("Cache in old format, regenerating...");
+      }
     }
 
     // Generate story with OpenAI
@@ -67,19 +73,19 @@ export async function POST(request: Request) {
       }
     );
 
-    // Parse and validate STAR format
-    const parsedStory = parseStarStory(story);
+    // Parse the story into structured format
+    const structuredStory = parseStoryToStructure(story);
 
-    if (!parsedStory.isValid) {
-      console.error("Generated story missing STAR components");
+    if (!structuredStory) {
+      console.error("Failed to parse story structure");
       return NextResponse.json(
         { error: "Failed to generate valid STAR story" },
         { status: 500 }
       );
     }
 
-    // Cache the story
-    setCachedContent(cacheKey, story);
+    // Cache the structured story as JSON string
+    setCachedContent(cacheKey, JSON.stringify(structuredStory));
 
     // Store in database
     const { error: insertError } = await supabase
@@ -90,8 +96,7 @@ export async function POST(request: Request) {
         content: story,
         metadata: {
           wordCount: story.split(/\s+/).length,
-          hasAllComponents: parsedStory.isValid,
-          components: parsedStory.components,
+          hasAllComponents: true,
         },
       });
 
@@ -101,11 +106,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      story,
+      story: structuredStory,
       cached: false,
       metadata: {
         wordCount: story.split(/\s+/).length,
-        components: parsedStory.components,
       },
     });
   } catch (error: unknown) {
@@ -117,26 +121,72 @@ export async function POST(request: Request) {
   }
 }
 
-// Helper function to parse and validate STAR format
-function parseStarStory(story: string): {
-  isValid: boolean;
-  components: {
-    situation: boolean;
-    task: boolean;
-    action: boolean;
-    result: boolean;
-  };
-} {
-  const lowerStory = story.toLowerCase();
+// Helper function to parse story text into structured format
+function parseStoryToStructure(story: string): {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+  talkingPoints: string[];
+} | null {
+  try {
+    // Try to parse as JSON first (if AI returns JSON)
+    const jsonMatch = story.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.situation && parsed.task && parsed.action && parsed.result) {
+        return {
+          situation: parsed.situation,
+          task: parsed.task,
+          action: parsed.action,
+          result: parsed.result,
+          talkingPoints: parsed.talkingPoints || [],
+        };
+      }
+    }
 
-  const components = {
-    situation: lowerStory.includes("situation") || lowerStory.includes("**s"),
-    task: lowerStory.includes("task") || lowerStory.includes("**t"),
-    action: lowerStory.includes("action") || lowerStory.includes("**a"),
-    result: lowerStory.includes("result") || lowerStory.includes("**r"),
-  };
+    // Parse markdown-style format
+    const situationMatch = story.match(
+      /\*\*Situation:?\*\*\s*([\s\S]*?)(?=\*\*Task|$)/i
+    );
+    const taskMatch = story.match(
+      /\*\*Task:?\*\*\s*([\s\S]*?)(?=\*\*Action|$)/i
+    );
+    const actionMatch = story.match(
+      /\*\*Action:?\*\*\s*([\s\S]*?)(?=\*\*Result|$)/i
+    );
+    const resultMatch = story.match(
+      /\*\*Result:?\*\*\s*([\s\S]*?)(?=\*\*Talking Points|$)/i
+    );
+    const talkingPointsMatch = story.match(
+      /\*\*Talking Points:?\*\*\s*([\s\S]*?)$/i
+    );
 
-  const isValid = Object.values(components).every((present) => present);
+    if (situationMatch && taskMatch && actionMatch && resultMatch) {
+      const talkingPoints: string[] = [];
+      if (talkingPointsMatch) {
+        const points = talkingPointsMatch[1]
+          .split(/\n/)
+          .filter(
+            (line) => line.trim().startsWith("-") || line.trim().startsWith("•")
+          );
+        talkingPoints.push(
+          ...points.map((p) => p.replace(/^[-•]\s*/, "").trim())
+        );
+      }
 
-  return { isValid, components };
+      return {
+        situation: situationMatch[1].trim(),
+        task: taskMatch[1].trim(),
+        action: actionMatch[1].trim(),
+        result: resultMatch[1].trim(),
+        talkingPoints,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error parsing story:", error);
+    return null;
+  }
 }
