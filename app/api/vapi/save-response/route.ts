@@ -3,17 +3,31 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    // Verify Vapi request
+    console.log("=== Save Response Called ===");
+
     const authHeader = request.headers.get("authorization");
     const token = authHeader?.replace("Bearer ", "");
     const expectedToken = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY;
 
+    console.log("Auth check:", {
+      hasToken: !!token,
+      hasExpected: !!expectedToken,
+    });
+
     if (!expectedToken || token !== expectedToken) {
+      console.log("Auth failed");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
     const { interviewId, question, answer, questionIndex } = body;
+
+    console.log("Request body:", {
+      interviewId,
+      question: question?.substring(0, 50),
+      answer: answer?.substring(0, 50),
+      questionIndex,
+    });
 
     if (!interviewId || !question || !answer) {
       return NextResponse.json(
@@ -61,9 +75,15 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log(
+      "Response saved successfully. Total responses:",
+      responses.length
+    );
+
     return NextResponse.json({
       success: true,
       message: "Response saved successfully",
+      totalResponses: responses.length,
     });
   } catch (error) {
     console.error("Error saving interview response:", error);
