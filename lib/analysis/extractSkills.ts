@@ -11,6 +11,16 @@ interface Project {
   github_repo_id?: number;
 }
 
+// Helper to add timeout to promises
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Timeout")), timeoutMs)
+    ),
+  ]);
+}
+
 export async function extractSkillsFromProjects(
   projects: Project[],
   githubToken?: string
@@ -18,69 +28,72 @@ export async function extractSkillsFromProjects(
   const skills = new Set<string>();
   const octokit = githubToken ? new Octokit({ auth: githubToken }) : null;
 
-  for (const project of projects) {
-    if (project.languages) {
-      Object.keys(project.languages).forEach((lang) => {
-        const normalized = normalizeSkillName(lang);
-        if (normalized) {
-          skills.add(normalized);
-        }
-      });
-    }
-
-    let owner: string | null = null;
-    let repo: string | null = null;
-
-    if (project.url) {
-      const match = project.url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-      if (match) {
-        owner = match[1];
-        repo = match[2];
+  // Process all projects in parallel for speed
+  await Promise.all(
+    projects.map(async (project) => {
+      // Extract from languages (fast, synchronous)
+      if (project.languages) {
+        Object.keys(project.languages).forEach((lang) => {
+          const normalized = normalizeSkillName(lang);
+          if (normalized) {
+            skills.add(normalized);
+          }
+        });
       }
-    }
 
-    if (octokit && owner && repo) {
+      // Extract from description (fast, synchronous)
+      if (project.description) {
+        const detectedSkills = detectSkillsInText(project.description);
+        detectedSkills.forEach((skill) => skills.add(skill));
+      }
+
+      // Parse GitHub URL
+      let owner: string | null = null;
+      let repo: string | null = null;
+
+      if (project.url) {
+        const match = project.url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+        if (match) {
+          owner = match[1];
+          repo = match[2];
+        }
+      }
+
+      // Try dependency files first (faster than OpenAI) with 5s timeout
+      if (octokit && owner && repo) {
+        try {
+          const depFiles = await withTimeout(
+            fetchDependencyFiles(octokit, owner, repo),
+            5000
+          );
+          const depSkills = extractSkillsFromDependencies(depFiles);
+          depSkills.forEach((skill) => skills.add(skill));
+
+          // Skip OpenAI if we found dependencies
+          if (depSkills.length > 0) {
+            return;
+          }
+        } catch (error) {
+          // Silently continue to OpenAI fallback
+        }
+      }
+
+      // Only use OpenAI as fallback if no dependencies found, with 8s timeout
       try {
-        console.log(`Fetching dependency files for ${owner}/${repo}...`);
-        const depFiles = await fetchDependencyFiles(octokit, owner, repo);
-
-        const depSkills = extractSkillsFromDependencies(depFiles);
-        console.log(
-          `Found ${depSkills.length} skills from dependencies:`,
-          depSkills
+        const aiSkills = await withTimeout(
+          analyzeCodebaseForSkills(
+            project.name,
+            project.languages || {},
+            project.description
+          ),
+          8000
         );
-
-        depSkills.forEach((skill) => skills.add(skill));
-
-        if (depSkills.length > 0) {
-          continue;
-        }
-      } catch (error) {
-        console.log(
-          `Could not fetch dependency files for ${owner}/${repo}, will try OpenAI`
-        );
+        aiSkills.forEach((skill) => skills.add(skill));
+      } catch (aiError) {
+        // Silently fail - we already have language and description skills
       }
-    }
-
-    try {
-      console.log(`Using OpenAI to analyze ${project.name}...`);
-      const aiSkills = await analyzeCodebaseForSkills(
-        project.name,
-        project.languages || {},
-        project.description
-      );
-      console.log(`OpenAI found ${aiSkills.length} skills:`, aiSkills);
-
-      aiSkills.forEach((skill) => skills.add(skill));
-    } catch (aiError) {
-      console.error(`OpenAI analysis failed for ${project.name}:`, aiError);
-    }
-
-    if (project.description) {
-      const detectedSkills = detectSkillsInText(project.description);
-      detectedSkills.forEach((skill) => skills.add(skill));
-    }
-  }
+    })
+  );
 
   return Array.from(skills);
 }

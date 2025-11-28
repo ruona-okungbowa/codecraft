@@ -11,23 +11,13 @@ export async function analyzeCodebaseForSkills(
 ): Promise<string[]> {
   const languageList = Object.keys(languages).join(", ");
 
-  const prompt = `Analyze this GitHub repository and identify the frameworks, libraries, and technologies used.
-
-Repository: ${repoName}
+  // Shorter, more focused prompt for faster response
+  const prompt = `Repository: ${repoName}
 Languages: ${languageList}
-${readmeContent ? `README:\n${readmeContent.substring(0, 1000)}` : "No README available"}
+${readmeContent ? `Description: ${readmeContent.substring(0, 500)}` : ""}
 
-List ONLY the specific frameworks and technologies (not just programming languages). Examples:
-- React, Vue, Angular (not just "JavaScript")
-- Django, Flask, FastAPI (not just "Python")
-- Express, Next.js, NestJS
-- PostgreSQL, MongoDB, Redis
-- Docker, Kubernetes
-- Tailwind CSS, Bootstrap
-
-Return a JSON array of technology names: ["React", "Node.js", "PostgreSQL"]
-
-If you cannot determine specific frameworks, return an empty array: []`;
+List frameworks/technologies used (not languages). Return JSON array only.
+Examples: ["React", "Express", "PostgreSQL", "Docker"]`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -36,18 +26,18 @@ If you cannot determine specific frameworks, return an empty array: []`;
         {
           role: "system",
           content:
-            "You are a code analysis expert. Identify frameworks and technologies from repository information. Return only a JSON array.",
+            "Extract frameworks/technologies from repo info. Return only JSON array of strings.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
-      temperature: 0.3,
-      max_tokens: 500,
+      temperature: 0.1, // Lower for faster, more deterministic responses
+      max_tokens: 200, // Reduced for faster response
     });
 
-    const responseText = completion.choices[0]?.message?.content;
+    const responseText = completion.choices[0]?.message?.content?.trim();
     if (!responseText) {
       return [];
     }
@@ -56,7 +46,9 @@ If you cannot determine specific frameworks, return an empty array: []`;
     const jsonMatch = responseText.match(/\[[\s\S]*?\]/);
     if (jsonMatch) {
       const skills = JSON.parse(jsonMatch[0]);
-      return Array.isArray(skills) ? skills : [];
+      return Array.isArray(skills)
+        ? skills.filter((s) => typeof s === "string")
+        : [];
     }
 
     return [];

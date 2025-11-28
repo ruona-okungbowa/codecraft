@@ -237,34 +237,27 @@ export default function SkillGapPage() {
     try {
       const res = await fetch("/api/analysis/skill-gaps", {
         method: "POST",
-
         headers: { "Content-Type": "application/json" },
-
         body: JSON.stringify({ targetRole: selectedRole }),
       });
 
       if (!res.ok) {
         const error = await res.json();
-
         throw new Error(error.error || "Analysis failed");
       }
 
       const data: AnalysisResponse = await res.json();
-
       setAnalysis(data);
 
       // Scroll to results after a short delay
-
       setTimeout(() => {
         document.getElementById("analysis-results")?.scrollIntoView({
           behavior: "smooth",
-
           block: "start",
         });
       }, 300);
     } catch (error) {
       console.error("Error analyzing skills:", error);
-
       alert(
         error instanceof Error
           ? error.message
@@ -626,12 +619,27 @@ export default function SkillGapPage() {
               </h2>
 
               <p className={`text-gray-600 mb-2 ${sansation.className}`}>
-                Comparing against 1,000+ job postings
+                Extracting skills from your projects
               </p>
 
               <p className={`text-sm text-gray-500 ${sansation.className}`}>
-                This usually takes 10-15 seconds
+                This usually takes 5-10 seconds
               </p>
+
+              <div className="mt-6 max-w-md mx-auto">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                  <span>Analyzing projects...</span>
+                  <span>⚡ Optimized</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 8, ease: "easeInOut" }}
+                  />
+                </div>
+              </div>
             </div>
           )}
 

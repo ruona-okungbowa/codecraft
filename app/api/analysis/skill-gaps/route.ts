@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if analysis already exists and is recent (< 24 hours)
+    // Check if analysis already exists and is recent (< 1 hour for better UX)
     const { data: existingAnalysis } = await supabase
       .from("skill_gaps")
       .select("*")
@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
       const hoursSinceAnalysis =
         (now.getTime() - analysedAt.getTime()) / (1000 * 60 * 60);
 
-      if (hoursSinceAnalysis < 24) {
+      // Return cached result if less than 1 hour old
+      if (hoursSinceAnalysis < 1) {
         const analysis = calculateSkillGaps(
           existingAnalysis.present_skills,
           targetRole
@@ -68,11 +69,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch user's projects
+    // Fetch user's projects (prioritize portfolio and recent projects)
     const { data: projects, error: projectsError } = await supabase
       .from("projects")
       .select("*")
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .order("in_portfolio", { ascending: false })
+      .order("last_commit_date", { ascending: false })
+      .limit(20); // Limit to 20 most relevant projects for speed
 
     if (projectsError) {
       throw new Error(`Failed to fetch projects: ${projectsError.message}`);
