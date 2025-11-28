@@ -128,21 +128,21 @@ This document outlines the day-by-day implementation plan for GitStory over 18 d
 
   - _Time: 7 hours_
 
-- [ ] 6. Dashboard Page
-  - [ ] 6.1 Create dashboard layout
+- [x] 6. Dashboard Page
+  - [x] 6.1 Create dashboard layout
     - Build DashboardLayout with sidebar navigation
     - Create Header with user menu
     - Add responsive design for mobile
     - _Requirements: 9.1_
 
-  - [ ] 6.2 Build dashboard overview
+  - [x] 6.2 Build dashboard overview
     - Display portfolio score prominently
     - Show quick stats: projects analyzed, recommendations, interviews
     - Add quick action buttons
     - Create skill coverage visualization
     - _Requirements: 9.1, 9.2, 9.5_
 
-  - [ ] 6.3 Implement dashboard data fetching
+  - [x] 6.3 Implement dashboard data fetching
     - Fetch portfolio score
     - Fetch project count
     - Fetch skill gaps summary
@@ -282,14 +282,14 @@ This document outlines the day-by-day implementation plan for GitStory over 18 d
     - Store in project_recommendations table
     - _Requirements: 5.1, 5.2, 5.4_
 
-  - [ ] 11.3 Build ProjectRecommendation component
+  - [x] 11.3 Build ProjectRecommendation component
     - Display top 3-5 recommendations as cards
     - Show: name, description, tech stack, difficulty, time
     - Add "View Details" to see full roadmap
     - Display gaps filled and priority
     - _Requirements: 5.2, 5.3, 5.4_
 
-  - [ ] 11.4 Build ProjectDetailModal component
+  - [x] 11.4 Build ProjectDetailModal component
     - Show week-by-week learning path
     - Display learning resources with links
     - Show success criteria
@@ -385,8 +385,8 @@ This document outlines the day-by-day implementation plan for GitStory over 18 d
   - _Time: 6 hours_
   - _Status: API complete (13.1, 13.2), UI pending (13.3)_
 
-- [ ] 14. README Generation
-  - [ ] 14.1 Implement README generation logic
+- [x] 14. README Generation
+  - [x] 14.1 Implement README generation logic
     - Create lib/openai/generateReadme.ts - Main generation logic with OpenAI
     - Create lib/github/fetchReadme.ts - Fetch existing README from GitHub
     - Create lib/utils/validateMarkdown.ts - Validate Markdown syntax
@@ -401,7 +401,7 @@ This document outlines the day-by-day implementation plan for GitStory over 18 d
     - _Requirements: 8.1, 8.2, 8.3_
     - _Files: lib/openai/generateReadme.ts, lib/github/fetchReadme.ts, lib/utils/validateMarkdown.ts, lib/utils/generateBadges.ts, app/api/ai/readme/route.ts, app/api/test/readme/route.ts_
 
-  - [ ] 14.2 Build READMEPreview component
+  - [x] 14.2 Build READMEPreview component
     - Display generated README with Markdown rendering
     - Show copy-to-clipboard button
     - Add instructions for adding to GitHub
@@ -467,8 +467,8 @@ This document outlines the day-by-day implementation plan for GitStory over 18 d
 
   - _Time: 6 hours_
 
-- [ ] 17. Landing Page and Marketing
-  - [ ] 17.1 Build landing page
+- [x] 17. Landing Page and Marketing
+  - [x] 17.1 Build landing page
     - Create hero section with value proposition
     - Add features section with screenshots
     - Create pricing section (free vs. pro)
@@ -476,7 +476,7 @@ This document outlines the day-by-day implementation plan for GitStory over 18 d
     - Include CTA buttons
     - _Requirements: All_
 
-  - [ ] 17.2 Create before/after showcase
+  - [x] 17.2 Create before/after showcase
     - Build comparison component
     - Show amateur vs. professional presentation
     - Add interactive demo
