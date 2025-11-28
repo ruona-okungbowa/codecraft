@@ -6,6 +6,49 @@ import { generateProjectReadme } from "@/lib/readme/generation";
 import { researchProjectReadmeBestPracticesWithCache } from "@/lib/readme/mcp-research";
 import { analyzeProject } from "@/lib/readme/analysis";
 import { ReadmeTemplate } from "@/lib/readme/types";
+import { openai } from "@/lib/openai/client";
+
+async function generateBriefDescription(
+  readmeContent: string,
+  projectName: string
+): Promise<string> {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an expert at writing concise project descriptions for GitHub repositories.",
+        },
+        {
+          role: "user",
+          content: `Based on this README content, write a brief, engaging description for the GitHub repository "${projectName}". 
+
+README:
+${readmeContent.substring(0, 1000)}
+
+Requirements:
+- Maximum 150 characters
+- Clear and professional
+- Highlight the main purpose
+- No emojis or special characters
+- One sentence only
+
+Return only the description text, nothing else.`,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 100,
+    });
+
+    const description = completion.choices[0]?.message?.content?.trim();
+    return description || "";
+  } catch (error) {
+    console.error("Error generating brief description:", error);
+    return "";
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -123,6 +166,38 @@ export async function POST(request: NextRequest) {
       githubToken
     );
 
+    // Generate brief description from README
+    const briefDescription = await generateBriefDescription(
+      generatedReadme.content,
+      project.name
+    );
+
+    // Update project description on GitHub if different
+    if (briefDescription && briefDescription !== project.description) {
+      try {
+        const urlParts = project.url.split("/");
+        const owner = urlParts[urlParts.length - 2];
+        const repo = urlParts[urlParts.length - 1];
+
+        const { Octokit } = await import("octokit");
+        const octokit = new Octokit({ auth: githubToken });
+
+        await octokit.rest.repos.update({
+          owner,
+          repo,
+          description: briefDescription,
+        });
+
+        // Update in database
+        await supabase
+          .from("projects")
+          .update({ description: briefDescription })
+          .eq("id", projectId);
+      } catch (error) {
+        console.error("Error updating project description:", error);
+      }
+    }
+
     // Return response
     return NextResponse.json({
       content: generatedReadme.content,
@@ -133,6 +208,7 @@ export async function POST(request: NextRequest) {
       },
       metadata: generatedReadme.metadata,
       generatedAt: generatedReadme.metadata.generatedAt,
+      briefDescription,
     });
   } catch (error) {
     console.error("Error generating project README:", error);

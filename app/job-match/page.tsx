@@ -95,11 +95,11 @@ export default function JobMatchPage() {
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
           <div className="px-10 py-6">
             <h1
-              className={`text-[28px] font-bold text-gray-900 ${newsreader.className}`}
+              className={`text-[28px] font-bold text-black ${newsreader.className}`}
             >
               Job Match Analysis
             </h1>
-            <p className={`text-sm text-gray-600 mt-1 ${sansation.className}`}>
+            <p className={`text-sm text-black mt-1 ${sansation.className}`}>
               Analyze how well your portfolio matches a job description
             </p>
           </div>
@@ -136,7 +136,7 @@ Required Skills:
 - RESTful APIs
 - Git, CI/CD
 - Responsive design"
-                className="w-full h-[400px] px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
+                className="w-full h-[400px] text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
               />
 
               {error && (
@@ -182,7 +182,7 @@ Required Skills:
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     No Analysis Yet
                   </h3>
-                  <p className="text-gray-600 max-w-sm">
+                  <p className="text-black max-w-sm">
                     Paste a job description and click &quot;Analyze Job
                     Match&quot; to see how well your portfolio matches the
                     requirements.
@@ -205,7 +205,7 @@ Required Skills:
                     >
                       {getMatchLabel(result.matchPercentage)}
                     </h3>
-                    <p className="text-gray-600">{result.summary}</p>
+                    <p className="text-black">{result.summary}</p>
                   </div>
 
                   <div>

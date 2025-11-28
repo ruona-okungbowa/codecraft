@@ -29,10 +29,24 @@ const InterviewPage = () => {
   const router = useRouter();
   const [interviews, setInterviews] = useState<InterviewWithFeedback[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
     fetchInterviews();
+    fetchUserName();
   }, []);
+
+  async function fetchUserName() {
+    try {
+      const response = await fetch("/api/user/profile");
+      if (response.ok) {
+        const data = await response.json();
+        setUserName(data.first_name || data.github_username || "");
+      }
+    } catch (error) {
+      console.error("Error fetching user name:", error);
+    }
+  }
 
   async function fetchInterviews() {
     try {
@@ -102,6 +116,11 @@ const InterviewPage = () => {
               className={`text-[28px] font-bold text-gray-900 ${newsreader.className}`}
             >
               Mock Interview
+              {userName && (
+                <span className="text-gray-500 font-normal text-xl ml-2">
+                  - Welcome, {userName}
+                </span>
+              )}
             </h1>
             <p className={`text-sm text-gray-600 mt-1 ${sansation.className}`}>
               Prepare for your next interview with AI-powered practice sessions

@@ -11,6 +11,12 @@ export default function Preview({ content }: PreviewProps) {
   const [html, setHtml] = useState("");
 
   useEffect(() => {
+    // Configure marked options
+    marked.setOptions({
+      breaks: true,
+      gfm: true,
+    });
+
     // Parse markdown to HTML
     const parseMarkdown = async () => {
       const parsed = await marked.parse(content);
@@ -30,24 +36,29 @@ export default function Preview({ content }: PreviewProps) {
           <div
             className="prose prose-sm max-w-none text-black
               prose-headings:font-bold prose-headings:text-black
-              prose-h1:text-3xl prose-h1:mb-4
-              prose-h2:text-2xl prose-h2:mt-6 prose-h2:mb-3
-              prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-2
-              prose-p:text-black prose-p:leading-relaxed
+              prose-h1:text-3xl prose-h1:mb-4 prose-h1:mt-0
+              prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
+              prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
+              prose-p:text-black prose-p:leading-relaxed prose-p:mb-4
               prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
               prose-code:text-sm prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-black
-              prose-pre:bg-gray-900 prose-pre:text-gray-100
-              prose-ul:list-disc prose-ul:ml-6
-              prose-ol:list-decimal prose-ol:ml-6
-              prose-li:text-black
-              prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-black
-              prose-img:rounded-lg prose-img:shadow-md
-              prose-table:border-collapse
+              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:my-4
+              prose-ul:list-disc prose-ul:ml-6 prose-ul:my-4
+              prose-ol:list-decimal prose-ol:ml-6 prose-ol:my-4
+              prose-li:text-black prose-li:my-1
+              prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-black prose-blockquote:my-4
+              prose-img:inline-block prose-img:my-0 prose-img:mx-1
+              prose-table:border-collapse prose-table:my-4
               prose-th:bg-gray-100 prose-th:p-2 prose-th:border prose-th:border-gray-300 prose-th:text-black
               prose-td:p-2 prose-td:border prose-td:border-gray-300 prose-td:text-black
-              prose-strong:text-black
-              [&_*]:text-black [&_a]:text-blue-600 [&_pre]:text-gray-100"
-            style={{ color: "#000000" }}
+              prose-strong:text-black prose-strong:font-semibold
+              [&_*]:text-black [&_a]:text-blue-600 [&_pre]:text-gray-100
+              [&_p>img]:inline-block [&_p>img]:my-0 [&_p>img]:mx-1"
+            style={{
+              color: "#000000",
+              whiteSpace: "normal",
+              wordWrap: "break-word",
+            }}
             dangerouslySetInnerHTML={{ __html: html }}
           />
         ) : (

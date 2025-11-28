@@ -48,10 +48,20 @@ export default function InterviewSessionPage({
           return;
         }
 
+        // Fetch user profile to get first name
+        const profileResponse = await fetch("/api/user/profile");
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          // Use first_name if available, otherwise fall back to github_username
+          const displayName =
+            profileData.first_name || profileData.github_username || "User";
+          setUserName(displayName);
+        }
+
+        // Get user ID
         const userResponse = await fetch("/api/user");
         if (userResponse.ok) {
           const userData = await userResponse.json();
-          setUserName(userData.user.user_metadata?.user_name || "User");
           setUserId(userData.user.id);
         }
       } catch (error) {

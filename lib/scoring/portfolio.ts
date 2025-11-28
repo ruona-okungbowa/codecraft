@@ -6,6 +6,7 @@ interface Props {
   techDiversityScore: number;
   documentationScore: number;
   consistencyScore: number;
+  hasProfileReadme?: boolean;
   breakdown: {
     strengths: string[];
     weaknesses: string[];
@@ -13,7 +14,10 @@ interface Props {
   };
 }
 
-export function calculatePortfolioScore(projects: Project[]): Props {
+export function calculatePortfolioScore(
+  projects: Project[],
+  hasProfileReadme?: boolean
+): Props {
   if (projects.length === 0) {
     return {
       overallScore: 0,
@@ -21,6 +25,7 @@ export function calculatePortfolioScore(projects: Project[]): Props {
       techDiversityScore: 0,
       documentationScore: 0,
       consistencyScore: 0,
+      hasProfileReadme: false,
       breakdown: {
         strengths: [],
         weaknesses: ["No projects found"],
@@ -29,12 +34,14 @@ export function calculatePortfolioScore(projects: Project[]): Props {
     };
   }
 
-  // Overvall Score: Project Quality: 35% Tech Diversity: 25% Documentation: 20% Consistency: 20%
-
   const projectQualityScore = calculateProjectQuality(projects);
   const techDiversityScore = calculateTechDiversity(projects);
-  const documentationScore = calculateDocumentation(projects);
+  let documentationScore = calculateDocumentation(projects);
   const consistencyScore = calculateConsistency(projects);
+
+  if (hasProfileReadme) {
+    documentationScore = Math.min(documentationScore + 10, 100);
+  }
 
   const overallScore = Math.round(
     projectQualityScore * 0.35 +
@@ -49,6 +56,7 @@ export function calculatePortfolioScore(projects: Project[]): Props {
     documentationScore,
     consistencyScore,
     projectCount: projects.length,
+    hasProfileReadme,
   });
 
   return {
@@ -57,6 +65,7 @@ export function calculatePortfolioScore(projects: Project[]): Props {
     techDiversityScore,
     documentationScore,
     consistencyScore,
+    hasProfileReadme,
     breakdown,
   };
 }
@@ -124,6 +133,31 @@ function calculateDocumentation(projects: Project[]): number {
   return Math.round(Math.min(score, 100));
 }
 
+export async function checkProfileReadme(
+  username: string,
+  githubToken: string
+): Promise<boolean> {
+  try {
+    const { Octokit } = await import("octokit");
+    const octokit = new Octokit({ auth: githubToken });
+
+    await octokit.rest.repos.get({
+      owner: username,
+      repo: username,
+    });
+
+    const { data } = await octokit.rest.repos.getContent({
+      owner: username,
+      repo: username,
+      path: "README.md",
+    });
+
+    return !!data;
+  } catch {
+    return false;
+  }
+}
+
 function calculateConsistency(projects: Project[]): number {
   const now = new Date();
   const threeMonthsAgo = new Date();
@@ -148,6 +182,7 @@ function generateFeedback(scores: {
   documentationScore: number;
   consistencyScore: number;
   projectCount: number;
+  hasProfileReadme?: boolean;
 }): {
   strengths: string[];
   weaknesses: string[];
@@ -177,10 +212,19 @@ function generateFeedback(scores: {
 
   if (scores.documentationScore >= 70) {
     strengths.push("Well-documented projects");
+    if (scores.hasProfileReadme) {
+      strengths.push("Professional GitHub profile README");
+    }
   } else if (scores.documentationScore < 50) {
     weaknesses.push("Projects lack proper documentation");
     suggestions.push(
       "Add detailed README files with setup instructions and descriptions"
+    );
+  }
+
+  if (!scores.hasProfileReadme) {
+    suggestions.push(
+      "Create a GitHub profile README to showcase your skills and projects"
     );
   }
 

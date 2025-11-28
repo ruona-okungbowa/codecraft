@@ -9,13 +9,22 @@ import { validateMarkdown } from "./validation";
 import { openai } from "@/lib/openai/client";
 import { selectTopProjects } from "./ranking";
 
+interface RepoAnalysis {
+  framework: string;
+  dependencies: string[];
+  devDependencies: string[];
+  scripts: Record<string, string>;
+  features: string[];
+  structure: string[];
+}
+
 export async function generateProjectReadme(
   project: Project,
   template: ReadmeTemplate,
   research: ReadmeResearch,
   githubToken?: string
 ): Promise<GeneratedReadme> {
-  let repoAnalysis = null;
+  let repoAnalysis: RepoAnalysis | null = null;
 
   if (githubToken && project.url) {
     try {
@@ -109,7 +118,7 @@ function buildProjectReadmePrompt(
   project: Project,
   template: ReadmeTemplate,
   research: ReadmeResearch,
-  repoAnalysis?: unknown
+  repoAnalysis?: RepoAnalysis | null
 ): string {
   const languages = Object.keys(project.languages || {}).join(", ");
   const badges = generateBadges(Object.keys(project.languages || {}));
@@ -158,19 +167,83 @@ ${research.trendingFeatures.map((f) => `- ${f}`).join("\n")}
 **Badges to Include:**
 ${badges}
 
-**Instructions:**
-1. Create a complete, professional README.md based on ACTUAL project analysis
-2. Use proper Markdown formatting
-3. Include code blocks with language tags for the ACTUAL framework detected
-4. Add appropriate badges at the top
-5. Make it engaging and easy to understand
-6. Include installation and usage instructions specific to the framework
-7. Add a features section highlighting ACTUAL capabilities from the analysis
-8. If Next.js is detected, include Next.js specific commands (npm run dev, npm run build)
-9. If Supabase is detected, mention database and authentication features
-10. Return ONLY the Markdown content, no wrapper code blocks
+**CRITICAL FORMATTING RULES - MUST FOLLOW:**
+1. Start with # for main title
+2. Add TWO blank lines after the title
+3. Add TWO blank lines before each ## section header
+4. Add ONE blank line after each ## section header
+5. Put badges on a separate line with blank lines above and below
+6. Add blank lines between all paragraphs
+7. Add blank lines before and after lists
+8. Add blank lines before and after code blocks
+9. Use proper code block formatting with language tags
+10. Each section must be clearly separated with proper whitespace
 
-Generate the README now:`;
+**CONTENT REQUIREMENTS:**
+1. Write a compelling project overview based on ACTUAL analysis (not generic)
+2. If it's a web app, describe what users can DO with it
+3. For HTML/CSS/JS projects, analyze the actual functionality from files
+4. For Python projects, describe the application purpose
+5. Include SPECIFIC features found in the code, not generic assumptions
+6. Installation steps must match the ACTUAL framework/language detected
+7. Usage examples should be framework-specific
+8. If no package.json exists, provide appropriate setup for the detected language
+9. Remove placeholder text like "(Demo link will be added once available)"
+10. Only include sections that are relevant to THIS specific project
+
+**EXAMPLE STRUCTURE WITH PROPER SPACING:**
+
+# Project Name
+
+
+Brief engaging description of what this project does.
+
+
+![Badge1](url) ![Badge2](url)
+
+
+## Features
+
+
+- Actual feature 1 from analysis
+- Actual feature 2 from analysis
+
+
+## Tech Stack
+
+
+List of actual technologies used
+
+
+## Installation
+
+
+Framework-specific installation steps
+
+\`\`\`
+npm install
+\`\`\`
+
+
+## Usage
+
+
+How to actually use this project
+
+
+## Contributing
+
+
+Standard contributing guidelines
+
+
+## License
+
+
+License information
+
+
+IMPORTANT: Return ONLY the Markdown content with proper spacing. Do NOT wrap in code blocks:`;
 }
 
 /**
@@ -259,7 +332,19 @@ async function callOpenAI(
       messages: [
         {
           role: "system",
-          content: `You are an expert technical writer who creates professional ${type === "project" ? "project" : "GitHub profile"} README files. Generate clear, well-structured Markdown documentation that follows current best practices.`,
+          content: `You are an expert technical writer who creates professional ${type === "project" ? "project" : "GitHub profile"} README files. 
+
+CRITICAL FORMATTING RULES:
+1. Add TWO blank lines after the title
+2. Add TWO blank lines before each ## heading
+3. Add ONE blank line after each ## heading
+4. Add ONE blank line between paragraphs
+5. Add ONE blank line before and after code blocks
+6. Add ONE blank line before and after lists
+7. Put badges on their own line with blank lines above and below
+8. Ensure proper spacing throughout
+
+Generate clear, well-structured Markdown with proper line breaks.`,
         },
         {
           role: "user",
@@ -276,7 +361,32 @@ async function callOpenAI(
       throw new Error("No response from OpenAI");
     }
 
-    return responseText.trim();
+    // Clean up the response and ensure proper spacing
+    let cleaned = responseText.trim();
+
+    // Remove markdown code block wrapper if present
+    cleaned = cleaned.replace(/^```markdown\n?/i, "").replace(/\n?```$/i, "");
+
+    // Ensure proper spacing after title
+    cleaned = cleaned.replace(/^(#\s+.+)\n([^#\n])/m, "$1\n\n$2");
+
+    // Ensure proper spacing before section headers
+    cleaned = cleaned.replace(/([^\n])\n(##\s+)/g, "$1\n\n$2");
+
+    // Ensure proper spacing after section headers
+    cleaned = cleaned.replace(/(##\s+.+)\n([^#\n])/g, "$1\n\n$2");
+
+    // Ensure badges have spacing
+    cleaned = cleaned.replace(
+      /(\]\(https:\/\/img\.shields\.io[^\)]+\))\s*(\]\()/g,
+      "$1 $2"
+    );
+    cleaned = cleaned.replace(
+      /(\]\(https:\/\/img\.shields\.io[^\)]+\))\n([^!\n])/g,
+      "$1\n\n$2"
+    );
+
+    return cleaned.trim();
   } catch (error) {
     console.error("Error generating README:", error);
     throw new Error(`Failed to generate README: ${error}`);

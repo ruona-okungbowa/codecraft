@@ -148,7 +148,7 @@ export default function DashboardPage() {
                   Updated
                 </span>
                 <Link
-                  href="/improve"
+                  href="/portfolio-score/improve"
                   className="text-sm text-blue-600 hover:underline font-medium"
                 >
                   Improve Score →
