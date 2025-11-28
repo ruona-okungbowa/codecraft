@@ -13,6 +13,13 @@ import {
   Briefcase,
 } from "lucide-react";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import {
+  showSuccess,
+  showError,
+  showLoading,
+  dismissToast,
+} from "@/lib/utils/toast";
+import { celebrateSuccess, celebrateMilestone } from "@/lib/utils/confetti";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -41,11 +48,13 @@ export default function JobMatchPage() {
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
       setError("Please enter a job description");
+      showError("Please enter a job description");
       return;
     }
 
     setAnalyzing(true);
     setError(null);
+    const toastId = showLoading("Analyzing job match...");
 
     try {
       const response = await fetch("/api/analysis/job-match", {
@@ -61,8 +70,21 @@ export default function JobMatchPage() {
 
       const data = await response.json();
       setResult(data);
+
+      dismissToast(toastId);
+      showSuccess("Match analysis complete! 🎯");
+
+      // Celebrate based on match percentage
+      if (data.matchPercentage >= 80) {
+        celebrateMilestone();
+      } else if (data.matchPercentage >= 60) {
+        celebrateSuccess();
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      dismissToast(toastId);
+      const errorMsg = err instanceof Error ? err.message : "An error occurred";
+      setError(errorMsg);
+      showError(errorMsg);
     } finally {
       setAnalyzing(false);
     }
@@ -91,22 +113,24 @@ export default function JobMatchPage() {
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-10 py-6">
+          <div className="px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
             <h1
-              className={`text-[28px] font-bold text-black ${newsreader.className}`}
+              className={`text-xl md:text-[28px] font-bold text-black ${newsreader.className}`}
             >
               Job Match Analysis
             </h1>
-            <p className={`text-sm text-black mt-1 ${sansation.className}`}>
+            <p
+              className={`text-xs md:text-sm text-black mt-1 ${sansation.className}`}
+            >
               Analyze how well your portfolio matches a job description
             </p>
           </div>
         </header>
 
-        <main className="px-10 py-8 max-w-[1400px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <main className="px-4 md:px-10 py-4 md:py-8 max-w-[1400px] mx-auto pt-16 md:pt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

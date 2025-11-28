@@ -3,6 +3,12 @@
 import { useRouter } from "next/navigation";
 import { Newsreader, Sansation } from "next/font/google";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import {
+  showSuccess,
+  showError,
+  showLoading,
+  dismissToast,
+} from "@/lib/utils/toast";
 import { Mic, ArrowRight, Loader2, Clock, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -49,10 +55,12 @@ const InterviewPage = () => {
   }
 
   async function fetchInterviews() {
+    const toastId = showLoading("Loading interviews...");
     try {
       const response = await fetch("/api/interviews");
       if (response.ok) {
         const data = await response.json();
+        dismissToast(toastId);
         const interviewsData = data.interviews || [];
 
         const interviewsWithFeedback = await Promise.all(
@@ -87,6 +95,8 @@ const InterviewPage = () => {
       }
     } catch (error) {
       console.error("Error fetching interviews:", error);
+      dismissToast(toastId);
+      showError("Failed to load interviews");
     } finally {
       setLoading(false);
     }
@@ -109,11 +119,11 @@ const InterviewPage = () => {
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-10 py-6">
+          <div className="px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
             <h1
-              className={`text-[28px] font-bold text-gray-900 ${newsreader.className}`}
+              className={`text-xl md:text-[28px] font-bold text-gray-900 ${newsreader.className}`}
             >
               Mock Interview
               {userName && (

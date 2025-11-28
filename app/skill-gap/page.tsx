@@ -4,6 +4,14 @@
 import { useEffect, useState } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  showSuccess,
+  showError,
+  showLoading,
+  dismissToast,
+} from "@/lib/utils/toast";
+import { celebrateSuccess, celebrateMilestone } from "@/lib/utils/confetti";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 import {
   RefreshCw,
@@ -233,6 +241,7 @@ export default function SkillGapPage() {
     if (!selectedRole) return;
 
     setAnalyzing(true);
+    const toastId = showLoading("Analyzing your skills...");
 
     try {
       const res = await fetch("/api/analysis/skill-gaps", {
@@ -249,6 +258,16 @@ export default function SkillGapPage() {
       const data: AnalysisResponse = await res.json();
       setAnalysis(data);
 
+      dismissToast(toastId);
+      showSuccess("Analysis complete! 🎯");
+
+      // Celebrate based on score
+      if (data.analysis.coveragePercentage >= 80) {
+        celebrateMilestone();
+      } else {
+        celebrateSuccess();
+      }
+
       // Scroll to results after a short delay
       setTimeout(() => {
         document.getElementById("analysis-results")?.scrollIntoView({
@@ -258,7 +277,8 @@ export default function SkillGapPage() {
       }, 300);
     } catch (error) {
       console.error("Error analyzing skills:", error);
-      alert(
+      dismissToast(toastId);
+      showError(
         error instanceof Error
           ? error.message
           : "Failed to analyze skills. Please try again."
@@ -399,24 +419,26 @@ export default function SkillGapPage() {
       <div className="flex min-h-screen bg-gray-50">
         <DashboardSidebar />
 
-        <div className="ml-[72px] flex-1">
+        <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
           {/* Header */}
 
-          <div className="bg-white border-b border-gray-200 px-10 py-6 sticky top-0 z-30">
+          <div className="bg-white border-b border-gray-200 px-4 md:px-10 py-4 md:py-6 sticky top-0 z-30 pl-16 md:pl-10">
             <h1
-              className={`text-3xl font-bold text-gray-900 ${newsreader.className}`}
+              className={`text-xl md:text-3xl font-bold text-gray-900 ${newsreader.className}`}
             >
               Skill Gap Analysis
             </h1>
 
-            <p className={`text-sm text-gray-600 mt-1 ${sansation.className}`}>
+            <p
+              className={`text-xs md:text-sm text-gray-600 mt-1 ${sansation.className}`}
+            >
               Understand what you need to learn for your target role
             </p>
           </div>
 
           {/* Empty state */}
 
-          <main className="p-10 max-w-[1400px] mx-auto">
+          <main className="p-4 md:p-10 max-w-[1400px] mx-auto pt-16 md:pt-4">
             <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-sm">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Code size={32} className="text-gray-400" />
@@ -453,33 +475,34 @@ export default function SkillGapPage() {
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
         {/* Page Header */}
 
-        <div className="bg-white border-b border-gray-200 px-10 py-6 sticky top-0 z-30">
-          <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+        <div className="bg-white border-b border-gray-200 px-4 md:px-10 py-4 md:py-6 sticky top-0 z-30 pl-16 md:pl-10">
+          <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h1
-                className={`text-3xl font-bold text-gray-900 ${newsreader.className}`}
+                className={`text-xl md:text-3xl font-bold text-gray-900 ${newsreader.className}`}
               >
                 Skill Gap Analysis
               </h1>
 
               <p
-                className={`text-sm text-gray-600 mt-1 ${sansation.className}`}
+                className={`text-xs md:text-sm text-gray-600 mt-1 ${sansation.className}`}
               >
                 Understand what you need to learn for your target role
               </p>
             </div>
 
             {analysis && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 md:gap-3 flex-wrap w-full md:w-auto">
                 <button
                   onClick={handleReanalyze}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors text-xs md:text-sm font-medium text-gray-700"
                 >
-                  <RefreshCw size={18} />
-                  Re-analyze Skills
+                  <RefreshCw size={16} />
+                  <span className="hidden sm:inline">Re-analyze Skills</span>
+                  <span className="sm:hidden">Re-analyze</span>
                 </button>
 
                 <button
@@ -493,17 +516,18 @@ export default function SkillGapPage() {
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700"
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors text-xs md:text-sm font-medium text-gray-700"
                 >
-                  <Download size={18} />
-                  Export Report
+                  <Download size={16} />
+                  <span className="hidden sm:inline">Export Report</span>
+                  <span className="sm:hidden">Export</span>
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        <main className="p-10">
+        <main className="p-4 md:p-10">
           {/* Role Selector Section */}
 
           {!analysis && (
@@ -515,11 +539,23 @@ export default function SkillGapPage() {
                   What role are you targeting?
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
                   {roleDefinitions.map((role) => (
                     <motion.div
                       key={role.id}
                       onClick={() => handleRoleSelect(role.id)}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        delay:
+                          role.id === "frontend"
+                            ? 0
+                            : role.id === "backend"
+                              ? 0.1
+                              : role.id === "fullstack"
+                                ? 0.2
+                                : 0.3,
+                      }}
                       whileHover={{ y: -4, scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`
@@ -655,8 +691,8 @@ export default function SkillGapPage() {
             >
               {/* Overview Section */}
 
-              <div className="bg-white rounded-2xl p-10 shadow-lg border border-gray-200">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              <div className="bg-white rounded-2xl p-4 md:p-10 shadow-lg border border-gray-200">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10">
                   {/* Overall Match Score */}
 
                   <div className="flex flex-col items-center">
@@ -777,15 +813,15 @@ export default function SkillGapPage() {
 
               {/* Current Skills Section */}
 
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
+              <div className="bg-white rounded-xl p-4 md:p-8 shadow-sm border border-gray-200">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4 md:mb-6">
                   <h2
-                    className={`text-2xl font-bold text-gray-900 ${newsreader.className}`}
+                    className={`text-xl md:text-2xl font-bold text-gray-900 ${newsreader.className}`}
                   >
                     Your Current Skills
                   </h2>
 
-                  <span className="text-sm text-gray-500">
+                  <span className="text-xs md:text-sm text-gray-500">
                     {analysis.analysis.presentSkills.length} skills detected
                   </span>
                 </div>
@@ -813,15 +849,17 @@ export default function SkillGapPage() {
 
               {/* Missing Skills Section */}
 
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
-                <div className="mb-6">
+              <div className="bg-white rounded-xl p-4 md:p-8 shadow-sm border border-gray-200">
+                <div className="mb-4 md:mb-6">
                   <h2
-                    className={`text-2xl font-bold text-gray-900 mb-2 ${newsreader.className}`}
+                    className={`text-xl md:text-2xl font-bold text-gray-900 mb-2 ${newsreader.className}`}
                   >
                     Skills to Learn
                   </h2>
 
-                  <p className={`text-sm text-gray-600 ${sansation.className}`}>
+                  <p
+                    className={`text-xs md:text-sm text-gray-600 ${sansation.className}`}
+                  >
                     Based on{" "}
                     {
                       roleDefinitions.find(
@@ -834,7 +872,7 @@ export default function SkillGapPage() {
 
                 {/* Priority Tabs */}
 
-                <div className="flex gap-2 mb-6 border-b border-gray-200">
+                <div className="flex gap-1 md:gap-2 mb-6 border-b border-gray-200 overflow-x-auto scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                   {(["essential", "preferred", "niceToHave"] as const).map(
                     (priority) => {
                       const count =
@@ -848,7 +886,7 @@ export default function SkillGapPage() {
                           onClick={() => setActivePriorityTab(priority)}
                           className={`
 
-                          px-6 py-3 font-medium transition-all rounded-t-lg relative
+                          px-3 md:px-6 py-2 md:py-3 font-medium transition-all rounded-t-lg relative whitespace-nowrap text-sm md:text-base flex-shrink-0
 
                           ${
                             activePriorityTab === priority
@@ -858,13 +896,22 @@ export default function SkillGapPage() {
 
                         `}
                         >
-                          <div className="flex items-center gap-2">
-                            {config.label}
+                          <div className="flex items-center gap-1.5 md:gap-2">
+                            <span className="hidden sm:inline">
+                              {config.label}
+                            </span>
+                            <span className="sm:hidden">
+                              {priority === "essential"
+                                ? "Essential"
+                                : priority === "preferred"
+                                  ? "Preferred"
+                                  : "Nice-to-have"}
+                            </span>
 
                             <span
                               className={`
 
-                            px-2 py-0.5 rounded-full text-xs font-semibold
+                            px-1.5 md:px-2 py-0.5 rounded-full text-xs font-semibold
 
                             ${
                               activePriorityTab === priority

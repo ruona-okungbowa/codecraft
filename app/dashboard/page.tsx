@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import SkeletonLoader from "@/components/SkeletonLoader";
+import { celebrateScoreImprovement } from "@/lib/utils/confetti";
+import { showSuccess } from "@/lib/utils/toast";
 import {
   Trophy,
   Folder,
-  ArrowUp,
-  FileText,
   Briefcase,
   Lightbulb,
   Mic,
@@ -60,6 +61,20 @@ export default function DashboardPage() {
         if (scoreRes.ok) {
           const scoreData = await scoreRes.json();
           setPortfolioScore(scoreData);
+
+          // Check for score improvement
+          const newScore = scoreData.overallScore || 0;
+          const storedScore = localStorage.getItem("dashboardScore");
+          if (storedScore) {
+            const prevScore = parseInt(storedScore);
+            if (newScore > prevScore) {
+              celebrateScoreImprovement();
+              showSuccess(
+                `Your portfolio score improved by ${newScore - prevScore} points! 🎉`
+              );
+            }
+          }
+          localStorage.setItem("dashboardScore", newScore.toString());
         }
 
         // Get user info from Supabase
@@ -90,20 +105,24 @@ export default function DashboardPage() {
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
         {/* Content Area */}
-        <main className="p-10 max-w-[1400px] mx-auto">
+        <main className="p-4 md:p-10 max-w-[1400px] mx-auto pt-16 md:pt-4">
           {/* Welcome Section */}
-          <div className="mb-10">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 md:mb-10"
+          >
             <h2
-              className={`text-3xl font-semibold text-gray-900 ${newsreader.className}`}
+              className={`text-xl md:text-3xl font-semibold text-gray-900 ${newsreader.className}`}
             >
               Welcome Back, {userName}! 👋
             </h2>
-          </div>
+          </motion.div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
             {/* Portfolio Score Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -208,90 +227,103 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="mb-12">
+          <div className="mb-8 md:mb-12">
             <h2
-              className={`text-2xl font-bold text-gray-900 mb-6 ${newsreader.className}`}
+              className={`text-lg md:text-2xl font-bold text-gray-900 mb-4 md:mb-6 ${newsreader.className}`}
             >
               What would you like to do today?
             </h2>
-            <div className="grid grid-cols-1 items-center md:grid-cols-2 lg:grid-cols-4 gap-5">
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                className="rounded-xl p-6 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
-                style={{
-                  background: "linear-gradient(135deg, #a855f7, #ec4899)",
-                }}
-              >
-                <div>
-                  <Briefcase size={40} className="text-white mb-3" />
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    Match to a Job
-                  </h3>
-                  <p className="text-sm text-white/90">See how you stack up</p>
-                </div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                className="rounded-xl p-6 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
-                style={{
-                  background: "linear-gradient(135deg, #22c55e, #14b8a6)",
-                }}
-              >
-                <div>
-                  <Lightbulb size={40} className="text-white mb-3" />
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    Get Project Ideas
-                  </h3>
-                  <p className="text-sm text-white/90">
-                    Build what employers want
-                  </p>
-                </div>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                className="rounded-xl p-6 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
-                style={{
-                  background: "linear-gradient(135deg, #f97316, #ef4444)",
-                }}
-              >
-                <div>
-                  <Mic size={40} className="text-white mb-3" />
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    Practice Interviewing
-                  </h3>
-                  <p className="text-sm text-white/90">Build confidence</p>
-                </div>
-                <motion.span
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-xs text-white/80 border border-white/30 px-2 py-1 rounded-full self-start"
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+              <Link href="/job-match" className="block">
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="rounded-xl p-4 md:p-6 h-[140px] md:h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
+                  style={{
+                    background: "linear-gradient(135deg, #a855f7, #ec4899)",
+                  }}
                 >
-                  New
-                </motion.span>
-              </motion.div>
+                  <div>
+                    <Briefcase size={28} className="text-white mb-2 md:mb-3" />
+                    <h3 className="text-base md:text-xl font-bold text-white mb-1">
+                      Match to a Job
+                    </h3>
+                    <p className="text-xs md:text-sm text-white/90">
+                      See how you stack up
+                    </p>
+                  </div>
+                </motion.div>
+              </Link>
+
+              <Link href="/project-recommendations" className="block">
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="rounded-xl p-4 md:p-6 h-[140px] md:h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
+                  style={{
+                    background: "linear-gradient(135deg, #22c55e, #14b8a6)",
+                  }}
+                >
+                  <div>
+                    <Lightbulb size={28} className="text-white mb-2 md:mb-3" />
+                    <h3 className="text-base md:text-xl font-bold text-white mb-1">
+                      Get Project Ideas
+                    </h3>
+                    <p className="text-xs md:text-sm text-white/90">
+                      Build what employers want
+                    </p>
+                  </div>
+                </motion.div>
+              </Link>
+
+              <Link href="/mock-interview" className="block">
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="rounded-xl p-4 md:p-6 h-[140px] md:h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
+                  style={{
+                    background: "linear-gradient(135deg, #f97316, #ef4444)",
+                  }}
+                >
+                  <div>
+                    <Mic size={28} className="text-white mb-2 md:mb-3" />
+                    <h3 className="text-base md:text-xl font-bold text-white mb-1">
+                      Practice Interviewing
+                    </h3>
+                    <p className="text-xs md:text-sm text-white/90">
+                      Build confidence
+                    </p>
+                  </div>
+                  <motion.span
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="text-xs text-white/80 border border-white/30 px-2 py-1 rounded-full self-start"
+                  >
+                    New
+                  </motion.span>
+                </motion.div>
+              </Link>
             </div>
           </div>
 
           {/* Recent Projects */}
-          <div className="bg-white rounded-xl p-8 border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-xl p-4 md:p-8 border border-gray-200">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
               <h2
-                className={`text-xl font-bold text-gray-900 ${newsreader.className}`}
+                className={`text-lg md:text-xl font-bold text-gray-900 ${newsreader.className}`}
               >
                 Recent Projects
               </h2>
               <Link
                 href="/projects"
-                className="text-sm text-blue-600 hover:underline"
+                className="text-xs md:text-sm text-blue-600 hover:underline whitespace-nowrap"
               >
                 View all →
               </Link>
             </div>
             {loading ? (
-              <div className="text-center py-8 text-gray-400">
-                Loading projects...
+              <div className="space-y-4">
+                <SkeletonLoader variant="card" count={3} />
               </div>
             ) : projects.length === 0 ? (
               <div className="text-center py-8">
@@ -305,34 +337,34 @@ export default function DashboardPage() {
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                 {projects.slice(0, 6).map((project) => (
                   <Link
                     key={project.id}
                     href={`/projects/${project.id}`}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
+                    className="p-3 md:p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
                   >
                     <h3
-                      className={`font-semibold text-gray-900 mb-2 ${newsreader.className}`}
+                      className={`text-sm md:text-base font-semibold text-gray-900 mb-2 truncate ${newsreader.className}`}
                     >
                       {project.name}
                     </h3>
                     <p
-                      className={`text-sm text-gray-600 mb-3 line-clamp-2 ${sansation.className}`}
+                      className={`text-xs md:text-sm text-gray-600 mb-3 line-clamp-2 ${sansation.className}`}
                     >
                       {project.description || "No description"}
                     </p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                       <span className="flex items-center gap-1">
-                        <Star size={14} />
+                        <Star size={12} />
                         {project.stars}
                       </span>
                       <span className="flex items-center gap-1">
-                        <GitFork size={14} />
+                        <GitFork size={12} />
                         {project.forks}
                       </span>
                       {project.languages && project.languages.length > 0 && (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs truncate max-w-[100px]">
                           {project.languages[0]}
                         </span>
                       )}

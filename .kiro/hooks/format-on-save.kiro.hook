@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Format Code on Save",
+  "description": "Automatically formats code using Prettier whenever a TypeScript, JavaScript, TSX, JSX, CSS, or JSON file is saved",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.css",
+      "**/*.json"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "npm run format"
+  }
+}

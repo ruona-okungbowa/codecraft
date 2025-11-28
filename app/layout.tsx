@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AuthContextProvider } from "@/lib/auth/AuthProvider";
 import { Newsreader, Sansation } from "next/font/google";
 import UserMenu from "@/components/UserMenu";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import Link from "next/link";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
     >
       <body>
         <AuthContextProvider>
+          <Toaster />
           <main>{children}</main>
         </AuthContextProvider>
       </body>

@@ -15,6 +15,13 @@ import {
 import Link from "next/link";
 import { Newsreader, Sansation } from "next/font/google";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import {
+  showSuccess,
+  showError,
+  showLoading,
+  dismissToast,
+} from "@/lib/utils/toast";
+import { celebrateSuccess } from "@/lib/utils/confetti";
 import { ProjectRow } from "@/types";
 
 const newsreader = Newsreader({
@@ -61,6 +68,7 @@ export default function PortfolioPage() {
   async function generatePortfolio() {
     setGenerating(true);
     setResult(null);
+    const toastId = showLoading("Generating your portfolio website...");
 
     try {
       const response = await fetch("/api/ai/portfolio-site", {
@@ -74,13 +82,20 @@ export default function PortfolioPage() {
           url: data.url,
           message: data.message,
         });
+        dismissToast(toastId);
+        showSuccess("Portfolio generated successfully! 🎉");
+        celebrateSuccess();
       } else {
         setResult({
           error: data.error || "Failed to generate portfolio",
         });
+        dismissToast(toastId);
+        showError(data.error || "Failed to generate portfolio");
       }
     } catch (error) {
       console.error("Error generating portfolio:", error);
+      dismissToast(toastId);
+      showError("An error occurred while generating portfolio");
       setResult({
         error: "An unexpected error occurred. Please try again.",
       });
@@ -100,19 +115,19 @@ export default function PortfolioPage() {
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
         {/* Header */}
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-10 py-6">
-            <div className="flex items-center justify-between">
+          <div className="px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
                 <h1
-                  className={`text-[28px] font-bold text-gray-900 ${newsreader.className}`}
+                  className={`text-xl md:text-[28px] font-bold text-gray-900 ${newsreader.className}`}
                 >
                   Portfolio Website Generator
                 </h1>
                 <p
-                  className={`text-sm text-gray-600 mt-1 ${sansation.className}`}
+                  className={`text-xs md:text-sm text-gray-600 mt-1 ${sansation.className}`}
                 >
                   Create a stunning portfolio website from your selected
                   projects

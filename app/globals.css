@@ -119,3 +119,25 @@ body {
     -apple-system,
     sans-serif;
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Ensure content doesn't overflow on mobile */
+@media (max-width: 768px) {
+  * {
+    max-width: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+}

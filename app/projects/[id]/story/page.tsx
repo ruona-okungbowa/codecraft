@@ -133,7 +133,7 @@ export default function StoryGeneratorPage({
     return (
       <div className="flex min-h-screen bg-gray-50">
         <DashboardSidebar />
-        <div className="ml-[72px] flex-1 flex items-center justify-center">
+        <div className="ml-0 md:ml-[72px] flex-1 flex items-center justify-center">
           <Loader2 size={48} className="text-blue-600 animate-spin" />
         </div>
       </div>
@@ -144,7 +144,7 @@ export default function StoryGeneratorPage({
     return (
       <div className="flex min-h-screen bg-gray-50">
         <DashboardSidebar />
-        <div className="ml-[72px] flex-1 flex items-center justify-center">
+        <div className="ml-0 md:ml-[72px] flex-1 flex items-center justify-center">
           <p className="text-gray-500">Project not found</p>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default function StoryGeneratorPage({
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
           <div className="px-10 py-6">
             <button

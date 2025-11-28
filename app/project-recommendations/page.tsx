@@ -5,6 +5,13 @@ import { motion } from "framer-motion";
 import { RefreshCw, Target, Code } from "lucide-react";
 import Link from "next/link";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import {
+  showSuccess,
+  showError,
+  showLoading,
+  dismissToast,
+} from "@/lib/utils/toast";
+import { celebrateSuccess } from "@/lib/utils/confetti";
 import FilterBar from "@/components/recommendations/FilterBar";
 import ProjectCard from "@/components/recommendations/ProjectCard";
 import PriorityCallout from "@/components/recommendations/PriorityCallout";
@@ -79,6 +86,7 @@ export default function ProjectRecommendationsPage() {
   };
 
   const handleSave = async (projectId: string) => {
+    const toastId = showLoading("Saving project...");
     try {
       const res = await fetch("/api/user-projects", {
         method: "POST",
@@ -88,13 +96,21 @@ export default function ProjectRecommendationsPage() {
       if (res.ok) {
         const data = await res.json();
         setUserProjects([...userProjects, data.userProject]);
+        dismissToast(toastId);
+        showSuccess("Project saved! 📌");
+      } else {
+        dismissToast(toastId);
+        showError("Failed to save project");
       }
     } catch (err) {
       console.error("Failed to save project:", err);
+      dismissToast(toastId);
+      showError("An error occurred");
     }
   };
 
   const handleStart = async (projectId: string) => {
+    const toastId = showLoading("Starting project...");
     try {
       const res = await fetch("/api/user-projects", {
         method: "POST",
@@ -104,9 +120,17 @@ export default function ProjectRecommendationsPage() {
       if (res.ok) {
         const data = await res.json();
         setUserProjects([...userProjects, data.userProject]);
+        dismissToast(toastId);
+        showSuccess("Project started! Let's build! 🚀");
+        celebrateSuccess();
+      } else {
+        dismissToast(toastId);
+        showError("Failed to start project");
       }
     } catch (err) {
       console.error("Failed to start project:", err);
+      dismissToast(toastId);
+      showError("An error occurred");
     }
   };
 
@@ -136,16 +160,16 @@ export default function ProjectRecommendationsPage() {
     return (
       <div className="flex min-h-screen bg-gray-50">
         <DashboardSidebar />
-        <div className="ml-[72px] flex-1">
-          <div className="bg-white border-b border-gray-200 px-10 py-6">
-            <h1 className="text-3xl font-bold text-gray-900">
+        <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
+          <div className="bg-white border-b border-gray-200 px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900">
               Project Recommendations
             </h1>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-xs md:text-sm text-gray-600 mt-1">
               Build projects that fill your skill gaps
             </p>
           </div>
-          <div className="p-10 max-w-[1600px] mx-auto">
+          <div className="p-4 md:p-10 max-w-[1600px] mx-auto pt-16 md:pt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {[1, 2, 3, 4].map((i) => (
                 <div
@@ -168,13 +192,13 @@ export default function ProjectRecommendationsPage() {
     return (
       <div className="flex min-h-screen bg-gray-50">
         <DashboardSidebar />
-        <div className="ml-[72px] flex-1">
-          <div className="bg-white border-b border-gray-200 px-10 py-6">
-            <h1 className="text-3xl font-bold text-gray-900">
+        <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
+          <div className="bg-white border-b border-gray-200 px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
+            <h1 className="text-xl md:text-3xl font-bold text-gray-900">
               Project Recommendations
             </h1>
           </div>
-          <div className="p-10 max-w-[1000px] mx-auto">
+          <div className="p-4 md:p-10 max-w-[1000px] mx-auto pt-16 md:pt-4">
             <div className="bg-white rounded-2xl p-16 text-center border border-gray-200">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Target size={32} className="text-gray-400" />
@@ -211,9 +235,9 @@ export default function ProjectRecommendationsPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
-      <div className="ml-[72px] flex-1">
-        <div className="bg-white border-b border-gray-200 px-10 py-6 sticky top-0 z-30">
-          <div className="max-w-[1600px] mx-auto flex items-center justify-between">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
+        <div className="bg-white border-b border-gray-200 px-4 md:px-10 py-4 md:py-6 sticky top-0 z-30 pl-16 md:pl-10">
+          <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
                 Project Recommendations

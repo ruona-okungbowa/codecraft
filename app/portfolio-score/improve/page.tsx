@@ -185,9 +185,9 @@ export default function PortfolioScoreImprovePage() {
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-10 py-6">
+          <div className="px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
             <button
               onClick={() => router.push("/dashboard")}
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"

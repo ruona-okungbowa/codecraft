@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  showSuccess,
+  showError,
+  showLoading,
+  dismissToast,
+} from "@/lib/utils/toast";
+import { celebrateSuccess } from "@/lib/utils/confetti";
+import {
   RefreshCw,
   Grid3x3,
   List,
@@ -95,13 +102,22 @@ export default function ProjectsPage() {
 
   async function handleSync() {
     setSyncing(true);
+    const toastId = showLoading("Syncing with GitHub...");
     try {
       const response = await fetch("/api/github/repos", { method: "POST" });
       if (response.ok) {
         await fetchProjects();
+        dismissToast(toastId);
+        showSuccess("Projects synced successfully!");
+        celebrateSuccess();
+      } else {
+        dismissToast(toastId);
+        showError("Failed to sync projects");
       }
     } catch (error) {
       console.error("Error syncing:", error);
+      dismissToast(toastId);
+      showError("An error occurred while syncing");
     } finally {
       setSyncing(false);
     }
@@ -122,9 +138,18 @@ export default function ProjectsPage() {
             p.id === projectId ? { ...p, in_portfolio: !currentStatus } : p
           )
         );
+        if (!currentStatus) {
+          showSuccess("Added to portfolio!");
+          celebrateSuccess();
+        } else {
+          showSuccess("Removed from portfolio");
+        }
+      } else {
+        showError("Failed to update portfolio");
       }
     } catch (error) {
       console.error("Error toggling portfolio:", error);
+      showError("An error occurred");
     } finally {
       setTogglingPortfolio(null);
       setDropdownOpen(null);
@@ -140,6 +165,7 @@ export default function ProjectsPage() {
       return;
     }
 
+    const toastId = showLoading("Deleting project...");
     try {
       const response = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
@@ -148,12 +174,16 @@ export default function ProjectsPage() {
       if (response.ok) {
         setProjects((prev) => prev.filter((p) => p.id !== projectId));
         setDropdownOpen(null);
+        dismissToast(toastId);
+        showSuccess("Project deleted successfully");
       } else {
-        alert("Failed to delete project");
+        dismissToast(toastId);
+        showError("Failed to delete project");
       }
     } catch (error) {
       console.error("Error deleting project:", error);
-      alert("Failed to delete project");
+      dismissToast(toastId);
+      showError("An error occurred while deleting");
     }
   }
 
@@ -327,42 +357,42 @@ export default function ProjectsPage() {
     <div className="flex min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="ml-[72px] flex-1">
+      <div className="ml-0 md:ml-[72px] flex-1">
         {/* Header Section */}
         <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-10 py-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="flex items-baseline gap-3">
+          <div className="px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4">
+              <div className="w-full md:w-auto">
+                <div className="flex items-baseline gap-2 md:gap-3 flex-wrap">
                   <h1
-                    className={`text-[28px] font-bold text-gray-900 ${newsreader.className}`}
+                    className={`text-xl md:text-[28px] font-bold text-gray-900 ${newsreader.className}`}
                   >
                     Projects
                   </h1>
-                  <span className="text-xl text-gray-500">
+                  <span className="text-lg md:text-xl text-gray-500">
                     ({projects.length})
                   </span>
                 </div>
                 <p
-                  className={`text-sm text-gray-600 mt-1 ${sansation.className}`}
+                  className={`text-xs md:text-sm text-gray-600 mt-1 ${sansation.className}`}
                 >
                   Manage your GitHub repositories and portfolio stories
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
                 {/* Sync Button */}
                 <button
                   onClick={handleSync}
                   disabled={syncing}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 text-xs md:text-sm"
                 >
                   <RefreshCw
-                    size={18}
+                    size={16}
                     className={`text-gray-500 ${syncing ? "animate-spin" : ""}`}
                   />
-                  <span className="text-sm font-medium text-gray-700">
-                    {syncing ? "Syncing..." : "Sync GitHub"}
+                  <span className="font-medium text-gray-700 hidden sm:inline">
+                    {syncing ? "Syncing..." : "Sync"}
                   </span>
                 </button>
 
@@ -377,7 +407,7 @@ export default function ProjectsPage() {
                     }`}
                     aria-label="Grid view"
                   >
-                    <Grid3x3 size={18} />
+                    <Grid3x3 size={16} />
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
@@ -388,29 +418,29 @@ export default function ProjectsPage() {
                     }`}
                     aria-label="List view"
                   >
-                    <List size={18} />
+                    <List size={16} />
                   </button>
                 </div>
 
                 {/* Sort Dropdown */}
-                <div className="relative">
+                <div className="relative flex-1 md:flex-none">
                   <button
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors w-full md:w-auto text-xs md:text-sm"
                   >
-                    <span className="text-sm font-medium text-gray-700">
-                      Sort:{" "}
+                    <span className="font-medium text-gray-700 truncate">
+                      <span className="hidden sm:inline">Sort: </span>
                       {sortBy === "recent"
-                        ? "Recently updated"
+                        ? "Recent"
                         : sortBy === "alphabetical"
                           ? "A-Z"
                           : sortBy === "story"
-                            ? "Story status"
+                            ? "Story"
                             : sortBy === "portfolio"
-                              ? "Portfolio first"
-                              : "Most complex"}
+                              ? "Portfolio"
+                              : "Complex"}
                     </span>
-                    <ChevronDown size={16} className="text-gray-500" />
+                    <ChevronDown size={14} className="text-gray-500 shrink-0" />
                   </button>
 
                   <AnimatePresence>
@@ -468,25 +498,25 @@ export default function ProjectsPage() {
         </header>
 
         {/* Filters & Search Bar */}
-        <div className="px-10 py-6 bg-gray-50 border-b border-gray-200">
-          <div className="flex items-center gap-4 flex-wrap">
+        <div className="px-4 md:px-10 py-4 md:py-6 bg-gray-50 border-b border-gray-200 overflow-x-hidden">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4">
             {/* Search Bar */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 w-full md:max-w-md">
               <Search
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
               />
               <input
                 type="text"
-                placeholder="Search projects by name or tech..."
+                placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 pl-12 pr-4 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                className="w-full h-10 md:h-11 pl-10 pr-4 bg-white border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm"
               />
             </div>
 
             {/* Quick Filters */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
               {[
                 {
                   value: "all" as FilterOption,
@@ -523,23 +553,26 @@ export default function ProjectsPage() {
                   <button
                     key={filter.value}
                     onClick={() => setActiveFilter(filter.value)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 md:px-4 md:py-2 rounded-full border text-xs md:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
                       isActive
                         ? "bg-blue-50 text-blue-700 border-blue-500"
                         : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                     }`}
                   >
-                    {Icon && <Icon size={14} />}
-                    <span>{filter.label}</span>
+                    {Icon && <Icon size={12} />}
+                    <span className="hidden sm:inline">{filter.label}</span>
+                    <span className="sm:hidden">
+                      {filter.label.split(" ")[0]}
+                    </span>
                     {filter.count !== undefined && (
-                      <span className="ml-1 text-xs opacity-70">
+                      <span className="text-xs opacity-70">
                         ({filter.count})
                       </span>
                     )}
                     {isActive && filter.value !== "all" && (
                       <X
-                        size={14}
-                        className="ml-1"
+                        size={12}
+                        className="ml-0.5"
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveFilter("all");
@@ -563,29 +596,29 @@ export default function ProjectsPage() {
         </div>
 
         {/* Stats Overview */}
-        <div className="px-10 py-4 bg-blue-50 border-b border-blue-100">
-          <div className="flex items-center gap-10">
-            <div className="flex items-center gap-2">
-              <BarChart3 size={16} className="text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">
-                {stats.total} repos analyzed
+        <div className="px-4 md:px-10 py-3 md:py-4 bg-blue-50 border-b border-blue-100 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center gap-3 md:gap-10 min-w-max">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <BarChart3 size={14} className="text-blue-600 shrink-0" />
+              <span className="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
+                {stats.total} repos
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">
-                {stats.storyComplete} stories complete
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <CheckCircle size={14} className="text-blue-600 shrink-0" />
+              <span className="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
+                {stats.storyComplete} complete
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <AlertTriangle size={16} className="text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <AlertTriangle size={14} className="text-blue-600 shrink-0" />
+              <span className="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
                 {stats.needsAttention} need attention
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Briefcase size={16} className="text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <Briefcase size={14} className="text-blue-600 shrink-0" />
+              <span className="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
                 {stats.inPortfolio} in portfolio
               </span>
             </div>
@@ -593,7 +626,7 @@ export default function ProjectsPage() {
         </div>
 
         {/* Main Content */}
-        <main className="px-10 py-6 pb-20 max-w-[1600px] mx-auto">
+        <main className="px-4 md:px-10 py-4 md:py-6 pb-20 max-w-[1600px] mx-auto">
           {loading ? (
             <div className="text-center py-20">
               <Loader2
@@ -644,7 +677,7 @@ export default function ProjectsPage() {
               </button>
             </div>
           ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {filteredProjects.map((project, index) => {
                 const status = getProjectStatus(project);
                 const statusBadge = getStatusBadge(status);
