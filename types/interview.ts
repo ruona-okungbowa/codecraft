@@ -58,4 +58,6 @@ export interface AgentProps {
   userName: string;
   userId: string;
   type: string;
+  role?: string;
+  level?: string;
 }

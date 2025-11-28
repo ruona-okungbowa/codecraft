@@ -126,6 +126,8 @@ function InterviewContent() {
             userName={userName}
             userId={interviewId}
             type={interviewData?.type || "technical"}
+            role={interviewData?.role}
+            level={interviewData?.level}
           />
         </div>
       </div>

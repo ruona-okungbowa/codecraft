@@ -110,14 +110,12 @@ const InterviewPage = () => {
               </motion.button>
             </div>
           </motion.div>
-
-          {/* Previous Interviews Section */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
             <div className="flex items-center justify-between mb-6">
               <h2
                 className={`text-xl font-bold text-gray-900 ${newsreader.className}`}
               >
-                Previous Interviews
+                Generated Interviews
               </h2>
               {interviews.length > 0 && (
                 <span className="text-sm text-gray-500">

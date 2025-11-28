@@ -20,7 +20,7 @@ interface SavedMessage {
   content: string;
 }
 
-const Agent = ({ userName, userId, type }: AgentProps) => {
+const Agent = ({ userName, userId, type, role, level }: AgentProps) => {
   const router = useRouter();
 
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -73,8 +73,15 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     };
   }, []);
 
+  const handleGenerateFeedback = async (messages: SavedMessage[]) => {
+    console.log("Generate feedback here.");
+  };
+
   useEffect(() => {
-    if (callStatus === CallStatus.FINISHED) router.push("/dashboard");
+    if (callStatus === CallStatus.FINISHED) {
+      router.push("/mock-interview");
+      handleGenerateFeedback(messages);
+    }
   }, [messages, callStatus, type, userId, router]);
 
   const handleCall = async () => {
@@ -89,13 +96,15 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     }
 
     console.log("Starting call with assistant:", assistantId);
-    console.log("Variables:", { userName, interviewId: userId });
+    console.log("Variables:", { userName, interviewId: userId, role, level });
 
     try {
       await vapi.start(assistantId, {
         variableValues: {
           userName,
           interviewId: userId,
+          role: role || "Software Engineer",
+          level: level || "junior",
         },
       });
     } catch (error) {
