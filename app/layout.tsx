@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
 import { AuthContextProvider } from "@/lib/auth/AuthProvider";
-import { Newsreader, Sansation } from "next/font/google";
+import { Outfit, Inter } from "next/font/google";
 import UserMenu from "@/components/UserMenu";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import Link from "next/link";
 
-const newsreader = Newsreader({
-  style: ["normal"],
-  variable: "--font-newsreader",
+// Display font - Playful & friendly for headings
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
 });
 
-const sansation = Sansation({
-  weight: "400",
-  variable: "--font-sansation",
+// Body font - Clean & readable
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -29,9 +33,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${newsreader.className} ${sansation.className}`}
+      className={`${outfit.variable} ${inter.variable}`}
     >
-      <body>
+      <body className={inter.className}>
         <AuthContextProvider>
           <Toaster />
           <main>{children}</main>

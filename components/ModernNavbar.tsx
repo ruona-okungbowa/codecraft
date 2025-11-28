@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import CodeCraftLogo from "./CodeCraftLogo";
 
 export default function ModernNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,43 +22,64 @@ export default function ModernNavbar() {
       {/* Navbar container */}
       <div className="absolute top-3 left-0 right-0 z-50 flex justify-center px-4">
         <nav
-          className="max-w-2xl w-full rounded-full px-5 py-1.5 flex items-center justify-between"
+          className="max-w-3xl w-full rounded-full px-6 py-2.5 flex items-center justify-between"
           style={{
-            backgroundColor: "rgba(55, 65, 81, 0.95)",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
             backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(0, 0, 0, 0.05)",
             boxShadow:
-              "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)",
+              "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
           }}
         >
           {/* Left: Logo */}
           <Link href="/" className="flex items-center group">
-            <Image
-              src="/icon-logo.png"
-              alt="Logo"
-              width={28}
-              height={28}
-              className="w-7 h-7"
-            />
+            <CodeCraftLogo size="sm" variant="full" />
           </Link>
 
           {/* Right: Navigation Links (Desktop) */}
           <div className="hidden lg:flex items-center gap-6 ml-auto">
             <button
               onClick={() => scrollToSection("features")}
-              className="text-gray-300 hover:text-white transition-colors duration-200 font-medium text-sm"
+              className="font-medium text-sm transition-colors duration-200"
+              style={{
+                color: "oklch(0.56 0.014 240)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "oklch(0.63 0.24 240)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "oklch(0.56 0.014 240)";
+              }}
             >
               Features
             </button>
             <button
               onClick={() => scrollToSection("about")}
-              className="text-gray-300 hover:text-white transition-colors duration-200 font-medium text-sm"
+              className="font-medium text-sm transition-colors duration-200"
+              style={{
+                color: "oklch(0.56 0.014 240)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "oklch(0.63 0.24 240)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "oklch(0.56 0.014 240)";
+              }}
             >
               About
             </button>
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className="text-gray-300 hover:text-white transition-colors duration-200 font-medium text-sm"
+              className="font-medium text-sm transition-colors duration-200"
+              style={{
+                color: "oklch(0.56 0.014 240)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "oklch(0.63 0.24 240)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "oklch(0.56 0.014 240)";
+              }}
             >
               How It Works
             </button>
@@ -67,7 +88,8 @@ export default function ModernNavbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden text-white p-1.5 ml-auto"
+            className="lg:hidden p-1.5 ml-auto"
+            style={{ color: "oklch(0.56 0.014 240)" }}
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -95,23 +117,25 @@ export default function ModernNavbar() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-64 bg-gray-800 z-50 lg:hidden shadow-2xl"
+              className="fixed top-0 right-0 bottom-0 w-64 z-50 lg:hidden shadow-2xl"
+              style={{
+                backgroundColor: "oklch(0.99 0.002 240)",
+              }}
             >
               <div className="flex flex-col h-full">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-700">
+                <div
+                  className="flex items-center justify-between p-6"
+                  style={{
+                    borderBottom: "1px solid oklch(0.93 0.006 240)",
+                  }}
+                >
                   <div className="flex items-center gap-3">
-                    <Image
-                      src="/icon-logo.png"
-                      alt="Logo"
-                      width={32}
-                      height={32}
-                      className="w-8 h-8"
-                    />
+                    <CodeCraftLogo size="md" variant="icon" />
                   </div>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
-                    className="text-gray-400 hover:text-white"
+                    style={{ color: "oklch(0.56 0.014 240)" }}
                   >
                     <X size={24} />
                   </button>
@@ -121,19 +145,40 @@ export default function ModernNavbar() {
                 <div className="flex flex-col p-6 gap-4">
                   <button
                     onClick={() => scrollToSection("features")}
-                    className="text-gray-300 hover:text-white transition-colors duration-200 font-medium text-left py-2"
+                    className="font-medium text-left py-2 transition-colors duration-200"
+                    style={{ color: "oklch(0.56 0.014 240)" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "oklch(0.63 0.24 240)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "oklch(0.56 0.014 240)";
+                    }}
                   >
                     Features
                   </button>
                   <button
                     onClick={() => scrollToSection("about")}
-                    className="text-gray-300 hover:text-white transition-colors duration-200 font-medium text-left py-2"
+                    className="font-medium text-left py-2 transition-colors duration-200"
+                    style={{ color: "oklch(0.56 0.014 240)" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "oklch(0.63 0.24 240)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "oklch(0.56 0.014 240)";
+                    }}
                   >
                     About
                   </button>
                   <button
                     onClick={() => scrollToSection("how-it-works")}
-                    className="text-gray-300 hover:text-white transition-colors duration-200 font-medium text-left py-2"
+                    className="font-medium text-left py-2 transition-colors duration-200"
+                    style={{ color: "oklch(0.56 0.014 240)" }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = "oklch(0.63 0.24 240)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = "oklch(0.56 0.014 240)";
+                    }}
                   >
                     How It Works
                   </button>

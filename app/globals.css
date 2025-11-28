@@ -1,113 +1,119 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary Purple Scale */
-  --color-primary-50: oklch(0.97 0.02 290);
-  --color-primary-100: oklch(0.94 0.05 290);
-  --color-primary-200: oklch(0.88 0.1 290);
-  --color-primary-300: oklch(0.8 0.15 290);
-  --color-primary-400: oklch(0.72 0.2 290);
-  --color-primary-500: oklch(0.64 0.25 290);
-  --color-primary-600: oklch(0.55 0.25 290);
-  --color-primary-700: oklch(0.47 0.22 290);
-  --color-primary-800: oklch(0.39 0.18 290);
-  --color-primary-900: oklch(0.32 0.14 290);
-  --color-primary-950: oklch(0.24 0.1 290);
+  /* Primary Brand Blue - Vibrant & Trustworthy */
+  --color-primary-50: oklch(0.97 0.03 240);
+  --color-primary-100: oklch(0.94 0.07 240);
+  --color-primary-200: oklch(0.89 0.12 240);
+  --color-primary-300: oklch(0.81 0.17 240);
+  --color-primary-400: oklch(0.72 0.21 240);
+  --color-primary-500: oklch(0.63 0.24 240);
+  --color-primary-600: oklch(0.54 0.24 240);
+  --color-primary-700: oklch(0.46 0.21 240);
+  --color-primary-800: oklch(0.38 0.17 240);
+  --color-primary-900: oklch(0.31 0.13 240);
+  --color-primary-950: oklch(0.24 0.09 240);
 
-  /* Secondary Pink Scale */
-  --color-secondary-50: oklch(0.97 0.02 340);
-  --color-secondary-100: oklch(0.94 0.05 340);
-  --color-secondary-200: oklch(0.88 0.1 340);
-  --color-secondary-300: oklch(0.8 0.15 340);
-  --color-secondary-400: oklch(0.72 0.2 340);
-  --color-secondary-500: oklch(0.64 0.24 340);
-  --color-secondary-600: oklch(0.55 0.24 340);
-  --color-secondary-700: oklch(0.47 0.21 340);
-  --color-secondary-800: oklch(0.39 0.17 340);
-  --color-secondary-900: oklch(0.32 0.13 340);
-  --color-secondary-950: oklch(0.24 0.09 340);
+  /* Growth Green - Plants, Progress, Success */
+  --color-growth-50: oklch(0.97 0.03 150);
+  --color-growth-100: oklch(0.94 0.07 150);
+  --color-growth-200: oklch(0.88 0.13 150);
+  --color-growth-300: oklch(0.80 0.18 150);
+  --color-growth-400: oklch(0.71 0.21 150);
+  --color-growth-500: oklch(0.63 0.23 150);
+  --color-growth-600: oklch(0.54 0.22 150);
+  --color-growth-700: oklch(0.46 0.19 150);
+  --color-growth-800: oklch(0.39 0.15 150);
+  --color-growth-900: oklch(0.32 0.12 150);
+  --color-growth-950: oklch(0.24 0.08 150);
 
-  /* Background Slate Scale */
-  --color-bg-50: oklch(0.98 0.005 240);
-  --color-bg-100: oklch(0.95 0.008 240);
-  --color-bg-200: oklch(0.89 0.01 240);
-  --color-bg-300: oklch(0.81 0.012 240);
-  --color-bg-400: oklch(0.65 0.015 240);
-  --color-bg-500: oklch(0.52 0.015 240);
-  --color-bg-600: oklch(0.42 0.013 240);
-  --color-bg-700: oklch(0.34 0.011 240);
-  --color-bg-800: oklch(0.26 0.009 240);
-  --color-bg-900: oklch(0.19 0.007 240);
-  --color-bg-950: oklch(0.13 0.005 240);
+  /* Energy Orange - Action, Excitement, CTAs */
+  --color-energy-50: oklch(0.97 0.03 50);
+  --color-energy-100: oklch(0.94 0.08 50);
+  --color-energy-200: oklch(0.89 0.14 50);
+  --color-energy-300: oklch(0.82 0.18 50);
+  --color-energy-400: oklch(0.75 0.21 50);
+  --color-energy-500: oklch(0.68 0.23 50);
+  --color-energy-600: oklch(0.59 0.22 50);
+  --color-energy-700: oklch(0.50 0.19 50);
+  --color-energy-800: oklch(0.42 0.15 50);
+  --color-energy-900: oklch(0.35 0.12 50);
+  --color-energy-950: oklch(0.27 0.08 50);
 
-  /* Text Slate Scale */
-  --color-text-50: oklch(0.98 0.005 240);
-  --color-text-100: oklch(0.95 0.008 240);
-  --color-text-200: oklch(0.89 0.01 240);
-  --color-text-300: oklch(0.81 0.012 240);
-  --color-text-400: oklch(0.65 0.015 240);
-  --color-text-500: oklch(0.52 0.015 240);
-  --color-text-600: oklch(0.42 0.013 240);
-  --color-text-700: oklch(0.34 0.011 240);
-  --color-text-800: oklch(0.26 0.009 240);
-  --color-text-900: oklch(0.19 0.007 240);
-  --color-text-950: oklch(0.13 0.005 240);
+  /* Craft Purple - Creativity, Playfulness */
+  --color-craft-50: oklch(0.97 0.03 290);
+  --color-craft-100: oklch(0.94 0.07 290);
+  --color-craft-200: oklch(0.88 0.13 290);
+  --color-craft-300: oklch(0.80 0.18 290);
+  --color-craft-400: oklch(0.72 0.22 290);
+  --color-craft-500: oklch(0.64 0.26 290);
+  --color-craft-600: oklch(0.55 0.26 290);
+  --color-craft-700: oklch(0.47 0.23 290);
+  --color-craft-800: oklch(0.39 0.19 290);
+  --color-craft-900: oklch(0.32 0.15 290);
+  --color-craft-950: oklch(0.24 0.10 290);
 
-  /* Success Green Scale */
-  --color-success-50: oklch(0.97 0.02 150);
-  --color-success-100: oklch(0.93 0.05 150);
-  --color-success-200: oklch(0.87 0.1 150);
-  --color-success-300: oklch(0.79 0.15 150);
-  --color-success-400: oklch(0.7 0.18 150);
-  --color-success-500: oklch(0.62 0.2 150);
-  --color-success-600: oklch(0.53 0.19 150);
-  --color-success-700: oklch(0.45 0.16 150);
-  --color-success-800: oklch(0.38 0.13 150);
-  --color-success-900: oklch(0.31 0.1 150);
-  --color-success-950: oklch(0.23 0.07 150);
+  /* Accent Pink - Highlights, Fun moments */
+  --color-accent-50: oklch(0.97 0.03 340);
+  --color-accent-100: oklch(0.94 0.07 340);
+  --color-accent-200: oklch(0.88 0.13 340);
+  --color-accent-300: oklch(0.80 0.18 340);
+  --color-accent-400: oklch(0.72 0.22 340);
+  --color-accent-500: oklch(0.64 0.25 340);
+  --color-accent-600: oklch(0.55 0.25 340);
+  --color-accent-700: oklch(0.47 0.22 340);
+  --color-accent-800: oklch(0.39 0.18 340);
+  --color-accent-900: oklch(0.32 0.14 340);
+  --color-accent-950: oklch(0.24 0.10 340);
 
-  /* Warning Amber Scale */
-  --color-warning-50: oklch(0.97 0.02 80);
-  --color-warning-100: oklch(0.94 0.05 80);
-  --color-warning-200: oklch(0.89 0.1 80);
-  --color-warning-300: oklch(0.82 0.15 80);
-  --color-warning-400: oklch(0.75 0.18 80);
-  --color-warning-500: oklch(0.68 0.2 80);
-  --color-warning-600: oklch(0.58 0.19 80);
-  --color-warning-700: oklch(0.48 0.16 80);
-  --color-warning-800: oklch(0.4 0.13 80);
-  --color-warning-900: oklch(0.33 0.1 80);
-  --color-warning-950: oklch(0.25 0.07 80);
+  /* Background - Soft, warm neutrals */
+  --color-bg-50: oklch(0.99 0.002 240);
+  --color-bg-100: oklch(0.97 0.004 240);
+  --color-bg-200: oklch(0.93 0.006 240);
+  --color-bg-300: oklch(0.86 0.008 240);
+  --color-bg-400: oklch(0.70 0.012 240);
+  --color-bg-500: oklch(0.56 0.014 240);
+  --color-bg-600: oklch(0.45 0.013 240);
+  --color-bg-700: oklch(0.36 0.011 240);
+  --color-bg-800: oklch(0.28 0.009 240);
+  --color-bg-900: oklch(0.21 0.007 240);
+  --color-bg-950: oklch(0.15 0.005 240);
 
-  /* Error Red Scale */
-  --color-error-50: oklch(0.97 0.02 25);
-  --color-error-100: oklch(0.94 0.05 25);
-  --color-error-200: oklch(0.89 0.1 25);
-  --color-error-300: oklch(0.82 0.15 25);
-  --color-error-400: oklch(0.73 0.2 25);
+  /* Text - Better contrast */
+  --color-text-50: oklch(0.99 0.002 240);
+  --color-text-100: oklch(0.97 0.004 240);
+  --color-text-200: oklch(0.93 0.006 240);
+  --color-text-300: oklch(0.86 0.008 240);
+  --color-text-400: oklch(0.70 0.012 240);
+  --color-text-500: oklch(0.56 0.014 240);
+  --color-text-600: oklch(0.45 0.013 240);
+  --color-text-700: oklch(0.36 0.011 240);
+  --color-text-800: oklch(0.28 0.009 240);
+  --color-text-900: oklch(0.21 0.007 240);
+  --color-text-950: oklch(0.15 0.005 240);
+
+  /* Utility Colors */
+  --color-success-500: oklch(0.63 0.23 150);
+  --color-warning-500: oklch(0.68 0.23 50);
   --color-error-500: oklch(0.64 0.23 25);
-  --color-error-600: oklch(0.55 0.23 25);
-  --color-error-700: oklch(0.46 0.2 25);
-  --color-error-800: oklch(0.39 0.16 25);
-  --color-error-900: oklch(0.32 0.13 25);
-  --color-error-950: oklch(0.24 0.09 25);
-
-  /* Info Blue Scale */
-  --color-info-50: oklch(0.97 0.02 240);
-  --color-info-100: oklch(0.94 0.05 240);
-  --color-info-200: oklch(0.88 0.1 240);
-  --color-info-300: oklch(0.8 0.15 240);
-  --color-info-400: oklch(0.7 0.19 240);
-  --color-info-500: oklch(0.61 0.22 240);
-  --color-info-600: oklch(0.52 0.22 240);
-  --color-info-700: oklch(0.44 0.19 240);
-  --color-info-800: oklch(0.37 0.15 240);
-  --color-info-900: oklch(0.3 0.12 240);
-  --color-info-950: oklch(0.23 0.08 240);
 
   /* Font Families */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-outfit);
+  --font-sans: var(--font-inter);
+  --font-mono: ui-monospace, monospace;
+
+  /* Brand Gradients */
+  --gradient-hero: linear-gradient(135deg, oklch(0.97 0.03 240) 0%, oklch(0.97 0.03 290) 50%, oklch(0.97 0.03 340) 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.63 0.24 240) 0%, oklch(0.64 0.26 290) 100%);
+  --gradient-growth: linear-gradient(135deg, oklch(0.63 0.23 150) 0%, oklch(0.63 0.24 180) 100%);
+  --gradient-energy: linear-gradient(135deg, oklch(0.68 0.23 50) 0%, oklch(0.64 0.25 340) 100%);
+  --gradient-creative: linear-gradient(135deg, oklch(0.64 0.26 290) 0%, oklch(0.64 0.25 340) 100%);
+
+  /* Shadows with color tints */
+  --shadow-primary: 0 10px 40px -10px oklch(0.54 0.24 240 / 0.3);
+  --shadow-growth: 0 10px 40px -10px oklch(0.54 0.22 150 / 0.3);
+  --shadow-energy: 0 10px 40px -10px oklch(0.59 0.22 50 / 0.3);
+  --shadow-soft: 0 4px 20px -4px oklch(0.15 0.005 240 / 0.1);
 }
 
 body {
