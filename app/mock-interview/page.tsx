@@ -3,14 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Newsreader, Sansation } from "next/font/google";
 import DashboardSidebar from "@/components/DashboardSidebar";
-import {
-  Mic,
-  ArrowRight,
-  Loader2,
-  Clock,
-  CheckCircle,
-  Play,
-} from "lucide-react";
+import { Mic, ArrowRight, Loader2, Clock, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { InterviewRow } from "@/types/interview";
@@ -25,9 +18,16 @@ const sansation = Sansation({
   weight: ["400"],
 });
 
+interface InterviewWithFeedback extends InterviewRow {
+  feedback?: {
+    total_score: number;
+  };
+  hasResponses?: boolean;
+}
+
 const InterviewPage = () => {
   const router = useRouter();
-  const [interviews, setInterviews] = useState<InterviewRow[]>([]);
+  const [interviews, setInterviews] = useState<InterviewWithFeedback[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +39,37 @@ const InterviewPage = () => {
       const response = await fetch("/api/interviews");
       if (response.ok) {
         const data = await response.json();
-        setInterviews(data.interviews || []);
+        const interviewsData = data.interviews || [];
+
+        const interviewsWithFeedback = await Promise.all(
+          interviewsData.map(async (interview: InterviewRow) => {
+            try {
+              const feedbackResponse = await fetch(
+                `/api/feedback?interviewId=${interview.id}`
+              );
+              const hasResponses =
+                interview.responses && interview.responses.length > 0;
+
+              if (feedbackResponse.ok) {
+                const feedbackData = await feedbackResponse.json();
+                return {
+                  ...interview,
+                  feedback: feedbackData.feedback,
+                  hasResponses,
+                };
+              }
+              return { ...interview, hasResponses };
+            } catch {
+              return {
+                ...interview,
+                hasResponses:
+                  interview.responses && interview.responses.length > 0,
+              };
+            }
+          })
+        );
+
+        setInterviews(interviewsWithFeedback);
       }
     } catch (error) {
       console.error("Error fetching interviews:", error);
@@ -176,15 +206,34 @@ const InterviewPage = () => {
                         <span>{formatTimeAgo(interview.created_at)}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <CheckCircle size={16} />
-                        <span>--/100</span>
+                        <CheckCircle
+                          size={16}
+                          className={
+                            interview.feedback
+                              ? "text-green-600"
+                              : "text-gray-400"
+                          }
+                        />
+                        <span
+                          className={
+                            interview.feedback
+                              ? "font-semibold text-green-600"
+                              : ""
+                          }
+                        >
+                          {interview.feedback
+                            ? `${interview.feedback.total_score}/100`
+                            : "--/100"}
+                        </span>
                       </div>
                     </div>
 
                     <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                      {interview.finalised
-                        ? "You haven't taken the interview yet. Take it now to improve your skills."
-                        : "Interview ready to start. Click to begin your practice session."}
+                      {interview.feedback
+                        ? "Interview completed! Click to view feedback and retake."
+                        : interview.hasResponses
+                          ? "Interview in progress. Continue or view partial results."
+                          : "Interview ready to start. Click to begin your practice session."}
                     </p>
 
                     <div className="flex items-center justify-between">
@@ -207,8 +256,20 @@ const InterviewPage = () => {
                           )}
                       </div>
 
-                      <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-colors group-hover:scale-105 transform shadow-md">
-                        View Interview
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (interview.feedback) {
+                            router.push(`/interview/${interview.id}/feedback`);
+                          } else {
+                            router.push(`/interview/${interview.id}`);
+                          }
+                        }}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-colors group-hover:scale-105 transform shadow-md"
+                      >
+                        {interview.feedback
+                          ? "View Feedback"
+                          : "Start Interview"}
                       </button>
                     </div>
                   </motion.div>

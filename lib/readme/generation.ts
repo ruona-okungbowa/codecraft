@@ -15,7 +15,27 @@ export async function generateProjectReadme(
   research: ReadmeResearch,
   githubToken?: string
 ): Promise<GeneratedReadme> {
-  const prompt = buildProjectReadmePrompt(project, template, research);
+  let repoAnalysis = null;
+
+  if (githubToken && project.url) {
+    try {
+      const urlParts = project.url.split("/");
+      const owner = urlParts[urlParts.length - 2];
+      const repo = urlParts[urlParts.length - 1];
+
+      const { analyzeRepository } = await import("./analyze-repo");
+      repoAnalysis = await analyzeRepository(owner, repo, githubToken);
+    } catch (error) {
+      console.error("Error analyzing repository:", error);
+    }
+  }
+
+  const prompt = buildProjectReadmePrompt(
+    project,
+    template,
+    research,
+    repoAnalysis
+  );
   const content = await callOpenAI(prompt, "project");
 
   const wordCount = content.split(/\s+/).length;
@@ -88,12 +108,28 @@ export async function generateProfileReadme(
 function buildProjectReadmePrompt(
   project: Project,
   template: ReadmeTemplate,
-  research: ReadmeResearch
+  research: ReadmeResearch,
+  repoAnalysis?: unknown
 ): string {
   const languages = Object.keys(project.languages || {}).join(", ");
   const badges = generateBadges(Object.keys(project.languages || {}));
 
   const templateInstructions = getTemplateInstructions(template);
+
+  let analysisSection = "";
+  if (repoAnalysis) {
+    analysisSection = `
+
+**Detailed Repository Analysis:**
+- Framework: ${repoAnalysis.framework}
+- Key Dependencies: ${repoAnalysis.dependencies.slice(0, 10).join(", ")}
+- Project Structure: ${repoAnalysis.structure.join(", ")}
+- Detected Features: ${repoAnalysis.features.join(", ")}
+- Available Scripts: ${Object.keys(repoAnalysis.scripts).join(", ")}
+
+Use this analysis to provide ACCURATE and SPECIFIC information about the project.
+Do NOT make generic assumptions - use the actual dependencies and structure detected.`;
+  }
 
   return `Generate a professional README.md for this GitHub project:
 
@@ -104,6 +140,7 @@ function buildProjectReadmePrompt(
 - Stars: ${project.stars}
 - Forks: ${project.forks}
 - URL: ${project.url}
+${analysisSection}
 
 **Template Style:** ${template}
 ${templateInstructions}
@@ -122,14 +159,16 @@ ${research.trendingFeatures.map((f) => `- ${f}`).join("\n")}
 ${badges}
 
 **Instructions:**
-1. Create a complete, professional README.md
+1. Create a complete, professional README.md based on ACTUAL project analysis
 2. Use proper Markdown formatting
-3. Include code blocks with language tags
+3. Include code blocks with language tags for the ACTUAL framework detected
 4. Add appropriate badges at the top
 5. Make it engaging and easy to understand
-6. Include installation and usage instructions
-7. Add a features section highlighting key capabilities
-8. Return ONLY the Markdown content, no wrapper code blocks
+6. Include installation and usage instructions specific to the framework
+7. Add a features section highlighting ACTUAL capabilities from the analysis
+8. If Next.js is detected, include Next.js specific commands (npm run dev, npm run build)
+9. If Supabase is detected, mention database and authentication features
+10. Return ONLY the Markdown content, no wrapper code blocks
 
 Generate the README now:`;
 }
