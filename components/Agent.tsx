@@ -80,10 +80,10 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    const assistantId = process.env.NEXT_VAPI_ASSISTANT_ID;
+    const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
 
     if (!assistantId) {
-      console.error("NEXT_VAPI_ASSISTANT_ID is not configured");
+      console.error("NEXT_PUBLIC_VAPI_ASSISTANT_ID is not configured");
       setCallStatus(CallStatus.INACTIVE);
       return;
     }
