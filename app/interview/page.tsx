@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Newsreader, Sansation } from "next/font/google";
 import { motion } from "framer-motion";
@@ -23,11 +23,13 @@ function InterviewContent() {
   const interviewId = searchParams.get("id");
 
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<"form" | "interview">(
-    interviewId ? "interview" : "form"
-  );
+  const [loadingInterview, setLoadingInterview] = useState(!!interviewId);
   const [userName, setUserName] = useState("");
-  const [userId, setUserId] = useState("");
+  const [interviewData, setInterviewData] = useState<{
+    type: string;
+    role: string;
+    level: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     role: "",
@@ -36,6 +38,32 @@ function InterviewContent() {
     techStack: "",
     amount: "5",
   });
+
+  // Load interview data if ID is provided
+  useEffect(() => {
+    if (interviewId) {
+      const loadInterview = async () => {
+        try {
+          const response = await fetch(`/api/interviews/${interviewId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setInterviewData(data.interview);
+          }
+
+          const userResponse = await fetch("/api/user");
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            setUserName(userData.user.user_metadata?.user_name || "User");
+          }
+        } catch (error) {
+          console.error("Error loading interview:", error);
+        } finally {
+          setLoadingInterview(false);
+        }
+      };
+      loadInterview();
+    }
+  }, [interviewId]);
 
   const handleGenerateInterview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,17 +84,8 @@ function InterviewContent() {
 
       if (!response.ok) throw new Error("Failed to generate interview");
 
-      const data = await response.json();
-      setUserId(data.userInterview.id);
-
-      // Get user info
-      const userResponse = await fetch("/api/user");
-      if (userResponse.ok) {
-        const userData = await userResponse.json();
-        setUserName(userData.user.user_metadata?.user_name || "User");
-      }
-
-      setStep("interview");
+      // Redirect back to mock-interview page
+      router.push("/mock-interview");
     } catch (error) {
       console.error("Error generating interview:", error);
       alert("Failed to generate interview. Please try again.");
@@ -75,7 +94,16 @@ function InterviewContent() {
     }
   };
 
-  if (step === "interview") {
+  // If interview ID is provided, show the interview interface
+  if (interviewId) {
+    if (loadingInterview) {
+      return (
+        <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+          <Loader2 size={48} className="text-blue-600 animate-spin" />
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
         <div className="w-full max-w-5xl">
@@ -94,12 +122,17 @@ function InterviewContent() {
             </p>
           </motion.div>
 
-          <Agent userName={userName} userId={userId} type={formData.type} />
+          <Agent
+            userName={userName}
+            userId={interviewId}
+            type={interviewData?.type || "technical"}
+          />
         </div>
       </div>
     );
   }
 
+  // Otherwise, show the generation form
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
       <motion.div
