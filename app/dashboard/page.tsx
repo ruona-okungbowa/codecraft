@@ -143,10 +143,6 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-                  <ArrowUp size={12} />
-                  Updated
-                </span>
                 <Link
                   href="/portfolio-score/improve"
                   className="text-sm text-blue-600 hover:underline font-medium"
@@ -219,27 +215,6 @@ export default function DashboardPage() {
               What would you like to do today?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                className="rounded-xl p-6 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
-                style={{
-                  background: "linear-gradient(135deg, #3b82f6, #06b6d4)",
-                }}
-              >
-                <div>
-                  <FileText size={40} className="text-white mb-3" />
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    Update Resume
-                  </h3>
-                  <p className="text-sm text-white/90">
-                    Refresh with latest projects
-                  </p>
-                </div>
-                <span className="text-xs text-white/80 border border-white/30 px-2 py-1 rounded-full self-start">
-                  Quick win
-                </span>
-              </motion.div>
-
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 className="rounded-xl p-6 h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
