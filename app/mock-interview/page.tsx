@@ -142,86 +142,73 @@ const InterviewPage = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {interviews.map((interview, index) => (
                   <motion.div
                     key={interview.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className="border border-gray-200 rounded-lg p-5 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
-                    onClick={() => router.push(`/interview?id=${interview.id}`)}
+                    className="relative bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-xl hover:border-blue-300 transition-all cursor-pointer overflow-hidden group"
+                    onClick={() => router.push(`/interview/${interview.id}`)}
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, #f97316, #ef4444)",
-                        }}
-                      >
-                        <Mic size={20} className="text-white" />
+                    <div className="absolute top-4 right-4">
+                      <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-medium rounded-full capitalize">
+                        {interview.type}
+                      </span>
+                    </div>
+
+                    <div className="mb-6 mt-2">
+                      <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                        <Mic size={36} className="text-white" />
                       </div>
-                      {interview.finalised && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                          <CheckCircle size={12} />
-                          <span>Complete</span>
-                        </div>
-                      )}
                     </div>
 
                     <h3
-                      className={`font-semibold text-gray-900 mb-2 ${newsreader.className}`}
+                      className={`text-xl font-bold text-gray-900 mb-4 ${newsreader.className}`}
                     >
                       {interview.role}
                     </h3>
 
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-xs text-gray-600">
-                        <span className="font-medium">Level:</span>
-                        <span className="capitalize">{interview.level}</span>
+                    <div className="flex items-center gap-4 mb-4 text-gray-600 text-sm">
+                      <div className="flex items-center gap-1.5">
+                        <Clock size={16} />
+                        <span>{formatTimeAgo(interview.created_at)}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-600">
-                        <span className="font-medium">Type:</span>
-                        <span className="capitalize">{interview.type}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-600">
-                        <span className="font-medium">Questions:</span>
-                        <span>
-                          {Array.isArray(interview.questions)
-                            ? interview.questions.length
-                            : 0}
-                        </span>
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle size={16} />
+                        <span>--/100</span>
                       </div>
                     </div>
 
-                    {interview.tech_stack &&
-                      interview.tech_stack.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mb-4">
-                          {interview.tech_stack.slice(0, 3).map((tech) => (
-                            <span
-                              key={tech}
-                              className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                          {interview.tech_stack.length > 3 && (
-                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">
-                              +{interview.tech_stack.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
+                    <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                      {interview.finalised
+                        ? "You haven't taken the interview yet. Take it now to improve your skills."
+                        : "Interview ready to start. Click to begin your practice session."}
+                    </p>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <Clock size={12} />
-                        <span>{formatTimeAgo(interview.created_at)}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {interview.tech_stack &&
+                          interview.tech_stack.slice(0, 3).map((tech) => (
+                            <div
+                              key={tech}
+                              className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-700 border border-gray-300"
+                              title={tech}
+                            >
+                              {tech.charAt(0).toUpperCase()}
+                            </div>
+                          ))}
+                        {interview.tech_stack &&
+                          interview.tech_stack.length > 3 && (
+                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-600 border border-gray-300">
+                              +{interview.tech_stack.length - 3}
+                            </div>
+                          )}
                       </div>
-                      <button className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
-                        <Play size={12} />
-                        <span>Start</span>
+
+                      <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-colors group-hover:scale-105 transform shadow-md">
+                        View Interview
                       </button>
                     </div>
                   </motion.div>

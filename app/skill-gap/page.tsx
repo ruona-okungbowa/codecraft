@@ -52,37 +52,27 @@ type Role = "frontend" | "backend" | "fullstack" | "devops";
 
 interface MissingSkills {
   essential: string[];
-
   preferred: string[];
-
   niceToHave: string[];
 }
 
 interface SkillAnalysis {
   role: Role;
-
   presentSkills: string[];
-
   missingSkills: MissingSkills;
-
   coveragePercentage: number;
 }
 
 interface AnalysisSummary {
   status: "excellent" | "good" | "needs-work" | "beginner";
-
   message: string;
-
   priority: string[];
 }
 
 interface AnalysisResponse {
   analysis: SkillAnalysis;
-
   summary: AnalysisSummary;
-
   cached: boolean;
-
   analyzedAt: string;
 }
 
@@ -97,81 +87,49 @@ interface LearningResource {
 const roleDefinitions = [
   {
     id: "frontend" as Role,
-
     title: "Frontend Developer",
-
     icon: Monitor,
-
     color: "blue",
-
     gradient: "from-blue-500 to-cyan-500",
-
     bgColor: "bg-blue-50",
-
     borderColor: "border-blue-500",
-
     textColor: "text-blue-600",
-
     description: "Build user interfaces with React, Vue, Angular",
   },
 
   {
     id: "backend" as Role,
-
     title: "Backend Developer",
-
     icon: Server,
-
     color: "green",
-
     gradient: "from-green-500 to-emerald-500",
-
     bgColor: "bg-green-50",
-
     borderColor: "border-green-500",
-
     textColor: "text-green-600",
-
     description: "Create APIs, databases, server logic",
   },
 
   {
     id: "fullstack" as Role,
-
     title: "Fullstack Developer",
-
     icon: Layers,
-
     color: "purple",
-
     gradient: "from-purple-500 to-pink-500",
-
     bgColor: "bg-purple-50",
-
     borderColor: "border-purple-500",
-
     textColor: "text-purple-600",
-
     description: "End-to-end application development",
   },
 
   {
     id: "devops" as Role,
-
     title: "DevOps Engineer",
-
     icon: Cloud,
-
     color: "orange",
-
     gradient: "from-orange-500 to-red-500",
-
     bgColor: "bg-orange-50",
-
     borderColor: "border-orange-500",
-
     textColor: "text-orange-600",
-
     description: "CI/CD, infrastructure, deployment",
   },
 ];
@@ -179,49 +137,31 @@ const roleDefinitions = [
 const priorityConfig = {
   essential: {
     label: "Essential",
-
     description: "Required for 80%+ of jobs",
-
     color: "red",
-
     bgColor: "bg-red-50",
-
     textColor: "text-red-700",
-
     borderColor: "border-red-500",
-
     badgeBg: "bg-red-100",
   },
 
   preferred: {
     label: "Preferred",
-
     description: "Common in job listings (40-80%)",
-
     color: "orange",
-
     bgColor: "bg-orange-50",
-
     textColor: "text-orange-700",
-
     borderColor: "border-orange-500",
-
     badgeBg: "bg-orange-100",
   },
 
   niceToHave: {
     label: "Nice-to-have",
-
     description: "Differentiators (20-40%)",
-
     color: "blue",
-
     bgColor: "bg-blue-50",
-
     textColor: "text-blue-700",
-
     borderColor: "border-blue-500",
-
     badgeBg: "bg-blue-100",
   },
 };
@@ -230,25 +170,19 @@ const mockLearningResources: { [key: string]: LearningResource[] } = {
   default: [
     {
       title: "Getting Started Guide",
-
       url: "https://developer.mozilla.org/",
-
       type: "docs",
     },
 
     {
       title: "Interactive Tutorial",
-
       url: "https://www.freecodecamp.org/",
-
       type: "tutorial",
     },
 
     {
       title: "Video Course",
-
       url: "https://www.youtube.com/",
-
       type: "video",
     },
   ],

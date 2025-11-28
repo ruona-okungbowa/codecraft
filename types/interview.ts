@@ -57,7 +57,7 @@ export interface CreateInterviewResponse {
 export interface AgentProps {
   userName: string;
   userId: string;
-  type: string;
+  interviewId: string;
   role?: string;
   level?: string;
 }

@@ -15,19 +15,11 @@ export async function generateProjectReadme(
   research: ReadmeResearch,
   githubToken?: string
 ): Promise<GeneratedReadme> {
-  // Build the prompt with research context
   const prompt = buildProjectReadmePrompt(project, template, research);
-
-  // Call OpenAI
   const content = await callOpenAI(prompt, "project");
 
-  // Count words
   const wordCount = content.split(/\s+/).length;
-
-  // Extract sections that were included
   const sectionsIncluded = extractSections(content);
-
-  // Validate the generated README
   const validation = validateMarkdown(content, "project");
 
   return {
@@ -42,14 +34,6 @@ export async function generateProjectReadme(
   };
 }
 
-/**
- * Generates a profile README using OpenAI with researched context
- * @param user - The user data
- * @param projects - User's projects
- * @param template - Template style to use
- * @param research - Research data from MCP or fallback
- * @returns Generated README with metadata and validation
- */
 export async function generateProfileReadme(
   user: User,
   projects: Project[],

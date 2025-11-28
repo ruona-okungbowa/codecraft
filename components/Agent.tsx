@@ -20,7 +20,7 @@ interface SavedMessage {
   content: string;
 }
 
-const Agent = ({ userName, userId, type, role, level }: AgentProps) => {
+const Agent = ({ userName, userId, interviewId, role, level }: AgentProps) => {
   const router = useRouter();
 
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -73,16 +73,37 @@ const Agent = ({ userName, userId, type, role, level }: AgentProps) => {
     };
   }, []);
 
-  const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-    console.log("Generate feedback here.");
+  const handleGenerateFeedback = async () => {
+    try {
+      const response = await fetch("/api/feedback/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interviewId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          router.push(`/interview/${interviewId}/feedback`);
+        } else {
+          console.error("Failed to generate feedback");
+          router.push("/mock-interview");
+        }
+      } else {
+        console.error("Feedback generation failed");
+        router.push("/mock-interview");
+      }
+    } catch (error) {
+      console.error("Error generating feedback:", error);
+      router.push("/mock-interview");
+    }
   };
 
   useEffect(() => {
     if (callStatus === CallStatus.FINISHED) {
-      router.push("/mock-interview");
-      handleGenerateFeedback(messages);
+      handleGenerateFeedback();
     }
-  }, [messages, callStatus, type, userId, router]);
+  }, [callStatus, handleGenerateFeedback]);
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
@@ -96,13 +117,13 @@ const Agent = ({ userName, userId, type, role, level }: AgentProps) => {
     }
 
     console.log("Starting call with assistant:", assistantId);
-    console.log("Variables:", { userName, interviewId: userId, role, level });
+    console.log("Variables:", { userName, interviewId, role, level });
 
     try {
       await vapi.start(assistantId, {
         variableValues: {
           userName,
-          interviewId: userId,
+          interviewId,
           role: role || "Software Engineer",
           level: level || "junior",
         },
@@ -156,7 +177,6 @@ const Agent = ({ userName, userId, type, role, level }: AgentProps) => {
           </p>
         </div>
 
-        {/* User Card */}
         <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[320px] shadow-sm">
           <div className="relative mb-4">
             <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
@@ -179,7 +199,6 @@ const Agent = ({ userName, userId, type, role, level }: AgentProps) => {
         </div>
       </div>
 
-      {/* Message Display */}
       {messages.length > 0 && latestMessage && (
         <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
           <p className="text-gray-800 text-center text-base animate-fade-in">
@@ -188,7 +207,6 @@ const Agent = ({ userName, userId, type, role, level }: AgentProps) => {
         </div>
       )}
 
-      {/* Call Button */}
       <div className="w-full flex justify-center mt-4">
         {callStatus !== CallStatus.ACTIVE ? (
           <button
