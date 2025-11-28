@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Newsreader, Sansation } from "next/font/google";
 import { motion } from "framer-motion";
@@ -17,7 +17,7 @@ const sansation = Sansation({
   weight: ["400"],
 });
 
-export default function InterviewPage() {
+function InterviewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const interviewId = searchParams.get("id");
@@ -77,7 +77,7 @@ export default function InterviewPage() {
 
   if (step === "interview") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
         <div className="w-full max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -101,7 +101,7 @@ export default function InterviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -237,5 +237,19 @@ export default function InterviewPage() {
         </form>
       </motion.div>
     </div>
+  );
+}
+
+export default function InterviewPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+          <Loader2 size={48} className="text-blue-600 animate-spin" />
+        </div>
+      }
+    >
+      <InterviewContent />
+    </Suspense>
   );
 }
