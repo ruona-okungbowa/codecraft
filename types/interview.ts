@@ -19,6 +19,13 @@ export interface InterviewQuestion {
   expectedAnswer?: string;
 }
 
+export interface InterviewResponse {
+  question: string;
+  answer: string;
+  questionIndex: number;
+  timestamp: string;
+}
+
 export interface InterviewRow {
   id: string;
   user_id: string;
@@ -27,6 +34,7 @@ export interface InterviewRow {
   level: string;
   tech_stack: string[];
   questions: any; // JSONB
+  responses?: InterviewResponse[]; // JSONB - stores user answers
   finalised: boolean;
   created_at: string;
   updated_at: string;
@@ -48,9 +56,6 @@ export interface CreateInterviewResponse {
 
 export interface AgentProps {
   userName: string;
-  userId?: string;
-  interviewId?: string;
-  feedbackId?: string;
-  type: "generate" | "interview";
-  questions?: string[];
+  userId: string;
+  type: string;
 }

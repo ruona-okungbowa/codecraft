@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Phone, PhoneOff, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi/vapi.sdk";
+import { Message } from "@/types/vapi";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -40,7 +41,8 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
     const onSpeechEnd = () => setIsSpeaking(false);
     const onError = (error: unknown) => {
       console.error("Vapi Error:", error);
-      if (error.type === "start-method-error") {
+      const err = error as { type?: string };
+      if (err.type === "start-method-error") {
         console.error(
           "Failed to start call. Check your Vapi workflow configuration."
         );
@@ -48,8 +50,14 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
       }
     };
 
-    vapi.on("call-start", onCallStart);
-    vapi.on("call-end", onCallEnd);
+    vapi.on("call-start", () => {
+      console.log("Call started");
+      onCallStart();
+    });
+    vapi.on("call-end", () => {
+      console.log("Call ended");
+      onCallEnd();
+    });
     vapi.on("message", onMessage);
     vapi.on("speech-end", onSpeechEnd);
     vapi.on("speech-start", onSpeechStart);
@@ -72,22 +80,22 @@ const Agent = ({ userName, userId, type }: AgentProps) => {
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    const workflowId = process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID;
+    const assistantId = process.env.NEXT_VAPI_ASSISTANT_ID;
 
-    if (!workflowId) {
-      console.error("VAPI_WORKFLOW_ID is not configured");
+    if (!assistantId) {
+      console.error("NEXT_VAPI_ASSISTANT_ID is not configured");
       setCallStatus(CallStatus.INACTIVE);
       return;
     }
 
-    console.log("Starting call with workflow:", workflowId);
-    console.log("Variables:", { username: userName, userid: userId });
+    console.log("Starting call with assistant:", assistantId);
+    console.log("Variables:", { userName, interviewId: userId });
 
     try {
-      await vapi.start(workflowId, {
+      await vapi.start(assistantId, {
         variableValues: {
-          username: userName,
-          userid: userId,
+          userName,
+          interviewId: userId,
         },
       });
     } catch (error) {
