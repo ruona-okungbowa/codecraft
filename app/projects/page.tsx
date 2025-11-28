@@ -785,7 +785,7 @@ export default function ProjectsPage() {
                       {/* Actions */}
                       <div className="mt-auto pt-4 border-t border-gray-200 bg-gray-50 -mx-5 -mb-5 px-5 py-4 flex items-center gap-2">
                         <Link
-                          href={`/projects/${project.id}`}
+                          href={`/projects/${project.id}/story`}
                           className={`flex-1 text-center px-4 py-2 rounded-lg transition-colors text-sm font-medium ${primaryAction.className}`}
                         >
                           {primaryAction.text}
@@ -994,7 +994,7 @@ export default function ProjectsPage() {
                       {/* Actions */}
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <Link
-                          href={`/projects/${project.id}`}
+                          href={`/projects/${project.id}/story`}
                           className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${primaryAction.className}`}
                         >
                           {primaryAction.text}
