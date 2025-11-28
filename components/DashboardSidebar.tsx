@@ -34,7 +34,6 @@ const navItems = [
   },
   { icon: BarChart3, label: "Job Match", href: "/job-match" },
   { icon: Mic, label: "Mock Interview", href: "/mock-interview" },
-  { icon: FileText, label: "Resume", href: "/generate-resume" },
   { icon: BookOpen, label: "README Generator", href: "/readme-generator" },
 ];
 

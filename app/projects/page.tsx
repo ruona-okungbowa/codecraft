@@ -793,7 +793,7 @@ export default function ProjectsPage() {
                                   <span>Generate README</span>
                                 </Link>
                                 <Link
-                                  href={`/projects/${project.id}`}
+                                  href={`/projects/${project.id}/story`}
                                   className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                                 >
                                   <BookOpen size={14} />
@@ -994,7 +994,7 @@ export default function ProjectsPage() {
                                   <span>Generate README</span>
                                 </Link>
                                 <Link
-                                  href={`/projects/${project.id}`}
+                                  href={`/projects/${project.id}/story`}
                                   className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                                 >
                                   <BookOpen size={14} />
