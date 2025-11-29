@@ -1,24 +1,21 @@
 import type { Metadata } from "next";
 import { AuthContextProvider } from "@/lib/auth/AuthProvider";
-import { Newsreader, DM_Sans, Caveat } from "next/font/google";
+import { Outfit, Inter } from "next/font/google";
+import UserMenu from "@/components/UserMenu";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
-const newsreader = Newsreader({
+// Display font - Playful & friendly for headings
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-newsreader",
+  variable: "--font-outfit",
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+// Body font - Clean & readable
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
-  display: "swap",
-});
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  variable: "--font-caveat",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -35,9 +32,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${dmSans.variable} ${caveat.variable}`}
+      className={`${outfit.variable} ${inter.variable}`}
     >
-      <body className={dmSans.className}>
+      <body className={inter.className}>
         <AuthContextProvider>
           <Toaster />
           <main>{children}</main>

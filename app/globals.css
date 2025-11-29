@@ -1,92 +1,119 @@
 @import "tailwindcss";
 
 @theme {
-  /* CodeCraft Design System Colors */
+  /* Primary Brand Blue - Vibrant & Trustworthy */
+  --color-primary-50: oklch(0.97 0.03 240);
+  --color-primary-100: oklch(0.94 0.07 240);
+  --color-primary-200: oklch(0.89 0.12 240);
+  --color-primary-300: oklch(0.81 0.17 240);
+  --color-primary-400: oklch(0.72 0.21 240);
+  --color-primary-500: oklch(0.63 0.24 240);
+  --color-primary-600: oklch(0.54 0.24 240);
+  --color-primary-700: oklch(0.46 0.21 240);
+  --color-primary-800: oklch(0.38 0.17 240);
+  --color-primary-900: oklch(0.31 0.13 240);
+  --color-primary-950: oklch(0.24 0.09 240);
 
-  /* Primary Blue - Trust & GitHub Connection */
-  --color-primary-50: #f0f4ff;
-  --color-primary-100: #e0e9ff;
-  --color-primary-200: #c7d7fe;
-  --color-primary-300: #a3b2f3;
-  --color-primary-400: #667fea;
-  --color-primary-500: #5568d3;
-  --color-primary-600: #4451b8;
-  --color-primary-700: #3a3f95;
-  --color-primary-800: #2f3478;
-  --color-primary-900: #252b5c;
+  /* Growth Green - Plants, Progress, Success */
+  --color-growth-50: oklch(0.97 0.03 150);
+  --color-growth-100: oklch(0.94 0.07 150);
+  --color-growth-200: oklch(0.88 0.13 150);
+  --color-growth-300: oklch(0.80 0.18 150);
+  --color-growth-400: oklch(0.71 0.21 150);
+  --color-growth-500: oklch(0.63 0.23 150);
+  --color-growth-600: oklch(0.54 0.22 150);
+  --color-growth-700: oklch(0.46 0.19 150);
+  --color-growth-800: oklch(0.39 0.15 150);
+  --color-growth-900: oklch(0.32 0.12 150);
+  --color-growth-950: oklch(0.24 0.08 150);
 
-  /* Growth Green - Achievement & Progress */
-  --color-growth-50: #f0fdf4;
-  --color-growth-100: #dcfce7;
-  --color-growth-200: #bbf7d0;
-  --color-growth-300: #86efac;
-  --color-growth-400: #4ade80;
-  --color-growth-500: #22c55e;
-  --color-growth-600: #16a34a;
-  --color-growth-700: #15803d;
-  --color-growth-800: #166534;
-  --color-growth-900: #14532d;
+  /* Energy Orange - Action, Excitement, CTAs */
+  --color-energy-50: oklch(0.97 0.03 50);
+  --color-energy-100: oklch(0.94 0.08 50);
+  --color-energy-200: oklch(0.89 0.14 50);
+  --color-energy-300: oklch(0.82 0.18 50);
+  --color-energy-400: oklch(0.75 0.21 50);
+  --color-energy-500: oklch(0.68 0.23 50);
+  --color-energy-600: oklch(0.59 0.22 50);
+  --color-energy-700: oklch(0.50 0.19 50);
+  --color-energy-800: oklch(0.42 0.15 50);
+  --color-energy-900: oklch(0.35 0.12 50);
+  --color-energy-950: oklch(0.27 0.08 50);
 
-  /* Energy Orange - Warmth & Creativity */
-  --color-energy-50: #fff7ed;
-  --color-energy-100: #ffedd5;
-  --color-energy-200: #fed7aa;
-  --color-energy-300: #fdba74;
-  --color-energy-400: #fb923c;
-  --color-energy-500: #f97316;
-  --color-energy-600: #ea580c;
-  --color-energy-700: #c2410c;
-  --color-energy-800: #9a3412;
-  --color-energy-900: #7c2d12;
+  /* Craft Purple - Creativity, Playfulness */
+  --color-craft-50: oklch(0.97 0.03 290);
+  --color-craft-100: oklch(0.94 0.07 290);
+  --color-craft-200: oklch(0.88 0.13 290);
+  --color-craft-300: oklch(0.80 0.18 290);
+  --color-craft-400: oklch(0.72 0.22 290);
+  --color-craft-500: oklch(0.64 0.26 290);
+  --color-craft-600: oklch(0.55 0.26 290);
+  --color-craft-700: oklch(0.47 0.23 290);
+  --color-craft-800: oklch(0.39 0.19 290);
+  --color-craft-900: oklch(0.32 0.15 290);
+  --color-craft-950: oklch(0.24 0.10 290);
 
-  /* Joy Pink/Purple - Playful & Inclusive */
-  --color-joy-50: #fdf4ff;
-  --color-joy-100: #fae8ff;
-  --color-joy-200: #f5d0fe;
-  --color-joy-300: #f0abfc;
-  --color-joy-400: #e879f9;
-  --color-joy-500: #d946ef;
-  --color-joy-600: #c026d3;
-  --color-joy-700: #a21caf;
-  --color-joy-800: #86198f;
-  --color-joy-900: #701a75;
+  /* Accent Pink - Highlights, Fun moments */
+  --color-accent-50: oklch(0.97 0.03 340);
+  --color-accent-100: oklch(0.94 0.07 340);
+  --color-accent-200: oklch(0.88 0.13 340);
+  --color-accent-300: oklch(0.80 0.18 340);
+  --color-accent-400: oklch(0.72 0.22 340);
+  --color-accent-500: oklch(0.64 0.25 340);
+  --color-accent-600: oklch(0.55 0.25 340);
+  --color-accent-700: oklch(0.47 0.22 340);
+  --color-accent-800: oklch(0.39 0.18 340);
+  --color-accent-900: oklch(0.32 0.14 340);
+  --color-accent-950: oklch(0.24 0.10 340);
 
-  /* Coral - Warm Accent */
-  --color-coral-50: #fff1f2;
-  --color-coral-100: #ffe4e6;
-  --color-coral-200: #fecdd3;
-  --color-coral-300: #fda4af;
-  --color-coral-400: #fb7185;
-  --color-coral-500: #f43f5e;
-  --color-coral-600: #e11d48;
-  --color-coral-700: #be123c;
-  --color-coral-800: #9f1239;
-  --color-coral-900: #881337;
+  /* Background - Soft, warm neutrals */
+  --color-bg-50: oklch(0.99 0.002 240);
+  --color-bg-100: oklch(0.97 0.004 240);
+  --color-bg-200: oklch(0.93 0.006 240);
+  --color-bg-300: oklch(0.86 0.008 240);
+  --color-bg-400: oklch(0.70 0.012 240);
+  --color-bg-500: oklch(0.56 0.014 240);
+  --color-bg-600: oklch(0.45 0.013 240);
+  --color-bg-700: oklch(0.36 0.011 240);
+  --color-bg-800: oklch(0.28 0.009 240);
+  --color-bg-900: oklch(0.21 0.007 240);
+  --color-bg-950: oklch(0.15 0.005 240);
 
-  /* Neutral - Warm Grays */
-  --color-neutral-50: #fafaf9;
-  --color-neutral-100: #f5f5f4;
-  --color-neutral-200: #e7e5e4;
-  --color-neutral-300: #d6d3d1;
-  --color-neutral-400: #a8a29e;
-  --color-neutral-500: #78716c;
-  --color-neutral-600: #57534e;
-  --color-neutral-700: #44403c;
-  --color-neutral-800: #292524;
-  --color-neutral-900: #1c1917;
-  --color-neutral-950: #0c0a09;
+  /* Text - Better contrast */
+  --color-text-50: oklch(0.99 0.002 240);
+  --color-text-100: oklch(0.97 0.004 240);
+  --color-text-200: oklch(0.93 0.006 240);
+  --color-text-300: oklch(0.86 0.008 240);
+  --color-text-400: oklch(0.70 0.012 240);
+  --color-text-500: oklch(0.56 0.014 240);
+  --color-text-600: oklch(0.45 0.013 240);
+  --color-text-700: oklch(0.36 0.011 240);
+  --color-text-800: oklch(0.28 0.009 240);
+  --color-text-900: oklch(0.21 0.007 240);
+  --color-text-950: oklch(0.15 0.005 240);
 
-  /* Semantic Colors */
-  --color-success: #22c55e;
-  --color-warning: #f97316;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
+  /* Utility Colors */
+  --color-success-500: oklch(0.63 0.23 150);
+  --color-warning-500: oklch(0.68 0.23 50);
+  --color-error-500: oklch(0.64 0.23 25);
 
   /* Font Families */
-  --font-heading: var(--font-newsreader);
-  --font-body: var(--font-dm-sans);
-  --font-accent: var(--font-caveat);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-outfit);
+  --font-sans: var(--font-inter);
+  --font-mono: ui-monospace, monospace;
+
+  /* Brand Gradients */
+  --gradient-hero: linear-gradient(135deg, oklch(0.97 0.03 240) 0%, oklch(0.97 0.03 290) 50%, oklch(0.97 0.03 340) 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.63 0.24 240) 0%, oklch(0.64 0.26 290) 100%);
+  --gradient-growth: linear-gradient(135deg, oklch(0.63 0.23 150) 0%, oklch(0.63 0.24 180) 100%);
+  --gradient-energy: linear-gradient(135deg, oklch(0.68 0.23 50) 0%, oklch(0.64 0.25 340) 100%);
+  --gradient-creative: linear-gradient(135deg, oklch(0.64 0.26 290) 0%, oklch(0.64 0.25 340) 100%);
+
+  /* Shadows with color tints */
+  --shadow-primary: 0 10px 40px -10px oklch(0.54 0.24 240 / 0.3);
+  --shadow-growth: 0 10px 40px -10px oklch(0.54 0.22 150 / 0.3);
+  --shadow-energy: 0 10px 40px -10px oklch(0.59 0.22 50 / 0.3);
+  --shadow-soft: 0 4px 20px -4px oklch(0.15 0.005 240 / 0.1);
 }
 
 body {
