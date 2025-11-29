@@ -1,30 +1,23 @@
 "use client";
 
-import { Box } from "@mui/material";
 import ModernNavbar from "@/components/ModernNavbar";
 import HeroSection from "@/components/HeroSection";
-import SeparatorSection from "@/components/SeparatorSection";
 import FeaturesSection from "@/components/FeaturesSection";
-import WhySection from "@/components/WhySection";
 import HowItWorksSection from "@/components/HowItWorksSection";
+import AboutSection from "@/components/AboutSection";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
 export default function LandingPage() {
   return (
-    <Box sx={{ bgcolor: "#ffffff", minHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#f6f7f8" }} className="min-h-screen">
       <ModernNavbar />
-
       <HeroSection />
-
-      <SeparatorSection />
-
       <FeaturesSection />
-
-      <WhySection />
       <HowItWorksSection />
+      <AboutSection />
       <CTASection />
       <Footer />
-    </Box>
+    </div>
   );
 }

@@ -22,7 +22,7 @@ export default function AnimatedCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
       whileHover={hover ? { y: -4, transition: { duration: 0.2 } } : {}}
-      className={`bg-white rounded-lg shadow-md ${className}`}
+      className={`glass-card noise-texture rounded-lg shadow-md ${className}`}
     >
       {children}
     </motion.div>

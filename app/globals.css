@@ -131,6 +131,108 @@ body {
   scrollbar-width: none; /* Firefox */
 }
 
+/* Animations */
+@keyframes gradient-pan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float-1 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+@keyframes float-2 {
+  0%,
+  100% {
+    transform: translateY(0) rotate(3deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(-3deg);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slower {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slowest {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-gradient-pan {
+  animation: gradient-pan 15s ease infinite;
+}
+
+.animate-float-1 {
+  animation: float-1 6s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: float-2 8s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-spin-slower {
+  animation: spin-slower 25s linear infinite reverse;
+}
+
+.animate-spin-slowest {
+  animation: spin-slowest 40s linear infinite;
+}
+
+/* Nav link hover effect */
+.nav-link span:first-child {
+  display: inline-block;
+  transition: transform 0.3s ease-in-out;
+}
+
+.nav-link:hover span:first-child {
+  transform: translateY(-2px);
+  color: #4c96e1;
+}
+
+/* Animated background gradient */
+.animated-bg {
+  background: linear-gradient(-45deg, #d476aa, #e29459, #e14c9f, #e18c4c);
+  background-size: 400% 400%;
+  animation: gradient-pan 15s ease infinite;
+}
+
 /* Ensure content doesn't overflow on mobile */
 @media (max-width: 768px) {
   * {
