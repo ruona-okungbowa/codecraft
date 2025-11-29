@@ -2,57 +2,47 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Link as LinkIcon, Sparkles, BarChart3, Rocket } from "lucide-react";
-import { Newsreader, Sansation } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const sansation = Sansation({
-  subsets: ["latin"],
-  weight: ["400"],
-});
+import CraftBot from "./CraftBot";
 
 const steps = [
   {
     number: 1,
     title: "Connect Your GitHub",
     description:
-      "One click, zero manual entry. We securely connect to your GitHub account and pull in all your public repositories. No forms to fill out, no copy-pasting required. Our secure OAuth integration ensures your data stays safe while giving us the access we need to analyze your work.",
+      "One click, zero manual entry. We securely connect to your GitHub account and pull in all your public repositories. No forms to fill out, no copy-pasting required.",
     icon: LinkIcon,
-    color: "#3b82f6",
-    screenshot: "/landing_image.svg", // Placeholder
+    color: "oklch(0.63 0.24 240)", // Primary Blue
+    screenshot: "/landing-image.png",
   },
   {
     number: 2,
     title: "AI Analyzes Your Work",
     description:
-      "Our AI reviews your repos, commit history, tech stack, and project complexity. We identify patterns, extract key achievements, and understand what makes your work valuable. The analysis looks at code quality, project structure, documentation, and real-world impact to build a complete picture of your skills.",
+      "Our AI reviews your repos, commit history, tech stack, and project complexity. We identify patterns, extract key achievements, and understand what makes your work valuable.",
     icon: Sparkles,
-    color: "#a855f7",
-    screenshot: "/landing_image.svg", // Placeholder
+    color: "oklch(0.64 0.26 290)", // Craft Purple
+    screenshot: "/landing-image.png",
   },
   {
     number: 3,
     title: "Get Portfolio & Insights",
     description:
-      "Receive a professional portfolio website (deployed to GitHub Pages), skill gap analysis, AI-generated resume content, and personalized project recommendations. Everything you need in one place. Your portfolio is automatically updated as you add new projects, keeping your professional presence fresh.",
+      "Receive a professional portfolio website, skill gap analysis, AI-generated resume content, and personalized project recommendations. Everything you need in one place.",
     icon: BarChart3,
-    color: "#22c55e",
-    screenshot: "/landing_image.svg", // Placeholder
+    color: "oklch(0.63 0.23 150)", // Growth Green
+    screenshot: "/landing-image.png",
   },
   {
     number: 4,
     title: "Practice & Land Offers",
     description:
-      "Use our mock interview tool to practice explaining your projects. Match your portfolio against real job descriptions. Walk into interviews knowing exactly what to say and where you stand. Get personalized feedback on your answers and track your improvement over time.",
+      "Use our mock interview tool to practice explaining your projects. Match your portfolio against real job descriptions. Walk into interviews knowing exactly what to say.",
     icon: Rocket,
-    color: "#f97316",
-    screenshot: "/landing_image.svg", // Placeholder
+    color: "oklch(0.68 0.23 50)", // Energy Orange
+    screenshot: "/landing-image.png",
   },
 ];
 
@@ -75,41 +65,72 @@ export default function HowItWorksSection() {
   const Icon = currentStep.icon;
 
   return (
-    <section id="how-it-works" className="bg-white py-24 px-6">
-      <div className="max-w-[1200px] mx-auto">
+    <section
+      id="how-it-works"
+      className="py-24 px-6 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, oklch(0.97 0.03 240) 0%, oklch(0.97 0.03 270) 50%, oklch(0.97 0.03 320) 100%)",
+      }}
+    >
+      {/* Floating shapes decoration */}
+      <div className="absolute top-10 right-10 opacity-20">
+        <CraftBot state="guiding" size={150} />
+      </div>
+
+      <div className="max-w-[1200px] mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
-          <h2
-            className={`text-5xl font-extrabold text-gray-900 mb-4 ${newsreader.className}`}
+          <motion.h2
+            className="text-5xl lg:text-6xl font-bold font-display mb-4"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.63 0.24 240) 0%, oklch(0.64 0.26 290) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
             How It Works
-          </h2>
-          <p className={`text-xl text-gray-600 ${sansation.className}`}>
+          </motion.h2>
+          <motion.p
+            className="text-xl"
+            style={{ color: "oklch(0.45 0.013 240)" }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
             Get interview-ready in 4 simple steps
-          </p>
+          </motion.p>
         </div>
 
         {/* Tabs */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {steps.map((step, index) => (
-            <button
+            <motion.button
               key={index}
               onClick={() => {
                 setActiveStep(index);
                 setIsPaused(true);
                 setTimeout(() => setIsPaused(false), 10000); // Resume after 10s
               }}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                 activeStep === index
-                  ? "text-white shadow-lg scale-105"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? "text-white shadow-lg"
+                  : "text-gray-600 hover:shadow-md"
               }`}
               style={{
-                backgroundColor: activeStep === index ? step.color : undefined,
+                backgroundColor: activeStep === index ? step.color : "oklch(1 0 0 / 0.9)",
+                border: activeStep === index ? "none" : `2px solid ${step.color}`,
               }}
             >
               Step {step.number}
-            </button>
+            </motion.button>
           ))}
         </div>
 
@@ -120,28 +141,33 @@ export default function HowItWorksSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="grid md:grid-cols-2 gap-12 items-center bg-gray-50 rounded-3xl p-8 md:p-12"
+            transition={{ duration: 0.4, type: "spring", bounce: 0.3 }}
+            className="grid md:grid-cols-2 gap-12 items-center rounded-3xl p-8 md:p-12"
+            style={{
+              background: "oklch(1 0 0 / 0.7)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid oklch(0.63 0.24 240 / 0.1)",
+            }}
           >
             <div>
-              <div
+              <motion.div
                 className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6"
                 style={{
-                  backgroundColor: `${currentStep.color}20`,
+                  background: `linear-gradient(135deg, ${currentStep.color} 0%, ${currentStep.color} 100%)`,
+                  opacity: 0.15,
                 }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", bounce: 0.5 }}
               >
                 <Icon size={40} style={{ color: currentStep.color }} />
-              </div>
+              </motion.div>
 
-              <h3
-                className={`text-4xl font-bold text-gray-900 mb-4 ${newsreader.className}`}
-              >
+              <h3 className="text-4xl font-bold font-display mb-4" style={{ color: "oklch(0.21 0.007 240)" }}>
                 {currentStep.title}
               </h3>
 
-              <p
-                className={`text-lg text-gray-600 leading-relaxed mb-6 ${sansation.className}`}
-              >
+              <p className="text-lg leading-relaxed mb-6" style={{ color: "oklch(0.45 0.013 240)" }}>
                 {currentStep.description}
               </p>
 
@@ -210,9 +236,13 @@ export default function HowItWorksSection() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-[#87d498] hover:bg-[#72b681] text-white font-bold px-8 py-4 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all duration-200 mb-3"
+            className="px-8 py-4 rounded-xl text-white font-semibold text-lg"
+            style={{
+              background: "linear-gradient(135deg, oklch(0.63 0.24 240) 0%, oklch(0.64 0.26 290) 100%)",
+              boxShadow: "0 10px 40px -10px oklch(0.54 0.24 240 / 0.4)",
+            }}
           >
-            <Link href="/login">Get Started</Link>
+            <Link href="/login">Get Started Free</Link>
           </motion.button>
         </motion.div>
       </div>
