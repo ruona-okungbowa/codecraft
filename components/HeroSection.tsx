@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
-import CraftBot from "./CraftBot";
 import { Sparkles, Github, ArrowRight } from "lucide-react";
 
 export default function HeroSection() {
@@ -325,59 +325,27 @@ export default function HeroSection() {
               }}
             />
 
-            {/* Mascot */}
-            <div className="relative">
-              <CraftBot state="welcome" size={400} />
-
-              {/* Floating code symbols around mascot */}
-              <motion.div
-                className="absolute top-10 left-0 text-4xl font-mono opacity-20"
-                style={{ color: "oklch(0.63 0.24 240)" }}
-                animate={{
-                  y: [0, -15, 0],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                {"</>"}
-              </motion.div>
-              <motion.div
-                className="absolute top-20 right-10 text-3xl font-mono opacity-20"
-                style={{ color: "oklch(0.64 0.26 290)" }}
-                animate={{
-                  y: [0, 20, 0],
-                  opacity: [0.2, 0.35, 0.2],
-                }}
-                transition={{
-                  duration: 4,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.5,
-                }}
-              >
-                {"{}"}
-              </motion.div>
-              <motion.div
-                className="absolute bottom-20 left-10 text-3xl font-mono opacity-20"
-                style={{ color: "oklch(0.63 0.23 150)" }}
-                animate={{
-                  y: [0, -10, 0],
-                  opacity: [0.2, 0.4, 0.2],
-                }}
-                transition={{
-                  duration: 3.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 1,
-                }}
-              >
-                {"[]"}
-              </motion.div>
-            </div>
+            {/* Hero Illustration */}
+            <motion.div
+              className="relative"
+              animate={{
+                y: [0, -10, 0],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <Image
+                src="/landing-image.png"
+                alt="Developer with GitHub, code, and growth elements"
+                width={600}
+                height={600}
+                priority
+                className="w-full h-auto drop-shadow-2xl"
+              />
+            </motion.div>
           </motion.div>
         </div>
       </div>
