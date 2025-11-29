@@ -117,10 +117,10 @@
 }
 
 body {
-  background: var(--color-bg-950);
-  color: var(--color-text-300);
+  background: var(--color-neutral-50);
+  color: var(--color-neutral-700);
   font-family:
-    var(--font-sans),
+    var(--font-body),
     system-ui,
     -apple-system,
     sans-serif;

@@ -4,7 +4,6 @@ import { Outfit, Inter } from "next/font/google";
 import UserMenu from "@/components/UserMenu";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import Link from "next/link";
 
 // Display font - Playful & friendly for headings
 const outfit = Outfit({
