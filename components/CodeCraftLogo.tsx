@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 interface CodeCraftLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -22,61 +23,17 @@ export default function CodeCraftLogo({
 
   const { height, fontSize } = sizes[size];
 
-  // Icon only - Simple sprout growing from brackets
+  // Icon only - Using the generated logo
   const IconMark = () => (
-    <svg
-      width={height}
-      height={height}
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      {/* Left bracket - Code (Blue) */}
-      <path
-        d="M18 12L10 24L18 36"
-        stroke="url(#blue-gradient)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+    <div className={className} style={{ width: height, height: height }}>
+      <Image
+        src="/logo.jpg"
+        alt="CodeCraft Logo"
+        width={height}
+        height={height}
+        className="w-full h-full object-contain"
       />
-      {/* Right bracket - Code (Blue) */}
-      <path
-        d="M30 12L38 24L30 36"
-        stroke="url(#blue-gradient)"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Plant sprout - Craft (Green to Purple) */}
-      <path
-        d="M24 28 Q24 20, 20 16 M24 28 Q24 18, 28 14"
-        stroke="url(#growth-gradient)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        fill="none"
-      />
-      {/* Seed/base */}
-      <circle cx="24" cy="30" r="3" fill="url(#growth-gradient)" />
-
-      {/* Gradients */}
-      <defs>
-        <linearGradient id="blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#667EEA" />
-          <stop offset="100%" stopColor="#5A67D8" />
-        </linearGradient>
-        <linearGradient
-          id="growth-gradient"
-          x1="0%"
-          y1="0%"
-          x2="100%"
-          y2="100%"
-        >
-          <stop offset="0%" stopColor="#22C55E" />
-          <stop offset="100%" stopColor="#A855F7" />
-        </linearGradient>
-      </defs>
-    </svg>
+    </div>
   );
 
   // Wordmark - Text only
