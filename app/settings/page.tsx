@@ -101,7 +101,8 @@ export default function SettingsPage() {
     try {
       const response = await fetch("/api/github/repos", { method: "POST" });
       if (response.ok) {
-        alert("GitHub synced successfully!");
+        const { showSuccess } = await import("@/lib/utils/toast");
+        showSuccess("GitHub synced successfully!");
       } else {
         alert("Failed to sync GitHub");
       }

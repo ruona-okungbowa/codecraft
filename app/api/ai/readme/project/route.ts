@@ -199,6 +199,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Store generated README in database
+    const { error: insertError } = await supabase
+      .from("generated_content")
+      .insert({
+        project_id: projectId,
+        content_type: "readme",
+        content: generatedReadme.content,
+        metadata: {
+          ...generatedReadme.metadata,
+          template,
+          validation: generatedReadme.validation,
+          characterCount: generatedReadme.content.length,
+          briefDescription,
+        },
+      });
+
+    if (insertError) {
+      console.error("Error storing README in database:", insertError);
+      // Don't fail the request, just log the error
+    }
+
     // Return response
     return NextResponse.json({
       content: generatedReadme.content,

@@ -155,19 +155,25 @@ export default function ProjectsPage() {
 
   async function handleSync() {
     setSyncing(true);
+    const { showSuccess, showError } = await import("@/lib/utils/toast");
     try {
       const response = await fetch("/api/github/repos", { method: "GET" });
       if (response.ok) {
         await fetchProjects();
+        showSuccess("Projects synced successfully!");
+      } else {
+        showError("Failed to sync projects. Please try again.");
       }
     } catch (error) {
       console.error("Error syncing:", error);
+      showError("An error occurred while syncing projects.");
     } finally {
       setSyncing(false);
     }
   }
 
   async function togglePortfolio(projectId: string, currentStatus: boolean) {
+    const { showSuccess, showError } = await import("@/lib/utils/toast");
     try {
       const response = await fetch(`/api/projects/${projectId}/portfolio`, {
         method: "PATCH",
@@ -181,9 +187,15 @@ export default function ProjectsPage() {
             p.id === projectId ? { ...p, in_portfolio: !currentStatus } : p
           )
         );
+        showSuccess(
+          !currentStatus ? "Added to portfolio!" : "Removed from portfolio"
+        );
+      } else {
+        showError("Failed to update portfolio status.");
       }
     } catch (error) {
       console.error("Error toggling portfolio:", error);
+      showError("An error occurred. Please try again.");
     } finally {
       setOpenDropdown(null);
     }
@@ -205,14 +217,17 @@ export default function ProjectsPage() {
           prev.map((p) => (p.id === projectId ? { ...p, has_readme: true } : p))
         );
         // Show success or navigate to view the readme
-        alert("README generated successfully!");
+        const { showSuccess } = await import("@/lib/utils/toast");
+        showSuccess("README generated successfully!");
       } else {
         const error = await response.json();
-        alert(`Failed to generate README: ${error.error}`);
+        const { showError } = await import("@/lib/utils/toast");
+        showError(`Failed to generate README: ${error.error}`);
       }
     } catch (error) {
       console.error("Error generating README:", error);
-      alert("An error occurred while generating README");
+      const { showError } = await import("@/lib/utils/toast");
+      showError("An error occurred while generating README");
     } finally {
       setGeneratingReadme(null);
     }

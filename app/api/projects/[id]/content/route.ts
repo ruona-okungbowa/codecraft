@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const { id: projectId } = await params;
 
     const supabase = await createClient();
     const {
@@ -17,22 +17,40 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get all generated content for this project
-    const { data: content, error } = await supabase
-      .from("generated_content")
-      .select("*")
-      .eq("project_id", id)
-      .order("created_at", { ascending: false });
+    // Verify project belongs to user
+    const { data: project, error: projectError } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("id", projectId)
+      .eq("user_id", user.id)
+      .single();
 
-    if (error) {
-      throw error;
+    if (projectError || !project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ content: content || [] });
-  } catch (error: unknown) {
-    console.error("Error fetching content:", error);
+    // Fetch all generated content for this project
+    const { data: content, error: contentError } = await supabase
+      .from("generated_content")
+      .select("*")
+      .eq("project_id", projectId)
+      .order("created_at", { ascending: false });
+
+    if (contentError) {
+      console.error("Error fetching generated content:", contentError);
+      return NextResponse.json(
+        { error: "Failed to fetch generated content" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      content: content || [],
+    });
+  } catch (error) {
+    console.error("Error in content route:", error);
     return NextResponse.json(
-      { error: (error as Error).message || "Failed to fetch content" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
