@@ -107,11 +107,18 @@ export async function GET(request: Request) {
     }
 
     console.log(`Stored ${projects.length} projects in database`);
-    return NextResponse.json({ projects, count: repos.length });
+    return NextResponse.json({
+      projects,
+      count: repos.length,
+      syncedAt: new Date().toISOString(),
+    });
   } catch (error: unknown) {
     console.error("Error fetching repos:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch repositories" },
+      {
+        error: "Failed to fetch repositories",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "TypeScript/React Code Review",
+  "description": "Automatically reviews TypeScript and React code changes in .ts, .tsx files and suggests improvements for code quality, best practices, performance, and maintainability",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review the TypeScript/React code changes in the edited file. Analyze the code for:\n\n1. **Code Quality**: Check for type safety issues, proper TypeScript usage, and adherence to strict mode\n2. **React Best Practices**: Verify proper use of hooks, component patterns, Server vs Client components, and React 19 features\n3. **Performance**: Identify potential performance issues, unnecessary re-renders, or inefficient patterns\n4. **Next.js Patterns**: Ensure proper use of App Router, Route Handlers, Server Components, and Next.js 16 conventions\n5. **Architecture**: Check alignment with project structure (see structure.md) and naming conventions\n6. **Error Handling**: Verify proper error boundaries, try-catch blocks, and user-facing error messages\n7. **Security**: Check for authentication validation, proper API usage, and data sanitization\n8. **Maintainability**: Assess code readability, modularity, and adherence to project patterns\n\nProvide specific, actionable suggestions for improvements. Focus on the most impactful changes. If the code looks good, acknowledge what was done well."
+  }
+}

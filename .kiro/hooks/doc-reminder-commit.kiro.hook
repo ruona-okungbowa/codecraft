@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Documentation Reminder",
+  "description": "Reminds developer to update documentation before committing changes by checking if code files were modified without corresponding documentation updates",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "app/**/*.ts",
+      "app/**/*.tsx",
+      "lib/**/*.ts",
+      "components/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A code file has been modified. Please check if there are any corresponding documentation files (README.md, docs/*.md, or inline JSDoc comments) that should be updated to reflect these changes. Remind the developer to:\n\n1. Update the README.md if public APIs or features changed\n2. Update relevant documentation in the docs/ folder if architectural changes were made\n3. Add or update JSDoc comments for new or modified functions\n4. Update type definitions if interfaces changed\n\nProvide a friendly reminder with specific suggestions based on what was changed."
+  }
+}

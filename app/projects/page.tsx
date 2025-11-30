@@ -126,6 +126,7 @@ export default function ProjectsPage() {
   const [sortBy, setSortBy] = useState<SortOption>("updated");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [generatingReadme, setGeneratingReadme] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -148,6 +149,7 @@ export default function ProjectsPage() {
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
+      setError("Failed to load projects. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -304,17 +306,18 @@ export default function ProjectsPage() {
     <div className="flex h-screen overflow-hidden bg-[#f6f7f8]">
       <CollapsibleSidebar />
 
-      <main className="flex-1 overflow-y-auto p-6 lg:p-10 ml-20">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 ml-0 md:ml-20">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <header className="mb-8">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <h2 className="text-3xl font-bold text-black">Your Projects</h2>
+          <header className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                Your Projects
+              </h2>
               <button
                 onClick={handleSync}
                 disabled={syncing}
-                className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 font-semibold transition-all duration-300 transform hover:scale-105 shadow-sm"
-                style={{ backgroundColor: "#4c96e1", color: "white" }}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg h-11 px-6 font-semibold transition-all duration-300 hover:scale-105 shadow-sm bg-[#4c96e1] hover:bg-[#3a7bc8] text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <GitHubIcon />
                 <span>{syncing ? "Syncing..." : "Sync with GitHub"}</span>
@@ -322,13 +325,13 @@ export default function ProjectsPage() {
             </div>
 
             {/* Search and Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="relative md:col-span-2 lg:col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="relative sm:col-span-2">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
                   <MaterialIcon name="search" />
                 </span>
                 <input
-                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-[#4c96e1] focus:border-[#4c96e1] transition text-black"
+                  className="w-full h-11 pl-10 pr-4 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-[#4c96e1] focus:border-[#4c96e1] focus:outline-none transition text-gray-900 placeholder:text-gray-500 text-sm sm:text-base"
                   placeholder="Search by name, language..."
                   type="text"
                   value={searchQuery}
@@ -338,7 +341,7 @@ export default function ProjectsPage() {
 
               <div className="relative">
                 <select
-                  className="w-full h-11 appearance-none px-4 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-[#4c96e1] focus:border-[#4c96e1] transition text-black"
+                  className="w-full h-11 appearance-none px-4 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-[#4c96e1] focus:border-[#4c96e1] focus:outline-none transition text-gray-900 text-sm sm:text-base"
                   value={languageFilter}
                   onChange={(e) => setLanguageFilter(e.target.value)}
                 >
@@ -356,7 +359,7 @@ export default function ProjectsPage() {
 
               <div className="relative">
                 <select
-                  className="w-full h-11 appearance-none px-4 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-[#4c96e1] focus:border-[#4c96e1] transition text-black"
+                  className="w-full h-11 appearance-none px-4 rounded-lg bg-white border border-gray-300 focus:ring-2 focus:ring-[#4c96e1] focus:border-[#4c96e1] focus:outline-none transition text-gray-900 text-sm sm:text-base"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
                 >
@@ -373,26 +376,30 @@ export default function ProjectsPage() {
           </header>
 
           {/* View Toggle and Count */}
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+            <p className="text-xs sm:text-sm text-gray-600">
               Showing {filteredProjects.length} of {projects.length} projects
             </p>
-            <div className="flex items-center gap-2 p-1 rounded-lg bg-gray-200/50 border border-gray-300">
+            <div className="flex items-center gap-2 p-1 rounded-lg bg-gray-100 border border-gray-200">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-md ${
-                  viewMode === "grid" ? "bg-white shadow-sm" : "text-gray-500"
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === "grid"
+                    ? "bg-white shadow-sm text-[#4c96e1]"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
-                style={viewMode === "grid" ? { color: "#4c96e1" } : undefined}
+                aria-label="Grid view"
               >
                 <MaterialIcon name="grid_view" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded-md ${
-                  viewMode === "list" ? "bg-white shadow-sm" : "text-gray-500"
+                className={`p-2 rounded-md transition-all ${
+                  viewMode === "list"
+                    ? "bg-white shadow-sm text-[#4c96e1]"
+                    : "text-gray-500 hover:text-gray-700"
                 }`}
-                style={viewMode === "list" ? { color: "#4c96e1" } : undefined}
+                aria-label="List view"
               >
                 <MaterialIcon name="view_list" />
               </button>
@@ -401,29 +408,40 @@ export default function ProjectsPage() {
 
           {loading ? (
             <div className="text-center py-20">
-              <p className="text-gray-500">Loading projects...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4c96e1] mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading your projects...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <div className="text-red-500 text-5xl mb-4">⚠️</div>
+              <h3 className="text-2xl font-bold mb-2 text-black">
+                Failed to Load Projects
+              </h3>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <button
+                onClick={fetchProjects}
+                className="px-6 py-3 bg-[#4c96e1] text-white rounded-lg hover:bg-[#3a7bc8] transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           ) : projects.length === 0 ? (
-            <div className="mt-16 text-center">
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
-                style={{ backgroundColor: "#e1f0ff" }}
-              >
-                <span style={{ color: "#4c96e1" }}>
+            <div className="mt-12 sm:mt-16 text-center px-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-6 bg-[#4c96e1]/10">
+                <span className="text-[#4c96e1]">
                   <MaterialIcon name="folder_off" />
                 </span>
               </div>
-              <h3 className="text-2xl font-bold mb-2 text-black">
+              <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900">
                 No repositories found
               </h3>
-              <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+              <p className="text-gray-600 mb-6 max-w-sm mx-auto text-sm sm:text-base">
                 It looks like we couldn&apos;t find any repositories. Try
                 syncing with GitHub to get started.
               </p>
               <button
                 onClick={handleSync}
-                className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 font-semibold transition-all duration-300 transform hover:scale-105 shadow-sm mx-auto"
-                style={{ backgroundColor: "#4c96e1", color: "white" }}
+                className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 font-semibold transition-all duration-300 hover:scale-105 shadow-sm mx-auto bg-[#4c96e1] hover:bg-[#3a7bc8] text-white text-sm sm:text-base"
               >
                 <GitHubIcon />
                 <span>Sync repositories</span>

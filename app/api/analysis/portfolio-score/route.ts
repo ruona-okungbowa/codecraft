@@ -65,13 +65,16 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json(scoreData);
+    return NextResponse.json({
+      ...scoreData,
+      calculatedAt: new Date().toISOString(),
+    });
   } catch (error: unknown) {
     console.error("Error calculating portfolio score", error);
     return NextResponse.json(
       {
-        error:
-          (error as Error).message || "Failed to calculate portfolio score",
+        error: "Failed to calculate portfolio score",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
