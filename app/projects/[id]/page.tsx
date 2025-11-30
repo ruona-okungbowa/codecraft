@@ -6,6 +6,7 @@ import { ProjectRow } from "@/types";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 import Link from "next/link";
 import { marked } from "marked";
+import { showSuccess, showError } from "@/lib/utils/toast";
 
 type TabType = "summary" | "stories" | "bullets" | "readme";
 
@@ -678,20 +679,85 @@ export default function ProjectDetailPage() {
             {activeTab === "stories" && (
               <div className="lg:col-span-3">
                 <div className="bg-white p-6 rounded-xl shadow-sm">
-                  <h3 className="text-xl font-bold mb-4 text-black">
-                    STAR Stories
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-black">
+                        STAR Stories
+                      </h3>
+                      {getStoryContent() && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Generated{" "}
+                          {formatTimeAgo(getStoryContent()?.created_at)}
+                        </p>
+                      )}
+                    </div>
+                    {getStoryContent() && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const content = getStoryContent()?.content || "";
+                            await navigator.clipboard.writeText(content);
+                            showSuccess("Copied to clipboard!");
+                          } catch (error) {
+                            console.error("Failed to copy:", error);
+                            showError("Failed to copy to clipboard");
+                          }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                        style={{
+                          backgroundColor: "rgba(76, 150, 225, 0.1)",
+                          color: "#4c96e1",
+                        }}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect
+                            x="9"
+                            y="9"
+                            width="13"
+                            height="13"
+                            rx="2"
+                            ry="2"
+                          />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        Copy
+                      </button>
+                    )}
+                  </div>
                   {getStoryContent() ? (
                     <div className="prose max-w-none">
-                      <pre className="whitespace-pre-wrap text-gray-600">
+                      <pre className="whitespace-pre-wrap text-gray-600 bg-gray-50 p-4 rounded-lg">
                         {getStoryContent()?.content}
                       </pre>
                     </div>
                   ) : (
-                    <p className="text-gray-600">
-                      No STAR stories generated yet. Click &quot;Generate
-                      All&quot; to create interview-ready stories.
-                    </p>
+                    <div className="text-center py-12">
+                      <svg
+                        width="64"
+                        height="64"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        className="mx-auto mb-4 text-gray-300"
+                      >
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <p className="text-gray-600 mb-2">
+                        No STAR stories generated yet.
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Click &quot;Generate All&quot; to create interview-ready
+                        stories.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -700,9 +766,72 @@ export default function ProjectDetailPage() {
             {activeTab === "bullets" && (
               <div className="lg:col-span-3">
                 <div className="bg-white p-6 rounded-xl shadow-sm">
-                  <h3 className="text-xl font-bold mb-4 text-black">
-                    Resume Bullets
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-black">
+                        Resume Bullets
+                      </h3>
+                      {getBulletsContent() && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Generated{" "}
+                          {formatTimeAgo(getBulletsContent()?.created_at)}
+                        </p>
+                      )}
+                    </div>
+                    {getBulletsContent() && (
+                      <button
+                        onClick={async () => {
+                          const content = getBulletsContent()?.content || "";
+                          // Format bullets for clipboard
+                          let formattedContent = content;
+                          try {
+                            const parsed = JSON.parse(content);
+                            if (Array.isArray(parsed)) {
+                              formattedContent = parsed
+                                .map((b: string | { text: string }) =>
+                                  typeof b === "string"
+                                    ? `• ${b}`
+                                    : `• ${b.text}`
+                                )
+                                .join("\n");
+                            }
+                          } catch {
+                            // Use as-is if not JSON
+                          }
+                          await navigator.clipboard.writeText(formattedContent);
+                          const { showSuccess } = await import(
+                            "@/lib/utils/toast"
+                          );
+                          showSuccess("Copied to clipboard!");
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                        style={{
+                          backgroundColor: "rgba(76, 150, 225, 0.1)",
+                          color: "#4c96e1",
+                        }}
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <rect
+                            x="9"
+                            y="9"
+                            width="13"
+                            height="13"
+                            rx="2"
+                            ry="2"
+                          />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        Copy All
+                      </button>
+                    )}
+                  </div>
                   {getBulletsContent() ? (
                     <div className="space-y-3">
                       {(() => {
@@ -718,16 +847,51 @@ export default function ProjectDetailPage() {
                               ) => (
                                 <div
                                   key={index}
-                                  className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg"
+                                  className="group flex items-start gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors relative"
                                 >
                                   <span className="text-[#4c96e1] font-bold mt-1">
                                     •
                                   </span>
-                                  <p className="text-gray-700 leading-relaxed">
+                                  <p className="text-gray-700 leading-relaxed flex-1">
                                     {typeof bullet === "string"
                                       ? bullet
                                       : bullet.text || ""}
                                   </p>
+                                  <button
+                                    onClick={async () => {
+                                      const text =
+                                        typeof bullet === "string"
+                                          ? bullet
+                                          : bullet.text || "";
+                                      await navigator.clipboard.writeText(text);
+                                      const { showSuccess } = await import(
+                                        "@/lib/utils/toast"
+                                      );
+                                      showSuccess("Copied!");
+                                    }}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-white"
+                                    title="Copy this bullet"
+                                  >
+                                    <svg
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      className="text-gray-500"
+                                    >
+                                      <rect
+                                        x="9"
+                                        y="9"
+                                        width="13"
+                                        height="13"
+                                        rx="2"
+                                        ry="2"
+                                      />
+                                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                    </svg>
+                                  </button>
                                 </div>
                               )
                             );
@@ -743,24 +907,72 @@ export default function ProjectDetailPage() {
                           return bullets.map((bullet, index) => (
                             <div
                               key={index}
-                              className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg"
+                              className="group flex items-start gap-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors relative"
                             >
                               <span className="text-[#4c96e1] font-bold mt-1">
                                 •
                               </span>
-                              <p className="text-gray-700 leading-relaxed">
+                              <p className="text-gray-700 leading-relaxed flex-1">
                                 {bullet}
                               </p>
+                              <button
+                                onClick={async () => {
+                                  await navigator.clipboard.writeText(bullet);
+                                  const { showSuccess } = await import(
+                                    "@/lib/utils/toast"
+                                  );
+                                  showSuccess("Copied!");
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-white"
+                                title="Copy this bullet"
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="text-gray-500"
+                                >
+                                  <rect
+                                    x="9"
+                                    y="9"
+                                    width="13"
+                                    height="13"
+                                    rx="2"
+                                    ry="2"
+                                  />
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                              </button>
                             </div>
                           ));
                         }
                       })()}
                     </div>
                   ) : (
-                    <p className="text-gray-600">
-                      No resume bullets generated yet. Click &quot;Generate
-                      All&quot; to create professional resume content.
-                    </p>
+                    <div className="text-center py-12">
+                      <svg
+                        width="64"
+                        height="64"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        className="mx-auto mb-4 text-gray-300"
+                      >
+                        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z" />
+                        <path d="M14 2v6h6" />
+                      </svg>
+                      <p className="text-gray-600 mb-2">
+                        No resume bullets generated yet.
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Click &quot;Generate All&quot; to create professional
+                        resume content.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -770,30 +982,81 @@ export default function ProjectDetailPage() {
               <div className="lg:col-span-3">
                 <div className="bg-white p-6 rounded-xl shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-black">
-                      README.md Preview
-                    </h3>
+                    <div>
+                      <h3 className="text-xl font-bold text-black">
+                        README.md Preview
+                      </h3>
+                      {getReadmeContent() && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          Generated{" "}
+                          {formatTimeAgo(getReadmeContent()?.created_at)}
+                        </p>
+                      )}
+                    </div>
                     {getReadmeContent() && (
-                      <a
-                        href={`${project.url}/blob/main/README.md`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-[#4c96e1] hover:underline flex items-center gap-1"
-                      >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          onClick={async () => {
+                            try {
+                              const content = getReadmeContent()?.content || "";
+                              await navigator.clipboard.writeText(content);
+                              showSuccess("Copied to clipboard!");
+                            } catch (error) {
+                              console.error("Failed to copy:", error);
+                              showError("Failed to copy to clipboard");
+                            }
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                          style={{
+                            backgroundColor: "rgba(76, 150, 225, 0.1)",
+                            color: "#4c96e1",
+                          }}
                         >
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                          <polyline points="15 3 21 3 21 9" />
-                          <line x1="10" y1="14" x2="21" y2="3" />
-                        </svg>
-                        View on GitHub
-                      </a>
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <rect
+                              x="9"
+                              y="9"
+                              width="13"
+                              height="13"
+                              rx="2"
+                              ry="2"
+                            />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                          Copy
+                        </button>
+                        <a
+                          href={`${project.url}/blob/main/README.md`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                          style={{
+                            backgroundColor: "rgba(76, 150, 225, 0.1)",
+                            color: "#4c96e1",
+                          }}
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                          View on GitHub
+                        </a>
+                      </div>
                     )}
                   </div>
                   {getReadmeContent() ? (
@@ -817,7 +1080,7 @@ export default function ProjectDetailPage() {
                         <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z" />
                         <path d="M14 2v6h6" />
                       </svg>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-gray-600 mb-2">
                         No README generated yet.
                       </p>
                       <p className="text-sm text-gray-500">
