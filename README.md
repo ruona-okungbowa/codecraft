@@ -1,122 +1,93 @@
-# GitStory
+# codecraft
 
-**Transform your GitHub projects into interview-ready portfolio stories with AI**
 
-GitStory is an AI-powered career readiness platform that analyzes your code repositories, generates professional narratives, identifies skill gaps, recommends projects, and provides mock interview practice.
+codecraft is a Next.js application that enhances job matching, resume generation, and interview preparation through AI and secure authentication.
+
+
+![CSS](https://img.shields.io/badge/CSS-blue?style=for-the-badge) ![HTML](https://img.shields.io/badge/HTML-blue?style=for-the-badge) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+
+
+## Overview
+
+
+codecraft is designed for job seekers and professionals aiming to improve their career prospects. It offers tools for creating resumes, preparing for interviews, and matching candidates with job opportunities using AI.
+
 
 ## Features
 
-- 🔐 **GitHub OAuth Integration** - Seamlessly connect your GitHub account
-- 📊 **Portfolio Scoring** - Get a comprehensive 0-100 score for your portfolio
-- 📝 **STAR Story Generation** - AI-generated interview stories in STAR format
-- 💼 **Resume Bullets** - Professional resume bullet points from your projects
-- 🎯 **Skill Gap Analysis** - Identify missing skills for your target role
-- 🚀 **Project Recommendations** - Personalized project suggestions to fill gaps
-- 🎤 **Mock Interviews** - Practice with AI-powered interview simulator
-- 🎯 **Job Matching** - Match your portfolio to job descriptions
-- 📄 **README Generation** - Professional README files for your projects
+
+- **Dashboard**: View analytics and track job applications.
+
+- **Resume Generation**: Create tailored resumes based on user input.
+
+- **Interview Preparation**: Access mock interviews and receive feedback.
+
+- **Job Matching**: Find job opportunities that align with user skills.
+
+- **Portfolio Management**: Organize and showcase projects and skills.
+
+- **Skill Gap Analysis**: Identify areas for improvement in user skill set.
+
+- **Project Recommendations**: Get suggestions for projects to enhance your portfolio.
+
 
 ## Tech Stack
 
-- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS
-- **Backend:** Vercel Serverless Functions
-- **Database:** Supabase (PostgreSQL + Auth)
-- **AI:** OpenAI GPT-4
-- **APIs:** GitHub REST API (Octokit)
-- **Deployment:** Vercel
+
+- **Framework**: Next.js 14 with App Router
+
+- **Language**: TypeScript
+
+- **Styling**: CSS, HTML, Material-UI
+
+- **Database**: Supabase (PostgreSQL)
+
+- **Authentication**: Supabase Auth
+
+- **AI**: OpenAI API
+
 
 ## Getting Started
 
+
 ### Prerequisites
 
-- Node.js 20+
-- npm or yarn
-- GitHub account
-- Supabase account
-- OpenAI API key
+
+- Node.js 18+ and npm
+
+- Supabase account for database and authentication setup
+
 
 ### Installation
 
-1. Clone the repository:
 
-```bash
-git clone https://github.com/yourusername/gitstory.git
-cd gitstory
-```
+1. Clone the repository:
+   
+   ```bash
+   git clone https://github.com/ruona-okungbowa/codecraft
+   cd codecraft
+   ```
 
 2. Install dependencies:
+   
+   ```bash
+   npm install
+   ```
 
-```bash
-npm install
-```
+3. Set up environment variables:
 
-3. Copy `.env.example` to `.env.local` and fill in your credentials:
+   Create a `.env.local` file with your Supabase API keys.
 
-```bash
-cp .env.example .env.local
-```
+4. Run the app:
+   
+   ```bash
+   npm run dev
+   ```
 
-4. Run the development server:
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-```bash
-npm run dev
-```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+## License
 
-## Environment Variables
 
-See `.env.example` for required environment variables:
-
-- `GITHUB_CLIENT_ID` - GitHub OAuth app client ID
-- `GITHUB_CLIENT_SECRET` - GitHub OAuth app client secret
-- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anonymous key
-- `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key
-- `OPENAI_API_KEY` - Your OpenAI API key
-
-## Project Structure
-
-```
-gitstory/
-├── app/                    # Next.js app directory
-│   ├── api/               # API routes
-│   ├── (auth)/            # Auth pages
-│   ├── (dashboard)/       # Dashboard pages
-│   └── page.tsx           # Landing page
-├── components/            # React components
-│   ├── ui/               # Reusable UI components
-│   └── features/         # Feature-specific components
-├── lib/                   # Utility functions
-│   ├── supabase/         # Supabase client
-│   ├── openai/           # OpenAI client
-│   └── github/           # GitHub API client
-├── types/                 # TypeScript type definitions
-└── .kiro/                # Kiro spec files
-    └── specs/
-        ├── requirements.md
-        ├── design.md
-        └── tasks.md
-```
-
-## Development
-
-```bash
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
-
-# Format code
-npm run format
-
-# Check formatting
-npm run format:check
-```
+This project is licensed under the MIT License.
