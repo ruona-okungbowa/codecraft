@@ -2,15 +2,26 @@ import { calculatePortfolioScore } from "@/lib/scoring/portfolio";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const supabase = await createClient();
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
 
+    if (authError) {
+      return NextResponse.json(
+        { error: "Authentication failed", details: authError.message },
+        { status: 401 }
+      );
+    }
+
     if (!user) {
-      return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - Please log in" },
+        { status: 401 }
+      );
     }
 
     const { data: projects, error: projectsError } = await supabase
@@ -19,19 +30,45 @@ export async function GET(request: Request) {
       .eq("user_id", user.id);
 
     if (projectsError) {
-      throw projectsError;
+      return NextResponse.json(
+        {
+          error: "Failed to fetch projects",
+          details: projectsError.message,
+        },
+        { status: 500 }
+      );
     }
 
-    const scoreData = calculatePortfolioScore(projects || []);
+    if (!projects || projects.length === 0) {
+      return NextResponse.json({
+        overallScore: 0,
+        rank: "N/A",
+        projectQualityScore: 0,
+        techDiversityScore: 0,
+        documentationScore: 0,
+        consistencyScore: 0,
+        professionalismScore: 0,
+        breakdown: {},
+        calculatedAt: new Date().toISOString(),
+        message:
+          "No projects found. Sync your GitHub repositories to get started.",
+      });
+    }
+
+    const scoreData = calculatePortfolioScore(projects);
 
     // Check if a score already exists for this user
-    const { data: existingScore } = await supabase
+    const { data: existingScore, error: selectError } = await supabase
       .from("portfolio_scores")
       .select("id")
       .eq("user_id", user.id)
       .order("calculated_at", { ascending: false })
       .limit(1)
       .single();
+
+    if (selectError && selectError.code !== "PGRST116") {
+      console.error("Error checking existing score:", selectError);
+    }
 
     const scoreRecord = {
       user_id: user.id,
@@ -69,13 +106,11 @@ export async function GET(request: Request) {
       ...scoreData,
       calculatedAt: new Date().toISOString(),
     });
-  } catch (error: unknown) {
-    console.error("Error calculating portfolio score", error);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      {
-        error: "Failed to calculate portfolio score",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
+      { error: "Failed to calculate portfolio score", details: errorMessage },
       { status: 500 }
     );
   }

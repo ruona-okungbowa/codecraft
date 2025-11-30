@@ -22,7 +22,7 @@ export async function deployProjectReadme(
       if ("sha" in data) {
         existingSha = data.sha;
       }
-    } catch (error) {
+    } catch (_error) {
       // README doesn't exist, that's fine
       existingSha = undefined;
     }
@@ -32,7 +32,7 @@ export async function deployProjectReadme(
       owner: repoOwner,
       repo: repoName,
       path: "README.md",
-      message: "docs: update README via GitStory",
+      message: "docs: update README via CodeCraft",
       content: Buffer.from(content).toString("base64"),
       sha: existingSha, // Required for updates
     });
@@ -88,7 +88,7 @@ export async function deployProfileReadme(
       if ("sha" in data) {
         existingSha = data.sha;
       }
-    } catch (error) {
+    } catch (_error) {
       // README doesn't exist, that's fine
       existingSha = undefined;
     }
@@ -98,7 +98,7 @@ export async function deployProfileReadme(
       owner: username,
       repo: username,
       path: "README.md",
-      message: "docs: update README via GitStory",
+      message: "docs: update README via CodeCraft",
       content: Buffer.from(content).toString("base64"),
       sha: existingSha,
     });
@@ -140,7 +140,7 @@ export async function ensureProfileRepoExists(
 
       // Repository exists
       return true;
-    } catch (error) {
+    } catch (_error) {
       // Repository doesn't exist, create it
       console.log(
         `Profile repository ${username}/${username} doesn't exist, creating it...`
@@ -201,7 +201,7 @@ EOF
 
 # Commit and push
 git add README.md
-git commit -m "docs: add README via GitStory"
+git commit -m "docs: add README via CodeCraft"
 git push origin main
 \`\`\`
 

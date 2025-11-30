@@ -5,12 +5,13 @@ import { validateMarkdown } from "@/lib/utils/validateMarkdown";
 
 export async function POST(request: Request) {
   try {
+    const body = await request.json().catch(() => ({}));
     const {
       projectId,
       enhance,
       template = "professional",
       forceRegenerate = false,
-    } = await request.json();
+    } = body;
 
     if (!projectId) {
       return NextResponse.json(
@@ -22,10 +23,21 @@ export async function POST(request: Request) {
     const supabase = await createClient();
     const {
       data: { user },
+      error: authError,
     } = await supabase.auth.getUser();
 
+    if (authError) {
+      return NextResponse.json(
+        { error: "Authentication failed", details: authError.message },
+        { status: 401 }
+      );
+    }
+
     if (!user) {
-      return NextResponse.json({ error: "Unauthorised user" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized - Please log in" },
+        { status: 401 }
+      );
     }
 
     const { data: project, error: projectError } = await supabase
@@ -35,7 +47,17 @@ export async function POST(request: Request) {
       .eq("user_id", user.id)
       .single();
 
-    if (projectError || !project) {
+    if (projectError) {
+      return NextResponse.json(
+        {
+          error: "Project not found",
+          details: "This project doesn't exist or you don't have access to it",
+        },
+        { status: 404 }
+      );
+    }
+
+    if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
@@ -116,10 +138,11 @@ export async function POST(request: Request) {
       generatedAt: new Date().toISOString(),
       validation,
     });
-  } catch (error: unknown) {
-    console.error("Error generating readme", error);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to generate README";
     return NextResponse.json(
-      { error: (error as Error).message || "Failed to generate readme" },
+      { error: errorMessage, details: "An unexpected error occurred" },
       { status: 500 }
     );
   }

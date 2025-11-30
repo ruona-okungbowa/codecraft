@@ -1,11 +1,11 @@
-// API route that retches the user's GitHub repos and stores them in database
+// API route that fetches the user's GitHub repos and stores them in database
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createGitHubClient } from "@/lib/github/client";
 import { Octokit } from "octokit";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const supabase = await createClient();
     const {
@@ -13,112 +13,156 @@ export async function GET(request: Request) {
       error: authError,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    if (authError) {
+      return NextResponse.json(
+        { error: "Authentication failed", details: authError.message },
+        { status: 401 }
+      );
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized - Please log in" },
+        { status: 401 }
+      );
     }
 
     const {
       data: { session },
+      error: sessionError,
     } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      return NextResponse.json(
+        { error: "Failed to get session", details: sessionError.message },
+        { status: 401 }
+      );
+    }
+
     const githubToken = session?.provider_token;
 
     if (!githubToken) {
       return NextResponse.json(
-        { error: "Github token not found" },
+        {
+          error: "GitHub token not found",
+          details: "Please reconnect your GitHub account",
+        },
         { status: 400 }
       );
     }
 
     const octokit = createGitHubClient(githubToken);
 
-    const repos = await octokit.paginate(
-      octokit.rest.repos.listForAuthenticatedUser,
-      {
-        sort: "updated",
-        per_page: 100,
-      }
-    );
+    // Fetch repos from GitHub
+    let repos;
+    try {
+      repos = await octokit.paginate(
+        octokit.rest.repos.listForAuthenticatedUser,
+        {
+          sort: "updated",
+          per_page: 100,
+        }
+      );
+    } catch (githubError) {
+      return NextResponse.json(
+        {
+          error: "Failed to fetch repositories from GitHub",
+          details:
+            githubError instanceof Error
+              ? githubError.message
+              : "GitHub API error",
+        },
+        { status: 502 }
+      );
+    }
 
-    console.log(`Fetched ${repos.length} repos from GitHub`);
     const projects = [];
+    const errors = [];
 
     for (const repo of repos) {
-      console.log(`Processing repo: ${repo.name}`);
-      const languages = await getRepoLanguages(
-        octokit,
-        repo.owner.login,
-        repo.name
-      );
+      try {
+        const languages = await getRepoLanguages(
+          octokit,
+          repo.owner.login,
+          repo.name
+        );
 
-      // Check if project already exists
-      const { data: existingProject, error: selectError } = await supabase
-        .from("projects")
-        .select("id")
-        .eq("github_repo_id", repo.id)
-        .single();
-
-      if (selectError && selectError.code !== "PGRST116") {
-        console.error(`Error checking project ${repo.name}:`, selectError);
-      }
-
-      const projectData = {
-        user_id: user.id,
-        github_repo_id: repo.id,
-        name: repo.name,
-        description: repo.description,
-        url: repo.html_url,
-        stars: repo.stargazers_count,
-        forks: repo.forks_count,
-        last_commit_date: repo.pushed_at,
-        languages,
-      };
-
-      if (existingProject) {
-        console.log(`Updating: ${repo.name}`);
-        // Update existing project
-        const { data: updatedProject, error: updateError } = await supabase
+        // Check if project already exists
+        const { data: existingProject, error: selectError } = await supabase
           .from("projects")
-          .update(projectData)
-          .eq("id", existingProject.id)
-          .select()
+          .select("id")
+          .eq("github_repo_id", repo.id)
           .single();
 
-        if (updateError) {
-          console.error(`Update error for ${repo.name}:`, updateError);
-        } else if (updatedProject) {
-          projects.push(updatedProject);
+        if (selectError && selectError.code !== "PGRST116") {
+          errors.push({
+            repo: repo.name,
+            error: "Failed to check existing project",
+          });
+          continue;
         }
-      } else {
-        // Insert new project
-        console.log(`Inserting: ${repo.name}`);
-        const { data: newProject, error: insertError } = await supabase
-          .from("projects")
-          .insert(projectData)
-          .select()
-          .single();
 
-        if (insertError) {
-          console.error(`Insert error for ${repo.name}:`, insertError);
-          console.error("Project data:", projectData);
-        } else if (newProject) {
-          projects.push(newProject);
+        const projectData = {
+          user_id: user.id,
+          github_repo_id: repo.id,
+          name: repo.name,
+          description: repo.description,
+          url: repo.html_url,
+          stars: repo.stargazers_count,
+          forks: repo.forks_count,
+          last_commit_date: repo.pushed_at,
+          languages,
+        };
+
+        if (existingProject) {
+          // Update existing project
+          const { data: updatedProject, error: updateError } = await supabase
+            .from("projects")
+            .update(projectData)
+            .eq("id", existingProject.id)
+            .select()
+            .single();
+
+          if (updateError) {
+            errors.push({ repo: repo.name, error: "Failed to update" });
+          } else if (updatedProject) {
+            projects.push(updatedProject);
+          }
+        } else {
+          // Insert new project
+          const { data: newProject, error: insertError } = await supabase
+            .from("projects")
+            .insert(projectData)
+            .select()
+            .single();
+
+          if (insertError) {
+            errors.push({ repo: repo.name, error: "Failed to insert" });
+          } else if (newProject) {
+            projects.push(newProject);
+          }
         }
+      } catch (repoError) {
+        errors.push({
+          repo: repo.name,
+          error:
+            repoError instanceof Error ? repoError.message : "Unknown error",
+        });
       }
     }
 
-    console.log(`Stored ${projects.length} projects in database`);
     return NextResponse.json({
       projects,
-      count: repos.length,
+      count: projects.length,
+      totalRepos: repos.length,
       syncedAt: new Date().toISOString(),
+      ...(errors.length > 0 && { errors }),
     });
-  } catch (error: unknown) {
-    console.error("Error fetching repos:", error);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      {
-        error: "Failed to fetch repositories",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
+      { error: "Failed to sync repositories", details: errorMessage },
       { status: 500 }
     );
   }

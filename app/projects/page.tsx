@@ -142,14 +142,22 @@ export default function ProjectsPage() {
 
   async function fetchProjects() {
     try {
+      setError(null);
       const response = await fetch("/api/projects");
-      if (response.ok) {
-        const data = await response.json();
-        setProjects(data.projects || []);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to load projects");
       }
+
+      const data = await response.json();
+      setProjects(data.projects || []);
     } catch (error) {
-      console.error("Error fetching projects:", error);
-      setError("Failed to load projects. Please try again.");
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to load projects. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -157,18 +165,40 @@ export default function ProjectsPage() {
 
   async function handleSync() {
     setSyncing(true);
-    const { showSuccess, showError } = await import("@/lib/utils/toast");
+    setError(null);
+    const { showSuccess, showError, showLoading, dismissToast } = await import(
+      "@/lib/utils/toast"
+    );
+    const toastId = showLoading("Syncing repositories from GitHub...");
+
     try {
       const response = await fetch("/api/github/repos", { method: "GET" });
-      if (response.ok) {
-        await fetchProjects();
-        showSuccess("Projects synced successfully!");
-      } else {
-        showError("Failed to sync projects. Please try again.");
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to sync projects");
+      }
+
+      const data = await response.json();
+      await fetchProjects();
+
+      dismissToast(toastId);
+      showSuccess(
+        `Successfully synced ${data.count} project${data.count !== 1 ? "s" : ""}!`
+      );
+
+      if (data.errors && data.errors.length > 0) {
+        showError(
+          `${data.errors.length} project${data.errors.length !== 1 ? "s" : ""} failed to sync`
+        );
       }
     } catch (error) {
-      console.error("Error syncing:", error);
-      showError("An error occurred while syncing projects.");
+      dismissToast(toastId);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while syncing projects.";
+      showError(message);
     } finally {
       setSyncing(false);
     }
@@ -176,6 +206,15 @@ export default function ProjectsPage() {
 
   async function togglePortfolio(projectId: string, currentStatus: boolean) {
     const { showSuccess, showError } = await import("@/lib/utils/toast");
+
+    // Optimistic update
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === projectId ? { ...p, in_portfolio: !currentStatus } : p
+      )
+    );
+    setOpenDropdown(null);
+
     try {
       const response = await fetch(`/api/projects/${projectId}/portfolio`, {
         method: "PATCH",
@@ -183,28 +222,36 @@ export default function ProjectsPage() {
         body: JSON.stringify({ inPortfolio: !currentStatus }),
       });
 
-      if (response.ok) {
-        setProjects((prev) =>
-          prev.map((p) =>
-            p.id === projectId ? { ...p, in_portfolio: !currentStatus } : p
-          )
-        );
-        showSuccess(
-          !currentStatus ? "Added to portfolio!" : "Removed from portfolio"
-        );
-      } else {
-        showError("Failed to update portfolio status.");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to update portfolio status");
       }
+
+      showSuccess(
+        !currentStatus ? "Added to portfolio!" : "Removed from portfolio"
+      );
     } catch (error) {
-      console.error("Error toggling portfolio:", error);
-      showError("An error occurred. Please try again.");
-    } finally {
-      setOpenDropdown(null);
+      // Revert optimistic update
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.id === projectId ? { ...p, in_portfolio: currentStatus } : p
+        )
+      );
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to update portfolio status.";
+      showError(message);
     }
   }
 
   async function handleGenerateReadme(projectId: string) {
     setGeneratingReadme(projectId);
+    const { showSuccess, showError, showLoading, dismissToast } = await import(
+      "@/lib/utils/toast"
+    );
+    const toastId = showLoading("Generating README with AI...");
+
     try {
       const response = await fetch("/api/ai/readme", {
         method: "POST",
@@ -212,24 +259,25 @@ export default function ProjectsPage() {
         body: JSON.stringify({ projectId, enhance: false }),
       });
 
-      if (response.ok) {
-        await response.json();
-        // Update project to mark it has readme
-        setProjects((prev) =>
-          prev.map((p) => (p.id === projectId ? { ...p, has_readme: true } : p))
-        );
-        // Show success or navigate to view the readme
-        const { showSuccess } = await import("@/lib/utils/toast");
-        showSuccess("README generated successfully!");
-      } else {
-        const error = await response.json();
-        const { showError } = await import("@/lib/utils/toast");
-        showError(`Failed to generate README: ${error.error}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to generate README");
       }
+
+      await response.json();
+      setProjects((prev) =>
+        prev.map((p) => (p.id === projectId ? { ...p, has_readme: true } : p))
+      );
+
+      dismissToast(toastId);
+      showSuccess("README generated successfully!");
     } catch (error) {
-      console.error("Error generating README:", error);
-      const { showError } = await import("@/lib/utils/toast");
-      showError("An error occurred while generating README");
+      dismissToast(toastId);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while generating README";
+      showError(message);
     } finally {
       setGeneratingReadme(null);
     }
@@ -407,9 +455,32 @@ export default function ProjectsPage() {
           </div>
 
           {loading ? (
-            <div className="text-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4c96e1] mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your projects...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white p-6 rounded-xl shadow-sm animate-pulse"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                  <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
+                  <div className="flex items-center justify-between border-y border-gray-200 py-3 my-3">
+                    <div className="h-4 bg-gray-200 rounded w-12"></div>
+                    <div className="h-4 bg-gray-200 rounded w-12"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24"></div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="flex-1 h-9 bg-gray-200 rounded-lg"></div>
+                    <div className="flex-1 h-9 bg-gray-200 rounded-lg"></div>
+                    <div className="w-9 h-9 bg-gray-200 rounded-lg"></div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : error ? (
             <div className="text-center py-20">
@@ -435,16 +506,40 @@ export default function ProjectsPage() {
               <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900">
                 No repositories found
               </h3>
-              <p className="text-gray-600 mb-6 max-w-sm mx-auto text-sm sm:text-base">
-                It looks like we couldn&apos;t find any repositories. Try
-                syncing with GitHub to get started.
+              <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm sm:text-base">
+                Connect your GitHub account and sync your repositories to start
+                building your portfolio. We&apos;ll analyze your projects and
+                help you create professional content.
               </p>
               <button
                 onClick={handleSync}
-                className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 font-semibold transition-all duration-300 hover:scale-105 shadow-sm mx-auto bg-[#4c96e1] hover:bg-[#3a7bc8] text-white text-sm sm:text-base"
+                disabled={syncing}
+                className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 font-semibold transition-all duration-300 hover:scale-105 shadow-sm mx-auto bg-[#4c96e1] hover:bg-[#3a7bc8] text-white text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
                 <GitHubIcon />
-                <span>Sync repositories</span>
+                <span>{syncing ? "Syncing..." : "Sync repositories"}</span>
+              </button>
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="mt-12 sm:mt-16 text-center px-4">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-6 bg-gray-100">
+                <span className="text-gray-400 text-5xl">🔍</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900">
+                No projects match your filters
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-sm mx-auto text-sm sm:text-base">
+                Try adjusting your search or filter criteria to find what
+                you&apos;re looking for.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setLanguageFilter("all");
+                }}
+                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base"
+              >
+                Clear filters
               </button>
             </div>
           ) : viewMode === "grid" ? (

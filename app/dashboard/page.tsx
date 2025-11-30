@@ -32,7 +32,12 @@ export default function DashboardPage() {
         const supabase = createClient();
         const {
           data: { user },
+          error: authError,
         } = await supabase.auth.getUser();
+
+        if (authError) {
+          throw new Error("Authentication failed. Please log in again.");
+        }
 
         if (user) {
           setUserName(
@@ -47,20 +52,27 @@ export default function DashboardPage() {
           fetch("/api/analysis/portfolio-score"),
         ]);
 
-        if (projectsRes.ok) {
+        if (!projectsRes.ok) {
+          const projectsError = await projectsRes.json().catch(() => ({}));
+          console.error("Failed to fetch projects:", projectsError);
+        } else {
           const projectsData = await projectsRes.json();
           setProjects(projectsData.projects || []);
         }
 
-        if (scoreRes.ok) {
+        if (!scoreRes.ok) {
+          const scoreError = await scoreRes.json().catch(() => ({}));
+          console.error("Failed to fetch portfolio score:", scoreError);
+        } else {
           const scoreData = await scoreRes.json();
           setPortfolioScore(scoreData);
         }
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        setError(
-          "Failed to load dashboard data. Please try refreshing the page."
-        );
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Failed to load dashboard data. Please try refreshing the page.";
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -110,12 +122,64 @@ export default function DashboardPage() {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
         <CollapsibleSidebar />
-        <main className="ml-0 md:ml-20 flex-1 flex items-center justify-center p-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4c96e1] mx-auto mb-4"></div>
-            <p className="text-gray-600 text-sm sm:text-base">
-              Loading your dashboard...
-            </p>
+        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-6 sm:mb-8 lg:mb-10">
+              <div className="h-10 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
+              <div className="h-4 bg-gray-200 rounded w-48 animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
+                <div className="bg-white p-8 rounded-xl shadow-sm animate-pulse">
+                  <div className="flex items-center gap-8">
+                    <div className="w-48 h-48 rounded-full bg-gray-200"></div>
+                    <div className="flex-1">
+                      <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full mb-6"></div>
+                      <div className="grid grid-cols-2 gap-3 mb-6">
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                      </div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="bg-white p-6 rounded-xl shadow-sm animate-pulse"
+                    >
+                      <div className="w-16 h-16 rounded-full bg-gray-200 mx-auto mb-4"></div>
+                      <div className="h-5 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <div className="bg-white p-6 rounded-xl shadow-sm animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-1/2 mb-6"></div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="h-10 bg-gray-200 rounded w-16"></div>
+                    <div className="w-16 h-16 rounded-full bg-gray-200"></div>
+                  </div>
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-gray-200"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-1"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
