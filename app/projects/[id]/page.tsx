@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ProjectRow } from "@/types";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 import Link from "next/link";
+import { marked } from "marked";
 
 type TabType = "summary" | "stories" | "bullets" | "readme";
 
@@ -768,20 +769,62 @@ export default function ProjectDetailPage() {
             {activeTab === "readme" && (
               <div className="lg:col-span-3">
                 <div className="bg-white p-6 rounded-xl shadow-sm">
-                  <h3 className="text-xl font-bold mb-4 text-black">
-                    README.md
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-bold text-black">
+                      README.md Preview
+                    </h3>
+                    {getReadmeContent() && (
+                      <a
+                        href={`${project.url}/blob/main/README.md`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-[#4c96e1] hover:underline flex items-center gap-1"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          <polyline points="15 3 21 3 21 9" />
+                          <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                        View on GitHub
+                      </a>
+                    )}
+                  </div>
                   {getReadmeContent() ? (
-                    <div className="prose max-w-none">
-                      <pre className="whitespace-pre-wrap text-gray-600">
-                        {getReadmeContent()?.content}
-                      </pre>
-                    </div>
+                    <div
+                      className="prose prose-slate max-w-none prose-headings:text-black prose-p:text-gray-700 prose-a:text-[#4c96e1] prose-strong:text-black prose-code:text-[#4c96e1] prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100"
+                      dangerouslySetInnerHTML={{
+                        __html: marked.parse(getReadmeContent()?.content || ""),
+                      }}
+                    />
                   ) : (
-                    <p className="text-gray-600">
-                      No README generated yet. Click &quot;Generate All&quot; to
-                      create a professional README file.
-                    </p>
+                    <div className="text-center py-12">
+                      <svg
+                        width="64"
+                        height="64"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1"
+                        className="mx-auto mb-4 text-gray-300"
+                      >
+                        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z" />
+                        <path d="M14 2v6h6" />
+                      </svg>
+                      <p className="text-gray-600 mb-4">
+                        No README generated yet.
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Click &quot;Generate All&quot; to create a professional
+                        README file.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
