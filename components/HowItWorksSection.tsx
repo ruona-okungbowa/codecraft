@@ -56,8 +56,12 @@ export default function HowItWorksSection() {
                   transform: "rotate(-2deg)",
                 }}
               >
-                <div className="aspect-video bg-gray-200 rounded flex items-center justify-center">
-                  <Github className="w-16 h-16 text-gray-400" />
+                <div className="aspect-video bg-gray-200 rounded overflow-hidden">
+                  <img
+                    src="/screen.png"
+                    alt="Portfolio preview"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <p className="text-sm text-gray-600 mt-3 font-medium text-center">
                   A glimpse of your future portfolio.
