@@ -859,15 +859,19 @@ export default function ProjectDetailPage() {
                                   </p>
                                   <button
                                     onClick={async () => {
-                                      const text =
-                                        typeof bullet === "string"
-                                          ? bullet
-                                          : bullet.text || "";
-                                      await navigator.clipboard.writeText(text);
-                                      const { showSuccess } = await import(
-                                        "@/lib/utils/toast"
-                                      );
-                                      showSuccess("Copied!");
+                                      try {
+                                        const text =
+                                          typeof bullet === "string"
+                                            ? bullet
+                                            : bullet.text || "";
+                                        await navigator.clipboard.writeText(
+                                          text
+                                        );
+                                        showSuccess("Copied!");
+                                      } catch (error) {
+                                        console.error("Failed to copy:", error);
+                                        showError("Failed to copy");
+                                      }
                                     }}
                                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-white"
                                     title="Copy this bullet"
@@ -917,11 +921,13 @@ export default function ProjectDetailPage() {
                               </p>
                               <button
                                 onClick={async () => {
-                                  await navigator.clipboard.writeText(bullet);
-                                  const { showSuccess } = await import(
-                                    "@/lib/utils/toast"
-                                  );
-                                  showSuccess("Copied!");
+                                  try {
+                                    await navigator.clipboard.writeText(bullet);
+                                    showSuccess("Copied!");
+                                  } catch (error) {
+                                    console.error("Failed to copy:", error);
+                                    showError("Failed to copy");
+                                  }
                                 }}
                                 className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded hover:bg-white"
                                 title="Copy this bullet"
