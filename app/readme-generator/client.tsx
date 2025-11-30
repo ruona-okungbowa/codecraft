@@ -66,6 +66,7 @@ export default function ReadmeClient() {
           body: JSON.stringify({
             projectId: selectedProjectId,
             template,
+            forceRegenerate: true,
           }),
         });
 

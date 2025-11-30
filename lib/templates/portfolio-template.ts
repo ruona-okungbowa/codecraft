@@ -7,8 +7,21 @@ export function generatePortfolioHTML(
   projects: Project[],
   skills: string[],
   email?: string,
-  avatarUrl?: string
+  avatarUrl?: string,
+  sections?: {
+    about?: boolean;
+    projects?: boolean;
+    skills?: boolean;
+    contact?: boolean;
+  }
 ): string {
+  // Default all sections to true if not provided
+  const showSections = {
+    about: sections?.about !== false,
+    projects: sections?.projects !== false,
+    skills: sections?.skills !== false,
+    contact: sections?.contact !== false,
+  };
   return `<!doctype html>
 <!--
   ╔═══════════════════════════════════════════════════════════════════════╗
@@ -379,7 +392,7 @@ export function generatePortfolioHTML(
          PROJECTS SECTION - Showcase Your Work
          EDIT HERE: Add, remove, or modify projects
          ============================================ -->
-    <section id="projects" class="py-16">
+    ${showSections.projects ? `<section id="projects" class="py-16">` : "<!-- Projects section hidden -->"}
       <div class="max-w-4xl mx-auto px-6 mb-12">
         <h2 class="text-3xl md:text-4xl font-bold animate-on-scroll">
           Featured Projects

@@ -64,8 +64,14 @@ Provide a detailed match analysis in JSON format:
 {
   "matchPercentage": number (0-100),
   "matchedSkills": ["skill1", "skill2"],
-  "missingSkills": ["skill1", "skill2"],
-  "recommendations": ["recommendation1", "recommendation2"],
+  "missingSkills": [
+    {"skill": "skill1", "priority": "high"},
+    {"skill": "skill2", "priority": "medium"}
+  ],
+  "bonusSkills": ["skill1", "skill2"],
+  "recommendations": [
+    {"title": "Title", "description": "Description"}
+  ],
   "summary": "brief summary of the match"
 }
 
@@ -73,7 +79,9 @@ Be honest and accurate. Consider:
 - Required vs nice-to-have skills
 - Years of experience if mentioned
 - Project complexity and relevance
-- Technology stack alignment`,
+- Technology stack alignment
+- Identify bonus skills the candidate has that aren't required but add value
+- Prioritize missing skills as high, medium, or low based on job requirements`,
         },
       ],
       temperature: 0.7,

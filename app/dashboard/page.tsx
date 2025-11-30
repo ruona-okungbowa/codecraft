@@ -1,41 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import SkeletonLoader from "@/components/SkeletonLoader";
-import { celebrateScoreImprovement } from "@/lib/utils/confetti";
-import { showSuccess } from "@/lib/utils/toast";
-import {
-  Trophy,
-  Folder,
-  Briefcase,
-  Lightbulb,
-  Mic,
-  Star,
-  GitFork,
-} from "lucide-react";
+import { Lightbulb, Briefcase, Mic, Folder, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { Newsreader, Sansation } from "next/font/google";
-import DashboardSidebar from "@/components/DashboardSidebar";
-import { ProjectRow } from "@/types";
 import { createClient } from "@/lib/supabase/client";
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const sansation = Sansation({
-  subsets: ["latin"],
-  weight: ["400"],
-});
+import { ProjectRow } from "@/types";
+import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 
 interface PortfolioScore {
   overallScore: number;
   projectQualityScore: number;
   techDiversityScore: number;
   documentationScore: number;
-  consistencyScore: number;
 }
 
 export default function DashboardPage() {
@@ -45,47 +21,40 @@ export default function DashboardPage() {
   );
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("there");
+  const [userEmail, setUserEmail] = useState("");
+  const [userAvatar, setUserAvatar] = useState("");
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // Fetch projects
-        const projectsRes = await fetch("/api/projects");
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          setUserName(
+            user.user_metadata?.name?.split(" ")[0] ||
+              user.email?.split("@")[0] ||
+              "there"
+          );
+          setUserEmail(user.email || "");
+          setUserAvatar(user.user_metadata?.avatar_url || "");
+        }
+
+        const [projectsRes, scoreRes] = await Promise.all([
+          fetch("/api/projects"),
+          fetch("/api/analysis/portfolio-score"),
+        ]);
+
         if (projectsRes.ok) {
           const projectsData = await projectsRes.json();
           setProjects(projectsData.projects || []);
         }
 
-        // Fetch portfolio score
-        const scoreRes = await fetch("/api/analysis/portfolio-score");
         if (scoreRes.ok) {
           const scoreData = await scoreRes.json();
           setPortfolioScore(scoreData);
-
-          // Check for score improvement
-          const newScore = scoreData.overallScore || 0;
-          const storedScore = localStorage.getItem("dashboardScore");
-          if (storedScore) {
-            const prevScore = parseInt(storedScore);
-            if (newScore > prevScore) {
-              celebrateScoreImprovement();
-              showSuccess(
-                `Your portfolio score improved by ${newScore - prevScore} points! 🎉`
-              );
-            }
-          }
-          localStorage.setItem("dashboardScore", newScore.toString());
-        }
-
-        // Get user info from Supabase
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (user?.user_metadata?.name) {
-          setUserName(user.user_metadata.name.split(" ")[0]);
-        } else if (user?.email) {
-          setUserName(user.email.split("@")[0]);
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -98,284 +67,305 @@ export default function DashboardPage() {
   }, []);
 
   const score = portfolioScore?.overallScore || 0;
-  const projectsCount = projects.length;
-  const recentProjects = projects.slice(0, 3);
+  const readmeScore = Math.round(
+    (portfolioScore?.documentationScore || 0) * 10
+  );
+  const codeScore = Math.round((portfolioScore?.projectQualityScore || 0) * 10);
+  const diversityScore = Math.round(
+    (portfolioScore?.techDiversityScore || 0) * 10
+  );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <DashboardSidebar />
+    <div className="flex min-h-screen bg-[#f6f7f8]">
+      <CollapsibleSidebar />
 
-      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
-        {/* Content Area */}
-        <main className="p-4 md:p-10 max-w-[1400px] mx-auto pt-16 md:pt-4">
-          {/* Welcome Section */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 md:mb-10"
-          >
-            <h2
-              className={`text-xl md:text-3xl font-semibold text-gray-900 ${newsreader.className}`}
-            >
-              Welcome Back, {userName}! 👋
+      {/* Main Content */}
+      <main className="ml-20 flex-1 overflow-y-auto p-6 lg:p-10">
+        <div className="max-w-7xl mx-auto">
+          {/* Welcome */}
+          <div className="mb-10">
+            <h2 className="text-3xl font-bold text-black">
+              Welcome back, {userName}! 👋
             </h2>
-          </motion.div>
+            <p className="text-black mt-1">
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
-            {/* Portfolio Score Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              whileHover={{ y: -2, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
-              className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm transition-all"
-            >
-              <div
-                className="w-12 h-12 rounded-lg flex items-center justify-center mb-4"
-                style={{
-                  background: "linear-gradient(135deg, #3b82f6, #a855f7)",
-                }}
-              >
-                <Trophy size={24} className="text-white" />
-              </div>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-5xl font-extrabold text-gray-900">
-                  {loading ? "--" : Math.round(score)}
-                </span>
-                <span className="text-xl text-gray-400">/100</span>
-              </div>
-              <p
-                className={`text-sm text-gray-600 mb-4 ${sansation.className}`}
-              >
-                Portfolio Score
-              </p>
-              <div className="w-full h-2 bg-gray-200 rounded-full mb-4 overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: loading ? "0%" : `${score}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className="h-full rounded-full"
-                  style={{
-                    background: "linear-gradient(90deg, #3b82f6, #a855f7)",
-                  }}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Link
-                  href="/portfolio-score/improve"
-                  className="text-sm text-blue-600 hover:underline font-medium"
-                >
-                  Improve Score →
-                </Link>
-              </div>
-            </motion.div>
-
-            {/* Projects Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              whileHover={{ y: -2, boxShadow: "0 10px 25px rgba(0,0,0,0.1)" }}
-              className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm transition-all"
-            >
-              <div className="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
-                <Folder size={24} className="text-green-600" />
-              </div>
-              <div className="text-5xl font-extrabold text-gray-900 mb-2">
-                {loading ? "--" : projectsCount}
-              </div>
-              <p
-                className={`text-sm text-gray-600 mb-4 ${sansation.className}`}
-              >
-                GitHub Repositories
-              </p>
-              <div className="space-y-2 mb-4">
-                {loading ? (
-                  <div className="text-sm text-gray-400">Loading...</div>
-                ) : recentProjects.length > 0 ? (
-                  recentProjects.map((project, index) => (
-                    <div
-                      key={project.id}
-                      className="flex items-center gap-2 text-sm text-gray-700"
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Portfolio Score Card */}
+              <div className="bg-white p-8 rounded-xl shadow-sm flex flex-col md:flex-row items-center gap-8">
+                <div className="relative w-48 h-48 flex items-center justify-center">
+                  <svg
+                    className="w-full h-full transform -rotate-90"
+                    viewBox="0 0 120 120"
+                  >
+                    <circle
+                      className="text-gray-200"
+                      cx="60"
+                      cy="60"
+                      fill="none"
+                      r="54"
+                      strokeWidth="12"
+                      stroke="currentColor"
+                    ></circle>
+                    <circle
+                      cx="60"
+                      cy="60"
+                      fill="none"
+                      r="54"
+                      strokeWidth="12"
+                      strokeDasharray="339.29"
+                      strokeDashoffset={339.29 - (339.29 * score) / 100}
+                      strokeLinecap="round"
+                      stroke="#4c96e1"
+                      style={{
+                        transition: "stroke-dashoffset 1.5s ease-out",
+                      }}
+                    ></circle>
+                  </svg>
+                  <div className="absolute flex flex-col items-center">
+                    <span
+                      className="text-5xl font-extrabold"
+                      style={{ color: "#4c96e1" }}
                     >
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          index === 0
-                            ? "bg-blue-500"
-                            : index === 1
-                              ? "bg-green-500"
-                              : "bg-orange-500"
-                        }`}
-                      />
-                      <span className={`truncate ${sansation.className}`}>
-                        {project.name}
+                      {loading ? "--" : Math.round(score)}
+                    </span>
+                    <span className="text-sm font-medium text-gray-600">
+                      out of 100
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-2xl font-bold mb-2 text-black">
+                    Excellent Portfolio Score!
+                  </h3>
+                  <p className="text-black mb-6 max-w-sm">
+                    Your portfolio is looking strong. Keep up the great work and
+                    refine your projects to reach a perfect score.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                      <span className="text-sm">
+                        README Quality: {readmeScore}/10
                       </span>
                     </div>
-                  ))
-                ) : (
-                  <div className="text-sm text-gray-400">No projects yet</div>
-                )}
-              </div>
-              <Link
-                href="/projects"
-                className="text-sm text-blue-600 hover:underline font-medium"
-              >
-                View all →
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="mb-8 md:mb-12">
-            <h2
-              className={`text-lg md:text-2xl font-bold text-gray-900 mb-4 md:mb-6 ${newsreader.className}`}
-            >
-              What would you like to do today?
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
-              <Link href="/job-match" className="block">
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="rounded-xl p-4 md:p-6 h-[140px] md:h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
-                  style={{
-                    background: "linear-gradient(135deg, #a855f7, #ec4899)",
-                  }}
-                >
-                  <div>
-                    <Briefcase size={28} className="text-white mb-2 md:mb-3" />
-                    <h3 className="text-base md:text-xl font-bold text-white mb-1">
-                      Match to a Job
-                    </h3>
-                    <p className="text-xs md:text-sm text-white/90">
-                      See how you stack up
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                      <span className="text-sm">
+                        Code Best Practices: {codeScore}/10
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+                      <span className="text-sm">
+                        Project Diversity: {diversityScore}/10
+                      </span>
+                    </div>
                   </div>
-                </motion.div>
-              </Link>
-
-              <Link href="/project-recommendations" className="block">
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="rounded-xl p-4 md:p-6 h-[140px] md:h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
-                  style={{
-                    background: "linear-gradient(135deg, #22c55e, #14b8a6)",
-                  }}
-                >
-                  <div>
-                    <Lightbulb size={28} className="text-white mb-2 md:mb-3" />
-                    <h3 className="text-base md:text-xl font-bold text-white mb-1">
-                      Get Project Ideas
-                    </h3>
-                    <p className="text-xs md:text-sm text-white/90">
-                      Build what employers want
-                    </p>
-                  </div>
-                </motion.div>
-              </Link>
-
-              <Link href="/mock-interview" className="block">
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="rounded-xl p-4 md:p-6 h-[140px] md:h-[180px] flex flex-col justify-between cursor-pointer shadow-lg hover:shadow-xl transition-all"
-                  style={{
-                    background: "linear-gradient(135deg, #f97316, #ef4444)",
-                  }}
-                >
-                  <div>
-                    <Mic size={28} className="text-white mb-2 md:mb-3" />
-                    <h3 className="text-base md:text-xl font-bold text-white mb-1">
-                      Practice Interviewing
-                    </h3>
-                    <p className="text-xs md:text-sm text-white/90">
-                      Build confidence
-                    </p>
-                  </div>
-                  <motion.span
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="text-xs text-white/80 border border-white/30 px-2 py-1 rounded-full self-start"
-                  >
-                    New
-                  </motion.span>
-                </motion.div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Recent Projects */}
-          <div className="bg-white rounded-xl p-4 md:p-8 border border-gray-200">
-            <div className="flex items-center justify-between mb-4 md:mb-6">
-              <h2
-                className={`text-lg md:text-xl font-bold text-gray-900 ${newsreader.className}`}
-              >
-                Recent Projects
-              </h2>
-              <Link
-                href="/projects"
-                className="text-xs md:text-sm text-blue-600 hover:underline whitespace-nowrap"
-              >
-                View all →
-              </Link>
-            </div>
-            {loading ? (
-              <div className="space-y-4">
-                <SkeletonLoader variant="card" count={3} />
-              </div>
-            ) : projects.length === 0 ? (
-              <div className="text-center py-8">
-                <Folder size={48} className="text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 mb-4">No projects yet</p>
-                <Link
-                  href="/api/auth/github"
-                  className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Connect GitHub
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                {projects.slice(0, 6).map((project) => (
                   <Link
-                    key={project.id}
-                    href={`/projects/${project.id}`}
-                    className="p-3 md:p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all"
+                    href="/portfolio-score"
+                    className="font-semibold hover:underline"
+                    style={{ color: "#4c96e1" }}
                   >
-                    <h3
-                      className={`text-sm md:text-base font-semibold text-gray-900 mb-2 truncate ${newsreader.className}`}
-                    >
-                      {project.name}
-                    </h3>
-                    <p
-                      className={`text-xs md:text-sm text-gray-600 mb-3 line-clamp-2 ${sansation.className}`}
-                    >
-                      {project.description || "No description"}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <Star size={12} />
-                        {project.stars}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <GitFork size={12} />
-                        {project.forks}
-                      </span>
-                      {project.languages && project.languages.length > 0 && (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs truncate max-w-[100px]">
-                          {project.languages[0]}
-                        </span>
-                      )}
-                    </div>
+                    View Detailed Breakdown →
                   </Link>
-                ))}
+                </div>
               </div>
-            )}
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <Link
+                  href="/job-match"
+                  className="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
+                    style={{ backgroundColor: "rgba(76, 150, 225, 0.1)" }}
+                  >
+                    <Briefcase
+                      className="w-8 h-8"
+                      style={{ color: "#4c96e1" }}
+                    />
+                  </div>
+                  <h4 className="font-bold text-lg text-black">
+                    Match to a Job
+                  </h4>
+                  <p className="text-sm text-black mt-1">
+                    Find roles that fit your skills.
+                  </p>
+                </Link>
+
+                <Link
+                  href="/project-recommendations"
+                  className="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
+                    <Lightbulb className="w-8 h-8 text-green-500" />
+                  </div>
+                  <h4 className="font-bold text-lg text-black">
+                    Get Project Ideas
+                  </h4>
+                  <p className="text-sm text-black mt-1">
+                    Discover new project inspirations.
+                  </p>
+                </Link>
+
+                <Link
+                  href="/mock-interview"
+                  className="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center mb-4">
+                    <Mic className="w-8 h-8 text-yellow-500" />
+                  </div>
+                  <h4 className="font-bold text-lg text-black">
+                    Practice Interview
+                  </h4>
+                  <p className="text-sm text-black mt-1">
+                    Sharpen your interview skills.
+                  </p>
+                </Link>
+              </div>
+
+              {/* Recent Activity */}
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                <h3 className="text-xl font-bold mb-4 text-black">
+                  Recent Activity & Updates
+                </h3>
+                <ul className="space-y-4">
+                  {loading ? (
+                    <li className="text-gray-500">Loading...</li>
+                  ) : (
+                    <>
+                      <li className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-full bg-green-500/10 flex-shrink-0 flex items-center justify-center mt-1">
+                          <TrendingUp className="w-5 h-5 text-green-500" />
+                        </div>
+                        <div>
+                          <p>
+                            <strong>
+                              Portfolio Score: {Math.round(score)}/100
+                            </strong>
+                          </p>
+                          <time className="text-sm text-gray-600">
+                            Just now
+                          </time>
+                        </div>
+                      </li>
+                      {projects.slice(0, 3).map((project) => (
+                        <li key={project.id} className="flex items-start gap-4">
+                          <div
+                            className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center mt-1"
+                            style={{
+                              backgroundColor: "rgba(76, 150, 225, 0.1)",
+                            }}
+                          >
+                            <Folder
+                              className="w-5 h-5"
+                              style={{ color: "#4c96e1" }}
+                            />
+                          </div>
+                          <div>
+                            <p>
+                              Synced project:{" "}
+                              <span className="font-semibold">
+                                {project.name}
+                              </span>
+                            </p>
+                            <time className="text-sm text-gray-600">
+                              {new Date(
+                                project.created_at
+                              ).toLocaleDateString()}
+                            </time>
+                          </div>
+                        </li>
+                      ))}
+                    </>
+                  )}
+                </ul>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="lg:col-span-1">
+              <div className="bg-white p-6 rounded-xl shadow-sm space-y-6">
+                <h3 className="text-xl font-bold text-black">
+                  Project Overview
+                </h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-4xl font-extrabold text-black">
+                      {loading ? "--" : projects.length}
+                    </p>
+                    <p className="text-black">Total Repositories</p>
+                  </div>
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "rgba(76, 150, 225, 0.1)" }}
+                  >
+                    <Folder className="w-8 h-8" style={{ color: "#4c96e1" }} />
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <h4 className="font-semibold mb-3">
+                    Recently Synced Projects
+                  </h4>
+                  <ul className="space-y-3">
+                    {loading ? (
+                      <li className="text-gray-500">Loading...</li>
+                    ) : projects.length === 0 ? (
+                      <li className="text-gray-500">No projects yet</li>
+                    ) : (
+                      projects.slice(0, 3).map((project, index) => {
+                        const colors = [
+                          { bg: "bg-indigo-100", text: "text-indigo-500" },
+                          { bg: "bg-pink-100", text: "text-pink-500" },
+                          { bg: "bg-emerald-100", text: "text-emerald-500" },
+                        ];
+                        const color = colors[index % 3];
+
+                        return (
+                          <li
+                            key={project.id}
+                            className="flex items-center gap-3"
+                          >
+                            <div
+                              className={`w-8 h-8 flex-shrink-0 rounded ${color.bg} ${color.text} flex items-center justify-center font-bold text-sm`}
+                            >
+                              {project.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div className="flex-1 truncate">
+                              <p className="font-medium text-sm truncate text-black">
+                                {project.name}
+                              </p>
+                              <p className="text-xs text-black">
+                                Synced{" "}
+                                {new Date(
+                                  project.created_at
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </li>
+                        );
+                      })
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

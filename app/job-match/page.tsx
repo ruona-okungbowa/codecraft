@@ -1,60 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { Newsreader, Sansation } from "next/font/google";
-import { motion } from "framer-motion";
-import {
-  Loader2,
-  Target,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  TrendingUp,
-  Briefcase,
-} from "lucide-react";
-import DashboardSidebar from "@/components/DashboardSidebar";
-import {
-  showSuccess,
-  showError,
-  showLoading,
-  dismissToast,
-} from "@/lib/utils/toast";
-import { celebrateSuccess, celebrateMilestone } from "@/lib/utils/confetti";
+import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import Link from "next/link";
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const sansation = Sansation({
-  subsets: ["latin"],
-  weight: ["400"],
-});
-
-interface MatchResult {
+interface JobMatchResult {
   matchPercentage: number;
   matchedSkills: string[];
-  missingSkills: string[];
-  recommendations: string[];
+  missingSkills: Array<{
+    skill: string;
+    priority: "high" | "medium" | "low";
+  }>;
+  bonusSkills: string[];
+  recommendations: Array<{
+    title: string;
+    description: string;
+  }>;
   summary: string;
 }
 
 export default function JobMatchPage() {
   const [jobDescription, setJobDescription] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
-  const [result, setResult] = useState<MatchResult | null>(null);
+  const [result, setResult] = useState<JobMatchResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleAnalyze = async () => {
+  async function handleAnalyze() {
     if (!jobDescription.trim()) {
       setError("Please enter a job description");
-      showError("Please enter a job description");
       return;
     }
 
     setAnalyzing(true);
     setError(null);
-    const toastId = showLoading("Analyzing job match...");
 
     try {
       const response = await fetch("/api/analysis/job-match", {
@@ -70,180 +48,162 @@ export default function JobMatchPage() {
 
       const data = await response.json();
       setResult(data);
-
-      dismissToast(toastId);
-      showSuccess("Match analysis complete! 🎯");
-
-      // Celebrate based on match percentage
-      if (data.matchPercentage >= 80) {
-        celebrateMilestone();
-      } else if (data.matchPercentage >= 60) {
-        celebrateSuccess();
-      }
     } catch (err) {
-      dismissToast(toastId);
       const errorMsg = err instanceof Error ? err.message : "An error occurred";
       setError(errorMsg);
-      showError(errorMsg);
     } finally {
       setAnalyzing(false);
     }
-  };
+  }
 
-  const getMatchColor = (percentage: number) => {
-    if (percentage >= 80) return "text-green-600";
-    if (percentage >= 60) return "text-yellow-600";
-    return "text-red-600";
-  };
+  function handleReset() {
+    setJobDescription("");
+    setResult(null);
+    setError(null);
+  }
 
-  const getMatchBgColor = (percentage: number) => {
-    if (percentage >= 80) return "bg-green-100";
-    if (percentage >= 60) return "bg-yellow-100";
-    return "bg-red-100";
-  };
-
-  const getMatchLabel = (percentage: number) => {
-    if (percentage >= 80) return "Excellent Match";
+  function getMatchLabel(percentage: number) {
+    if (percentage >= 80) return "Strong Match";
     if (percentage >= 60) return "Good Match";
     if (percentage >= 40) return "Fair Match";
     return "Needs Improvement";
-  };
+  }
+
+  function getMatchColor(percentage: number) {
+    if (percentage >= 80) return "text-green-600";
+    if (percentage >= 60) return "text-[#4c96e1]";
+    return "text-orange-600";
+  }
+
+  function getStrokeColor(percentage: number) {
+    if (percentage >= 80) return "#10b981";
+    if (percentage >= 60) return "#4c96e1";
+    return "#f59e0b";
+  }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <DashboardSidebar />
+    <div className="flex min-h-screen bg-[#f6f7f8]">
+      <CollapsibleSidebar />
 
-      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
-            <h1
-              className={`text-xl md:text-[28px] font-bold text-black ${newsreader.className}`}
-            >
-              Job Match Analysis
+      <main className="flex-1 p-8 overflow-y-auto ml-20">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Page Heading */}
+          <div className="flex flex-col gap-2">
+            <h1 className="text-slate-900 text-4xl font-black leading-tight tracking-[-0.033em]">
+              Job Match Analyzer
             </h1>
-            <p
-              className={`text-xs md:text-sm text-black mt-1 ${sansation.className}`}
-            >
-              Analyze how well your portfolio matches a job description
+            <p className="text-slate-500 text-base font-normal leading-normal">
+              Paste a job description below to see how your skills stack up.
             </p>
           </div>
-        </header>
 
-        <main className="px-4 md:px-10 py-4 md:py-8 max-w-[1400px] mx-auto pt-16 md:pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl border border-gray-200 shadow-sm p-8"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Briefcase size={24} className="text-blue-600" />
-                </div>
-                <h2
-                  className={`text-xl font-bold text-gray-900 ${newsreader.className}`}
-                >
+          {/* Input Section */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex flex-col gap-4">
+              <label className="flex flex-col w-full">
+                <p className="text-slate-900 text-base font-medium leading-normal pb-2">
                   Job Description
-                </h2>
-              </div>
-
-              <textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                placeholder="Paste the job description here...
-
-Example:
-We are looking for a Senior Frontend Developer with 5+ years of experience in React, TypeScript, and Next.js. You will be responsible for building scalable web applications using modern frameworks and best practices.
-
-Required Skills:
-- React, TypeScript, Next.js
-- RESTful APIs
-- Git, CI/CD
-- Responsive design"
-                className="w-full h-[400px] text-black px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono text-sm"
-              />
-
+                </p>
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  className="form-textarea flex w-full resize-y rounded-md text-slate-900 focus:outline-0 focus:ring-2 focus:ring-[#4c96e1]/50 border border-slate-300 bg-[#f6f7f8] min-h-36 placeholder:text-slate-400 p-4 text-base font-normal leading-normal"
+                  placeholder="e.g., Senior Frontend Developer at TechCorp..."
+                />
+              </label>
               {error && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-                  <AlertCircle
-                    size={20}
-                    className="text-red-600 shrink-0 mt-0.5"
-                  />
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-sm text-red-700">{error}</p>
                 </div>
               )}
+              <div className="flex justify-start">
+                <button
+                  onClick={handleAnalyze}
+                  disabled={analyzing || !jobDescription.trim()}
+                  className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-6 bg-[#4c96e1] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-[#3a7bc8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {analyzing ? (
+                    <span className="flex items-center gap-2">
+                      <span className="animate-spin">⏳</span>
+                      Analyzing...
+                    </span>
+                  ) : (
+                    <span>Analyze Match</span>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
 
-              <button
-                onClick={handleAnalyze}
-                disabled={analyzing || !jobDescription.trim()}
-                className="w-full mt-6 inline-flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                {analyzing ? (
-                  <>
-                    <Loader2 size={20} className="animate-spin" />
-                    Analyzing Match...
-                  </>
-                ) : (
-                  <>
-                    <Target size={20} />
-                    Analyze Job Match
-                  </>
-                )}
-              </button>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-xl border border-gray-200 shadow-sm p-8"
-            >
-              {!result ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                    <Target size={40} className="text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Analysis Yet
-                  </h3>
-                  <p className="text-black max-w-sm">
-                    Paste a job description and click &quot;Analyze Job
-                    Match&quot; to see how well your portfolio matches the
-                    requirements.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="text-center pb-6 border-b border-gray-200">
-                    <div
-                      className={`inline-flex items-center justify-center w-32 h-32 rounded-full ${getMatchBgColor(result.matchPercentage)} mb-4`}
-                    >
-                      <span
-                        className={`text-4xl font-bold ${getMatchColor(result.matchPercentage)}`}
+          {/* Results Section */}
+          {result && (
+            <>
+              {/* Match Score Section */}
+              <div className="space-y-4">
+                <h2 className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                  Your Match Score
+                </h2>
+                <div className="bg-white p-8 rounded-lg shadow-sm">
+                  <div className="flex items-start gap-8">
+                    <div className="relative size-32 shrink-0">
+                      <svg
+                        className="size-full -rotate-90"
+                        viewBox="0 0 36 36"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="16"
+                          fill="none"
+                          className="stroke-slate-200"
+                          strokeWidth="3"
+                        />
+                        <circle
+                          cx="18"
+                          cy="18"
+                          r="16"
+                          fill="none"
+                          stroke={getStrokeColor(result.matchPercentage)}
+                          strokeWidth="3"
+                          strokeDasharray={`${result.matchPercentage} 100`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-3xl font-bold text-slate-900">
                         {result.matchPercentage}%
                       </span>
                     </div>
-                    <h3
-                      className={`text-2xl font-bold ${getMatchColor(result.matchPercentage)} mb-2`}
-                    >
-                      {getMatchLabel(result.matchPercentage)}
-                    </h3>
-                    <p className="text-black">{result.summary}</p>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <CheckCircle size={20} className="text-green-600" />
-                      <h4 className="font-semibold text-gray-900">
-                        Matched Skills ({result.matchedSkills.length})
-                      </h4>
+                    <div className="flex flex-col gap-2 flex-1">
+                      <p
+                        className={`text-3xl font-bold leading-tight ${getMatchColor(result.matchPercentage)}`}
+                      >
+                        {getMatchLabel(result.matchPercentage)}
+                      </p>
+                      <p className="text-slate-500 text-base leading-relaxed">
+                        {result.summary}
+                      </p>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Skills Comparison Section */}
+              <div className="space-y-4">
+                <h2 className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                  Skills Comparison
+                </h2>
+                <div className="space-y-4">
+                  {/* Matched Skills */}
+                  <div className="bg-green-500/10 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold text-green-800 mb-4">
+                      Matched Skills
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       {result.matchedSkills.map((skill, index) => (
                         <span
                           key={index}
-                          className="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full"
+                          className="bg-white text-slate-700 text-sm font-medium px-3 py-1 rounded-full"
                         >
                           {skill}
                         </span>
@@ -251,19 +211,50 @@ Required Skills:
                     </div>
                   </div>
 
+                  {/* Missing Skills */}
                   {result.missingSkills.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <XCircle size={20} className="text-red-600" />
-                        <h4 className="font-semibold text-gray-900">
-                          Missing Skills ({result.missingSkills.length})
-                        </h4>
-                      </div>
+                    <div className="bg-red-500/10 p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold text-red-800 mb-4">
+                        Missing Skills
+                      </h3>
                       <div className="flex flex-wrap gap-2">
-                        {result.missingSkills.map((skill, index) => (
+                        {result.missingSkills.map((item, index) => (
                           <span
                             key={index}
-                            className="px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full"
+                            className="bg-white text-slate-700 text-sm font-medium px-3 py-1 rounded-full"
+                          >
+                            {item.skill}{" "}
+                            <span
+                              className={
+                                item.priority === "high"
+                                  ? "text-red-500 ml-1"
+                                  : item.priority === "medium"
+                                    ? "text-orange-500 ml-1"
+                                    : "text-yellow-500 ml-1"
+                              }
+                            >
+                              (
+                              {item.priority.charAt(0).toUpperCase() +
+                                item.priority.slice(1)}{" "}
+                              Priority)
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Bonus Skills */}
+                  {result.bonusSkills.length > 0 && (
+                    <div className="bg-indigo-500/10 p-6 rounded-lg">
+                      <h3 className="text-lg font-semibold text-indigo-800 mb-4">
+                        Bonus Skills
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {result.bonusSkills.map((skill, index) => (
+                          <span
+                            key={index}
+                            className="bg-white text-slate-700 text-sm font-medium px-3 py-1 rounded-full"
                           >
                             {skill}
                           </span>
@@ -271,34 +262,52 @@ Required Skills:
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
 
-                  {result.recommendations.length > 0 && (
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <TrendingUp size={20} className="text-blue-600" />
-                        <h4 className="font-semibold text-gray-900">
-                          Recommendations
+              {/* Recommendations Section */}
+              {result.recommendations.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                    Next Steps to Improve Your Match
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {result.recommendations.map((rec, index) => (
+                      <div
+                        key={index}
+                        className="bg-white p-4 rounded-lg shadow-sm"
+                      >
+                        <h4 className="font-bold text-slate-800">
+                          {rec.title}
                         </h4>
+                        <p className="text-sm text-slate-500 mt-1">
+                          {rec.description}
+                        </p>
                       </div>
-                      <ul className="space-y-2">
-                        {result.recommendations.map((rec, index) => (
-                          <li
-                            key={index}
-                            className="flex items-start gap-2 text-gray-700"
-                          >
-                            <span className="text-blue-600 mt-1">•</span>
-                            <span>{rec}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
               )}
-            </motion.div>
-          </div>
-        </main>
-      </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-200">
+                <Link
+                  href="/project-recommendations"
+                  className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-11 px-5 bg-[#4c96e1] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#3a7bc8] transition-colors"
+                >
+                  <span>Get project recommendations</span>
+                </Link>
+                <button
+                  onClick={handleReset}
+                  className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-11 px-5 bg-slate-200 text-slate-800 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-slate-300 transition-colors"
+                >
+                  <span>Try another job description</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

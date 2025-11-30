@@ -233,6 +233,15 @@ body {
   animation: gradient-pan 15s ease infinite;
 }
 
+/* Material Symbols Icons */
+.material-symbols-outlined {
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
 /* Ensure content doesn't overflow on mobile */
 @media (max-width: 768px) {
   * {
