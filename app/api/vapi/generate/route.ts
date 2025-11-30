@@ -53,6 +53,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, role, level, techstack, amount } = body;
 
+    // Validate amount
+    if (!amount || amount < 1 || amount > 10) {
+      return NextResponse.json(
+        { error: "Amount must be between 1 and 10" },
+        { status: 400 }
+      );
+    }
+
     const { text: questions } = await generateText({
       model: openai("gpt-4o-mini"),
       prompt: `Generate EXACTLY ${amount} interview questions for a ${role} position.
@@ -65,24 +73,55 @@ Job Details:
 
 CRITICAL REQUIREMENTS:
 1. Generate EXACTLY ${amount} questions - no more, no less
-2. Questions should be appropriate for ${type} interview focus
-3. Do not use special characters like "/" or "*" (voice assistant compatibility)
-4. Return ONLY a valid JSON array of strings
-5. Each question should be clear and concise
+2. Number each question (e.g., "Question 1 of ${amount}: ...")
+3. Questions should be appropriate for ${type} interview focus
+4. Do not use special characters like "/" or "*" (voice assistant compatibility)
+5. Return ONLY a valid JSON array of strings
+6. Each question should be clear and concise
 
 Format (example for 3 questions):
-["Question 1 text here","Question 2 text here","Question 3 text here"]
+["Question 1 of 3: First question text here","Question 2 of 3: Second question text here","Question 3 of 3: Third question text here"]
 
 Generate exactly ${amount} questions now:`,
     });
 
+    // Parse and validate questions
+    let parsedQuestions;
+    try {
+      parsedQuestions = JSON.parse(questions);
+
+      if (!Array.isArray(parsedQuestions)) {
+        throw new Error("Questions must be an array");
+      }
+
+      // Ensure exact count
+      if (parsedQuestions.length !== amount) {
+        console.warn(
+          `Expected ${amount} questions, got ${parsedQuestions.length}. Adjusting...`
+        );
+        if (parsedQuestions.length > amount) {
+          parsedQuestions = parsedQuestions.slice(0, amount);
+        }
+      }
+    } catch (parseError) {
+      return NextResponse.json(
+        {
+          error: "Failed to parse generated questions",
+          details:
+            parseError instanceof Error ? parseError.message : "Parse error",
+        },
+        { status: 500 }
+      );
+    }
+
     const interview = {
-      user_id: userId, // Use user.id from auth, not userId from body
+      user_id: userId,
       role,
       type,
       level,
       techstack: techstack.split(",").map((tech: string) => tech.trim()),
-      questions: JSON.parse(questions),
+      questions: parsedQuestions,
+      question_count: parsedQuestions.length,
       finalised: true,
     };
 
