@@ -798,7 +798,7 @@ export default function ProjectDetailPage() {
                   </div>
                   {getReadmeContent() ? (
                     <div
-                      className="prose prose-slate max-w-none prose-headings:text-black prose-p:text-black prose-a:text-[#4c96e1] prose-strong:text-black prose-code:text-[#4c96e1] prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-gray-100"
+                      className="prose prose-slate max-w-none prose-headings:text-black prose-p:text-black prose-a:text-[#4c96e1] prose-strong:text-black prose-code:text-[#4c96e1] prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:text-black"
                       dangerouslySetInnerHTML={{
                         __html: marked.parse(getReadmeContent()?.content || ""),
                       }}
