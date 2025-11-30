@@ -10,6 +10,7 @@ import { showSuccess } from "@/lib/utils/toast";
 
 export default function PortfolioScorePage() {
   const [score, setScore] = useState<number | null>(null);
+  const [rank, setRank] = useState<string | null>(null);
   const [previousScore, setPreviousScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +23,8 @@ export default function PortfolioScorePage() {
       const response = await fetch("/api/analysis/portfolio-score");
       if (response.ok) {
         const data = await response.json();
-        const newScore = data.score || 0;
+        const newScore = data.overallScore || data.score || 0;
+        const newRank = data.rank || null;
 
         // Check if score improved
         const stored = localStorage.getItem("previousPortfolioScore");
@@ -36,6 +38,7 @@ export default function PortfolioScorePage() {
         }
 
         setScore(newScore);
+        setRank(newRank);
         localStorage.setItem("previousPortfolioScore", newScore.toString());
       }
     } catch (error) {
@@ -103,6 +106,16 @@ export default function PortfolioScorePage() {
               <div className="text-xl md:text-2xl text-gray-500 mt-2">
                 out of 100
               </div>
+              {rank && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="mt-4 text-3xl font-bold text-blue-600"
+                >
+                  Rank: {rank}
+                </motion.div>
+              )}
             </motion.div>
 
             {previousScore !== null &&
@@ -120,6 +133,33 @@ export default function PortfolioScorePage() {
                   </span>
                 </motion.div>
               )}
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-8"
+            >
+              <a
+                href="/portfolio-score/detailed"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                View Detailed Breakdown
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </a>
+            </motion.div>
 
             <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
               <motion.div

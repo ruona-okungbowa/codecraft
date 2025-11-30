@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { projectId, template = "professional" } = body;
+    const { projectId, template = "professional", config } = body;
 
     if (!projectId) {
       return NextResponse.json(
@@ -163,7 +163,8 @@ export async function POST(request: NextRequest) {
       },
       template,
       research,
-      githubToken
+      githubToken,
+      config
     );
 
     // Generate brief description from README

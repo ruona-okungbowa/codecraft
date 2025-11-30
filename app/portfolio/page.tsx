@@ -1,62 +1,84 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-  ExternalLink,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  Star,
-  Globe,
-  Code,
-  Rocket,
-} from "lucide-react";
-import Link from "next/link";
-import { Newsreader, Sansation } from "next/font/google";
-import DashboardSidebar from "@/components/DashboardSidebar";
-import {
-  showSuccess,
-  showError,
-  showLoading,
-  dismissToast,
-} from "@/lib/utils/toast";
-import { celebrateSuccess } from "@/lib/utils/confetti";
+import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 import { ProjectRow } from "@/types";
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const sansation = Sansation({
-  subsets: ["latin"],
-  weight: ["400"],
-});
+interface PortfolioConfig {
+  selectedProjects: string[];
+  theme: "minimalist" | "modern-dark" | "creative";
+  name: string;
+  bio: string;
+  linkedinUrl: string;
+  sections: {
+    about: boolean;
+    projects: boolean;
+    skills: boolean;
+    contact: boolean;
+  };
+}
 
 export default function PortfolioPage() {
-  const [selectedProjects, setSelectedProjects] = useState<ProjectRow[]>([]);
+  const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<{
-    url?: string;
-    message?: string;
-    error?: string;
-  } | null>(null);
+  const [generatedUrl, setGeneratedUrl] = useState<string>("");
+
+  const [config, setConfig] = useState<PortfolioConfig>({
+    selectedProjects: [],
+    theme: "minimalist",
+    name: "John Doe",
+    bio: "Full-stack developer passionate about building innovative web applications and solving complex problems.",
+    linkedinUrl: "",
+    sections: {
+      about: true,
+      projects: true,
+      skills: true,
+      contact: true,
+    },
+  });
+
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">(
+    "desktop"
+  );
 
   useEffect(() => {
-    fetchSelectedProjects();
+    fetchProjects();
+    fetchUserData();
   }, []);
 
-  async function fetchSelectedProjects() {
+  async function fetchUserData() {
+    try {
+      const response = await fetch("/api/user/profile");
+      if (response.ok) {
+        const data = await response.json();
+        const name = data.first_name || data.github_username || "John Doe";
+        setConfig((prev) => ({
+          ...prev,
+          name: name,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }
+
+  async function fetchProjects() {
     try {
       const response = await fetch("/api/projects");
       if (response.ok) {
         const data = await response.json();
-        const portfolio = data.projects.filter(
-          (p: ProjectRow) => p.in_portfolio
-        );
-        setSelectedProjects(portfolio);
+        setProjects(data.projects || []);
+
+        // Pre-select projects that are in portfolio
+        const portfolioProjects = data.projects
+          .filter((p: ProjectRow) => p.in_portfolio)
+          .map((p: ProjectRow) => p.id);
+
+        setConfig((prev) => ({
+          ...prev,
+          selectedProjects: portfolioProjects,
+        }));
       }
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -65,329 +87,499 @@ export default function PortfolioPage() {
     }
   }
 
+  async function downloadAsZip() {
+    try {
+      const response = await fetch("/api/portfolio/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(config),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${config.name.replace(/\s+/g, "-").toLowerCase()}-portfolio.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else {
+        alert("Failed to download portfolio");
+      }
+    } catch (error) {
+      console.error("Error downloading portfolio:", error);
+      alert("An error occurred while downloading");
+    }
+  }
+
+  function toggleProject(projectId: string) {
+    setConfig((prev) => ({
+      ...prev,
+      selectedProjects: prev.selectedProjects.includes(projectId)
+        ? prev.selectedProjects.filter((id) => id !== projectId)
+        : [...prev.selectedProjects, projectId],
+    }));
+  }
+
+  function toggleAllProjects() {
+    if (config.selectedProjects.length === projects.length) {
+      setConfig((prev) => ({ ...prev, selectedProjects: [] }));
+    } else {
+      setConfig((prev) => ({
+        ...prev,
+        selectedProjects: projects.map((p) => p.id),
+      }));
+    }
+  }
+
   async function generatePortfolio() {
     setGenerating(true);
-    setResult(null);
-    const toastId = showLoading("Generating your portfolio website...");
-
     try {
       const response = await fetch("/api/ai/portfolio-site", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        setResult({
-          url: data.url,
-          message: data.message,
-        });
-        dismissToast(toastId);
-        showSuccess("Portfolio generated successfully! 🎉");
-        celebrateSuccess();
+        const data = await response.json();
+        setGeneratedUrl(data.url);
+        const toast = await import("react-hot-toast");
+        toast.default.success(
+          "Portfolio deployed to GitHub Pages successfully!",
+          { duration: 5000 }
+        );
       } else {
-        setResult({
-          error: data.error || "Failed to generate portfolio",
-        });
-        dismissToast(toastId);
-        showError(data.error || "Failed to generate portfolio");
+        const error = await response.json();
+        const toast = await import("react-hot-toast");
+        toast.default.error(error.error || "Failed to generate portfolio");
       }
     } catch (error) {
       console.error("Error generating portfolio:", error);
-      dismissToast(toastId);
-      showError("An error occurred while generating portfolio");
-      setResult({
-        error: "An unexpected error occurred. Please try again.",
-      });
+      const toast = await import("react-hot-toast");
+      toast.default.error("An error occurred while generating portfolio");
     } finally {
       setGenerating(false);
     }
   }
 
-  const getLanguageArray = (
-    languages: Record<string, number> | null | undefined
-  ): string[] => {
-    if (!languages) return [];
-    return Object.keys(languages).sort((a, b) => languages[b] - languages[a]);
-  };
-
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <DashboardSidebar />
+    <div className="flex min-h-screen bg-[#f6f7f8]">
+      <CollapsibleSidebar />
 
-      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
-        {/* Header */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-4 md:px-10 py-4 md:py-6 pl-16 md:pl-10">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <h1
-                  className={`text-xl md:text-[28px] font-bold text-gray-900 ${newsreader.className}`}
-                >
-                  Portfolio Website Generator
-                </h1>
-                <p
-                  className={`text-xs md:text-sm text-gray-600 mt-1 ${sansation.className}`}
-                >
-                  Create a stunning portfolio website from your selected
-                  projects
-                </p>
-              </div>
+      <main className="flex-1 p-8 overflow-y-auto ml-20">
+        <div className="max-w-7xl mx-auto">
+          {/* Page Heading */}
+          <header className="flex flex-wrap justify-between gap-3 mb-8">
+            <div className="flex min-w-72 flex-col gap-2">
+              <h1 className="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">
+                Your Portfolio Website
+              </h1>
+              <p className="text-base font-normal leading-normal text-slate-500">
+                Configure, preview, and deploy your personal portfolio with
+                ease.
+              </p>
             </div>
-          </div>
-        </header>
+          </header>
 
-        {/* Main Content */}
-        <main className="px-10 py-8 max-w-5xl mx-auto">
-          {loading ? (
-            <div className="text-center py-20">
-              <Loader2
-                size={48}
-                className="text-gray-400 animate-spin mx-auto mb-4"
-              />
-              <p className="text-gray-500">Loading your projects...</p>
-            </div>
-          ) : (
-            <>
-              {/* Selected Projects Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2
-                    className={`text-2xl font-bold text-gray-900 ${newsreader.className}`}
-                  >
-                    Selected Projects ({selectedProjects.length})
-                  </h2>
-                  <Link
-                    href="/projects"
-                    className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Manage Projects →
-                  </Link>
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column: Configuration */}
+            <div className="flex flex-col gap-4">
+              <h2 className="text-xl font-bold text-slate-900">
+                Configuration
+              </h2>
 
-                {selectedProjects.length === 0 ? (
-                  <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
-                    <Star size={48} className="text-gray-300 mx-auto mb-4" />
-                    <h3
-                      className={`text-xl font-bold text-gray-900 mb-2 ${newsreader.className}`}
-                    >
-                      No projects selected
-                    </h3>
-                    <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                      Add projects to your portfolio from the Projects page to
-                      generate your website
+              {/* Accordions */}
+              <div className="flex flex-col gap-3">
+                {/* Project Selection */}
+                <details
+                  className="flex flex-col rounded border border-slate-200 bg-white px-4 py-2 group"
+                  open
+                >
+                  <summary className="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                    <p className="text-sm font-medium leading-normal text-slate-900">
+                      Project Selection
                     </p>
-                    <Link
-                      href="/projects"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                    >
-                      <Star size={18} />
-                      <span>Select Projects</span>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {selectedProjects.map((project) => {
-                      const languages = getLanguageArray(project.languages);
-                      return (
-                        <motion.div
-                          key={project.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <h3
-                              className={`text-lg font-bold text-gray-900 ${newsreader.className}`}
+                    <span className="material-symbols-outlined text-slate-900 group-open:rotate-180 transition-transform">
+                      expand_more
+                    </span>
+                  </summary>
+                  <div className="pt-2 pb-2 border-t border-slate-200">
+                    {loading ? (
+                      <p className="text-sm text-slate-500 py-3">
+                        Loading projects...
+                      </p>
+                    ) : (
+                      <>
+                        <label className="flex gap-x-3 py-3 flex-row items-center cursor-pointer">
+                          <input
+                            checked={
+                              config.selectedProjects.length === projects.length
+                            }
+                            onChange={toggleAllProjects}
+                            className="h-5 w-5 rounded border-slate-300 bg-transparent text-[#4c96e1] focus:ring-[#4c96e1]"
+                            type="checkbox"
+                          />
+                          <p className="text-base font-normal leading-normal text-slate-900">
+                            Select all
+                          </p>
+                        </label>
+                        {projects.map((project) => (
+                          <label
+                            key={project.id}
+                            className="flex gap-x-3 py-3 flex-row items-center cursor-pointer"
+                          >
+                            <input
+                              checked={config.selectedProjects.includes(
+                                project.id
+                              )}
+                              onChange={() => toggleProject(project.id)}
+                              className="h-5 w-5 rounded border-slate-300 bg-transparent text-[#4c96e1] focus:ring-[#4c96e1]"
+                              type="checkbox"
+                            />
+                            <p
+                              className={`text-base font-normal leading-normal ${
+                                config.selectedProjects.includes(project.id)
+                                  ? "text-slate-900"
+                                  : "text-slate-500"
+                              }`}
                             >
                               {project.name}
-                            </h3>
-                            <div className="flex items-center gap-1 text-yellow-500">
-                              <Star size={14} fill="currentColor" />
-                              <span className="text-sm text-gray-600">
-                                {project.stars}
-                              </span>
-                            </div>
-                          </div>
-                          <p
-                            className={`text-sm text-gray-600 mb-3 line-clamp-2 ${sansation.className}`}
-                          >
-                            {project.description || "No description"}
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {languages.slice(0, 3).map((lang) => (
-                              <span
-                                key={lang}
-                                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full"
-                              >
-                                {lang}
-                              </span>
-                            ))}
-                            {languages.length > 3 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
-                                +{languages.length - 3}
-                              </span>
+                            </p>
+                          </label>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </details>
+
+                {/* Personal Information */}
+                <details className="flex flex-col rounded border border-slate-200 bg-white px-4 py-2 group">
+                  <summary className="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                    <p className="text-sm font-medium leading-normal text-slate-900">
+                      Personal Information
+                    </p>
+                    <span className="material-symbols-outlined text-slate-900 group-open:rotate-180 transition-transform">
+                      expand_more
+                    </span>
+                  </summary>
+                  <div className="pt-4 pb-2 border-t border-slate-200 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Name
+                      </label>
+                      <input
+                        className="w-full rounded border-slate-300 bg-[#f6f7f8] text-slate-900 focus:ring-[#4c96e1] focus:border-[#4c96e1]"
+                        placeholder="Your Name"
+                        type="text"
+                        value={config.name}
+                        onChange={(e) =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        Bio
+                      </label>
+                      <textarea
+                        className="w-full rounded border-slate-300 bg-[#f6f7f8] text-slate-900 focus:ring-[#4c96e1] focus:border-[#4c96e1]"
+                        placeholder="Your Bio"
+                        rows={3}
+                        value={config.bio}
+                        onChange={(e) =>
+                          setConfig((prev) => ({
+                            ...prev,
+                            bio: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </details>
+
+                {/* Sections to Include */}
+                <details className="flex flex-col rounded border border-slate-200 bg-white px-4 py-2 group">
+                  <summary className="flex cursor-pointer items-center justify-between gap-6 py-2 list-none">
+                    <p className="text-sm font-medium leading-normal text-slate-900">
+                      Sections to Include
+                    </p>
+                    <span className="material-symbols-outlined text-slate-900 group-open:rotate-180 transition-transform">
+                      expand_more
+                    </span>
+                  </summary>
+                  <div className="pt-2 pb-2 border-t border-slate-200">
+                    {Object.entries(config.sections).map(([key, value]) => (
+                      <label
+                        key={key}
+                        className="flex gap-x-3 py-3 flex-row items-center cursor-pointer"
+                      >
+                        <input
+                          checked={value}
+                          onChange={(e) =>
+                            setConfig((prev) => ({
+                              ...prev,
+                              sections: {
+                                ...prev.sections,
+                                [key]: e.target.checked,
+                              },
+                            }))
+                          }
+                          className="h-5 w-5 rounded border-slate-300 bg-transparent text-[#4c96e1] focus:ring-[#4c96e1]"
+                          type="checkbox"
+                        />
+                        <p
+                          className={`text-base font-normal leading-normal ${
+                            value ? "text-slate-900" : "text-slate-500"
+                          }`}
+                        >
+                          {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </p>
+                      </label>
+                    ))}
+                  </div>
+                </details>
+              </div>
+            </div>
+
+            {/* Right Column: Preview & Actions */}
+            <div className="flex flex-col gap-8">
+              {/* Preview */}
+              <div className="flex flex-col gap-4">
+                <h2 className="text-xl font-bold text-slate-900">Preview</h2>
+                <div className="p-4 rounded-lg bg-white border border-slate-200">
+                  <div className="flex justify-end items-center mb-4 gap-2">
+                    <button
+                      onClick={() => setPreviewMode("desktop")}
+                      className={`p-2 rounded-full ${
+                        previewMode === "desktop"
+                          ? "bg-[#4c96e1]/20 text-[#4c96e1]"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">
+                        desktop_windows
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setPreviewMode("mobile")}
+                      className={`p-2 rounded-full ${
+                        previewMode === "mobile"
+                          ? "bg-[#4c96e1]/20 text-[#4c96e1]"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">
+                        phone_iphone
+                      </span>
+                    </button>
+                  </div>
+                  <div
+                    className={`${previewMode === "mobile" ? "max-w-sm mx-auto" : ""} aspect-[16/10] bg-gradient-to-b from-slate-900 to-slate-800 rounded border border-slate-700 overflow-hidden shadow-2xl`}
+                  >
+                    <div className="h-full overflow-y-auto">
+                      {/* Navigation Bar */}
+                      <div className="bg-slate-900/90 backdrop-blur-md border-b border-slate-700 px-4 py-2 flex justify-between items-center">
+                        <p className="text-xs text-gray-400 font-medium">
+                          {config.name || "Your Name"}
+                        </p>
+                        <div className="flex gap-3 text-xs text-gray-400">
+                          <span>Home</span>
+                          <span>Projects</span>
+                          <span>About</span>
+                        </div>
+                      </div>
+
+                      {/* Hero Section */}
+                      <div className="px-6 py-12 text-center">
+                        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                          {config.name || "Your Name"}
+                        </h1>
+                        <p className="text-sm text-blue-400 mb-3 font-semibold">
+                          Software Engineer
+                        </p>
+                        <p className="text-xs text-gray-300 leading-relaxed mb-4 max-w-md mx-auto">
+                          {config.bio ||
+                            "Your bio will appear here. Add a compelling description about yourself."}
+                        </p>
+                        <button className="bg-blue-500 text-white px-4 py-2 rounded text-xs font-semibold hover:bg-blue-600 transition-all">
+                          View my Work
+                        </button>
+                      </div>
+
+                      {/* Projects Section */}
+                      {config.sections.projects && (
+                        <div className="px-6 py-4">
+                          <h2 className="text-lg font-bold text-white mb-3">
+                            Featured Projects
+                          </h2>
+                          <div className="space-y-3">
+                            {projects
+                              .filter((p) =>
+                                config.selectedProjects.includes(p.id)
+                              )
+                              .slice(0, 2)
+                              .map((project) => (
+                                <div
+                                  key={project.id}
+                                  className="bg-slate-800 border border-slate-700 rounded-lg p-4"
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <h3 className="text-sm font-bold text-blue-400">
+                                      {project.name}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-xs">
+                                      <span className="text-yellow-400">
+                                        ⭐ {project.stars || 0}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <p className="text-xs text-gray-300 line-clamp-2">
+                                    {project.description ||
+                                      "Project description"}
+                                  </p>
+                                </div>
+                              ))}
+                            {config.selectedProjects.length === 0 && (
+                              <p className="text-xs text-gray-500 italic text-center py-4">
+                                Select projects to display them here
+                              </p>
                             )}
                           </div>
-                        </motion.div>
-                      );
-                    })}
+                        </div>
+                      )}
+
+                      {/* Skills Section */}
+                      {config.sections.skills && (
+                        <div className="px-6 py-4">
+                          <h2 className="text-lg font-bold text-white mb-3">
+                            Skills & Technologies
+                          </h2>
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              "JavaScript",
+                              "React",
+                              "Node.js",
+                              "TypeScript",
+                              "Python",
+                            ].map((skill) => (
+                              <div
+                                key={skill}
+                                className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
+                              >
+                                <span className="text-xs font-medium text-gray-200">
+                                  {skill}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* About Section */}
+                      {config.sections.about && (
+                        <div className="px-6 py-4">
+                          <h2 className="text-lg font-bold text-white mb-3">
+                            About Me
+                          </h2>
+                          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
+                            <p className="text-xs text-gray-300 leading-relaxed">
+                              {config.bio ||
+                                "Hi, I'm a passionate Software Engineer with a knack for crafting seamless digital experiences."}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Contact Section */}
+                      {config.sections.contact && (
+                        <div className="px-6 py-4 pb-6">
+                          <h2 className="text-lg font-bold text-white mb-3">
+                            Contact
+                          </h2>
+                          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 space-y-2">
+                            <div className="flex items-center gap-2 text-xs text-gray-300">
+                              <span className="material-symbols-outlined text-gray-400 text-sm">
+                                email
+                              </span>
+                              <span>your.email@example.com</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-300">
+                              <span className="material-symbols-outlined text-gray-400 text-sm">
+                                link
+                              </span>
+                              <span>github.com/yourusername</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col gap-4">
+                <h2 className="text-xl font-bold text-slate-900">Actions</h2>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={generatePortfolio}
+                    disabled={
+                      generating || config.selectedProjects.length === 0
+                    }
+                    className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-4 bg-[#4c96e1] text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-[#3a7bc8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {generating ? "Deploying..." : "Deploy to GitHub Pages"}
+                  </button>
+                  <button
+                    onClick={downloadAsZip}
+                    className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-4 bg-[#4c96e1]/20 text-[#4c96e1] text-base font-bold leading-normal tracking-[0.015em] hover:bg-[#4c96e1]/30 transition-colors"
+                  >
+                    Download as ZIP
+                  </button>
+                </div>
+                <p className="text-sm text-slate-500 text-center">
+                  Deploy creates a live website on GitHub Pages. Download gives
+                  you the HTML files to host anywhere.
+                </p>
+
+                {/* Generated URL Display */}
+                {generatedUrl && (
+                  <div className="mt-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <span className="material-symbols-outlined text-green-600 mt-0.5">
+                        check_circle
+                      </span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-green-900 mb-1">
+                          Portfolio deployed successfully!
+                        </p>
+                        <a
+                          href={generatedUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-800 underline break-all"
+                        >
+                          {generatedUrl}
+                        </a>
+                        <p className="text-xs text-slate-600 mt-2">
+                          Note: It may take a few minutes for GitHub Pages to
+                          publish your site.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-
-              {/* Generation Section */}
-              {selectedProjects.length > 0 && (
-                <div className="bg-gradient-to-br from-[#d8f0de] to-[#dbfae1] border border-[#d8f0de] rounded-xl p-8">
-                  <div className="max-w-2xl mx-auto text-center">
-                    <div className="w-16 h-16 bg-[#87d498] rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Globe size={32} className="text-white " />
-                    </div>
-                    <h2
-                      className={`text-2xl font-bold text-gray-900 mb-3 ${newsreader.className}`}
-                    >
-                      Ready to Generate Your Portfolio
-                    </h2>
-                    <p className="text-gray-700 mb-6">
-                      We&apos;ll create a beautiful, professional portfolio
-                      website featuring your {selectedProjects.length} selected{" "}
-                      {selectedProjects.length === 1 ? "project" : "projects"}{" "}
-                      and deploy it to GitHub Pages.
-                    </p>
-
-                    <button
-                      onClick={generatePortfolio}
-                      disabled={generating}
-                      className="inline-flex items-center gap-2 px-8 py-4 text-white rounded-lg bg-[#87d498] hover:bg-[#72b681] transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-semibold text-lg shadow-lg"
-                    >
-                      {generating ? (
-                        <>
-                          <Loader2 size={24} className="animate-spin" />
-                          <span>Generating Website...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Generate Website</span>
-                        </>
-                      )}
-                    </button>
-
-                    {generating && (
-                      <p className="text-sm text-gray-600 mt-4">
-                        This may take 30-60 seconds...
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Result Section */}
-              {result && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-8"
-                >
-                  {result.error ? (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle size={24} className="text-red-600 mt-1" />
-                        <div>
-                          <h3
-                            className={`text-lg font-bold text-red-900 mb-2 ${newsreader.className}`}
-                          >
-                            Generation Failed
-                          </h3>
-                          <p className="text-red-700">{result.error}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-                      <div className="flex items-start gap-3">
-                        <CheckCircle
-                          size={24}
-                          className="text-green-600 mt-1"
-                        />
-                        <div className="flex-1">
-                          <h3
-                            className={`text-lg font-bold text-green-900 mb-2 ${newsreader.className}`}
-                          >
-                            Portfolio Generated Successfully!
-                          </h3>
-                          <p className="text-green-700 mb-4">
-                            {result.message}
-                          </p>
-                          {result.url && (
-                            <div className="flex flex-col sm:flex-row gap-3">
-                              <a
-                                href={result.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                              >
-                                <ExternalLink size={18} />
-                                <span>View Your Portfolio</span>
-                              </a>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(result.url!);
-                                }}
-                                className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors font-medium"
-                              >
-                                <Code size={18} />
-                                <span>Copy URL</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-
-              {/* Info Section */}
-              <div className="mt-8 bg-[#d8f0de] border border-[#d8f0de] rounded-xl p-6">
-                <h3
-                  className={`text-lg font-bold text-gray-900 mb-3 ${newsreader.className}`}
-                >
-                  How it works
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#87d498] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                      1
-                    </div>
-                    <p className="text-gray-700">
-                      We analyse your selected projects and generate compelling
-                      descriptions.
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#87d498] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                      2
-                    </div>
-                    <p className="text-gray-700">
-                      A beautiful, responsive portfolio website is created with
-                      modern design
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-[#87d498] text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
-                      3
-                    </div>
-                    <p className="text-gray-700">
-                      Your portfolio is automatically deployed to GitHub Pages
-                      at username.github.io
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </main>
-      </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

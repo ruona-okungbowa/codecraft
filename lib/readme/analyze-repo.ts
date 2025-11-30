@@ -7,6 +7,8 @@ interface RepoAnalysis {
   scripts: Record<string, string>;
   features: string[];
   structure: string[];
+  projectPurpose?: string;
+  mainPages?: string[];
 }
 
 export async function analyzeRepository(
@@ -23,10 +25,13 @@ export async function analyzeRepository(
     scripts: {},
     features: [],
     structure: [],
+    projectPurpose: "",
+    mainPages: [],
   };
 
   // Try to analyze package.json for Node.js projects
   try {
+    console.log(`Attempting to fetch package.json for ${owner}/${repo}`);
     const { data: packageJson } = await octokit.rest.repos.getContent({
       owner,
       repo,
@@ -37,11 +42,23 @@ export async function analyzeRepository(
       const content = Buffer.from(packageJson.content, "base64").toString();
       const pkg = JSON.parse(content);
 
+      console.log(`Successfully parsed package.json for ${owner}/${repo}`);
+      console.log(
+        `Found ${Object.keys(pkg.dependencies || {}).length} dependencies`
+      );
+
       analysis.dependencies = Object.keys(pkg.dependencies || {});
       analysis.devDependencies = Object.keys(pkg.devDependencies || {});
       analysis.scripts = pkg.scripts || {};
 
-      if (analysis.dependencies.includes("next")) {
+      // Detect framework - check for mobile first, then web frameworks
+      if (analysis.dependencies.includes("expo")) {
+        analysis.framework = "React Native (Expo)";
+        analysis.features.push("Mobile application");
+      } else if (analysis.dependencies.includes("react-native")) {
+        analysis.framework = "React Native";
+        analysis.features.push("Mobile application");
+      } else if (analysis.dependencies.includes("next")) {
         analysis.framework = "Next.js";
       } else if (analysis.dependencies.includes("react")) {
         analysis.framework = "React";
@@ -49,10 +66,17 @@ export async function analyzeRepository(
         analysis.framework = "Vue.js";
       } else if (analysis.dependencies.includes("express")) {
         analysis.framework = "Express.js";
+      } else if (analysis.dependencies.includes("@angular/core")) {
+        analysis.framework = "Angular";
+      } else if (analysis.dependencies.includes("svelte")) {
+        analysis.framework = "Svelte";
       }
+
+      console.log(`Detected framework: ${analysis.framework}`);
     }
-  } catch {
-    console.log("No package.json found, analyzing as non-Node.js project");
+  } catch (error) {
+    console.error(`Error fetching package.json for ${owner}/${repo}:`, error);
+    console.log("Analyzing as non-Node.js project");
   }
 
   // Analyze repository structure and detect project type
@@ -70,6 +94,19 @@ export async function analyzeRepository(
         .filter((p) => p.includes("."))
         .map((p) => p.split(".").pop()?.toLowerCase())
     );
+
+    // Detect main pages/routes for Next.js App Router
+    const appPages = paths
+      .filter((p) => p.startsWith("app/") && p.endsWith("page.tsx"))
+      .map((p) => {
+        const route = p.replace("app/", "").replace("/page.tsx", "");
+        return route || "home";
+      });
+
+    if (appPages.length > 0) {
+      analysis.mainPages = appPages;
+      console.log(`Detected ${appPages.length} pages:`, appPages);
+    }
 
     // Detect project structure
     if (paths.some((p) => p.startsWith("app/"))) {
@@ -95,8 +132,11 @@ export async function analyzeRepository(
     if (analysis.dependencies.includes("@supabase/supabase-js")) {
       analysis.features.push("Supabase authentication and database");
     }
-    if (analysis.dependencies.includes("openai")) {
-      analysis.features.push("OpenAI AI integration");
+    if (
+      analysis.dependencies.includes("openai") ||
+      analysis.dependencies.includes("@google/genai")
+    ) {
+      analysis.features.push("AI integration");
     }
     if (
       analysis.dependencies.includes("framer-motion") ||
@@ -106,6 +146,15 @@ export async function analyzeRepository(
     }
     if (analysis.dependencies.includes("@vapi-ai/web")) {
       analysis.features.push("Voice AI integration");
+    }
+    if (analysis.dependencies.includes("@react-navigation/native")) {
+      analysis.features.push("Navigation system");
+    }
+    if (analysis.dependencies.includes("expo-haptics")) {
+      analysis.features.push("Haptic feedback");
+    }
+    if (analysis.dependencies.includes("expo-font")) {
+      analysis.features.push("Custom fonts");
     }
 
     // Detect non-Node.js projects by file extensions
@@ -170,7 +219,15 @@ async function analyzeKeyFiles(
   analysis: RepoAnalysis
 ): Promise<void> {
   const keyFiles = [
+    "README.md",
+    "package.json",
     "index.html",
+    "app/page.tsx",
+    "app/layout.tsx",
+    "pages/index.tsx",
+    "pages/_app.tsx",
+    "src/App.tsx",
+    "src/App.js",
     "main.py",
     "app.py",
     "index.js",
@@ -183,7 +240,7 @@ async function analyzeKeyFiles(
   ];
 
   for (const file of keyFiles) {
-    const foundPath = paths.find((p) => p.endsWith(file));
+    const foundPath = paths.find((p) => p.endsWith(file) || p === file);
     if (foundPath) {
       try {
         const { data } = await octokit.rest.repos.getContent({
@@ -194,6 +251,29 @@ async function analyzeKeyFiles(
 
         if ("content" in data) {
           const content = Buffer.from(data.content, "base64").toString();
+
+          // Analyze README to understand project purpose
+          if (foundPath.includes("README")) {
+            const lines = content.split("\n").slice(0, 50); // First 50 lines
+            const description = lines.join("\n");
+
+            // Extract key information from README
+            if (description.toLowerCase().includes("portfolio")) {
+              analysis.features.push("Portfolio/Career platform");
+            }
+            if (description.toLowerCase().includes("interview")) {
+              analysis.features.push("Interview preparation");
+            }
+            if (description.toLowerCase().includes("resume")) {
+              analysis.features.push("Resume generation");
+            }
+            if (description.toLowerCase().includes("job")) {
+              analysis.features.push("Job matching");
+            }
+            if (description.toLowerCase().includes("github")) {
+              analysis.features.push("GitHub integration");
+            }
+          }
 
           // Detect features from file content
           if (

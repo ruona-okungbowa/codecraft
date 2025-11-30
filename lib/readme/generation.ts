@@ -16,13 +16,26 @@ interface RepoAnalysis {
   scripts: Record<string, string>;
   features: string[];
   structure: string[];
+  projectPurpose?: string;
+  mainPages?: string[];
+}
+
+interface ConfigOptions {
+  installation?: boolean;
+  usage?: boolean;
+  api?: boolean;
+  contributing?: boolean;
+  license?: boolean;
+  badges?: boolean;
+  demo?: boolean;
 }
 
 export async function generateProjectReadme(
   project: Project,
   template: ReadmeTemplate,
   research: ReadmeResearch,
-  githubToken?: string
+  githubToken?: string,
+  config?: ConfigOptions
 ): Promise<GeneratedReadme> {
   let repoAnalysis: RepoAnalysis | null = null;
 
@@ -32,10 +45,17 @@ export async function generateProjectReadme(
       const owner = urlParts[urlParts.length - 2];
       const repo = urlParts[urlParts.length - 1];
 
+      console.log(`Starting repository analysis for ${owner}/${repo}`);
       const { analyzeRepository } = await import("./analyze-repo");
       repoAnalysis = await analyzeRepository(owner, repo, githubToken);
+      console.log(`Repository analysis complete:`, {
+        framework: repoAnalysis.framework,
+        dependenciesCount: repoAnalysis.dependencies.length,
+        featuresCount: repoAnalysis.features.length,
+      });
     } catch (error) {
       console.error("Error analyzing repository:", error);
+      console.log("Proceeding with basic project information only");
     }
   }
 
@@ -43,7 +63,8 @@ export async function generateProjectReadme(
     project,
     template,
     research,
-    repoAnalysis
+    repoAnalysis,
+    config
   );
   const content = await callOpenAI(prompt, "project");
 
@@ -118,7 +139,8 @@ function buildProjectReadmePrompt(
   project: Project,
   template: ReadmeTemplate,
   research: ReadmeResearch,
-  repoAnalysis?: RepoAnalysis | null
+  repoAnalysis?: RepoAnalysis | null,
+  config?: ConfigOptions
 ): string {
   const languages = Object.keys(project.languages || {}).join(", ");
   const badges = generateBadges(Object.keys(project.languages || {}));
@@ -127,29 +149,126 @@ function buildProjectReadmePrompt(
 
   let analysisSection = "";
   if (repoAnalysis) {
+    const scriptsDetails = Object.entries(repoAnalysis.scripts)
+      .map(([name, cmd]) => `  - \`${name}\`: ${cmd}`)
+      .join("\n");
+
     analysisSection = `
 
-**Detailed Repository Analysis:**
-- Framework: ${repoAnalysis.framework}
-- Key Dependencies: ${repoAnalysis.dependencies.slice(0, 10).join(", ")}
-- Project Structure: ${repoAnalysis.structure.join(", ")}
-- Detected Features: ${repoAnalysis.features.join(", ")}
-- Available Scripts: ${Object.keys(repoAnalysis.scripts).join(", ")}
+**🔍 REPOSITORY ANALYSIS - STUDY THIS CAREFULLY:**
 
-Use this analysis to provide ACCURATE and SPECIFIC information about the project.
-Do NOT make generic assumptions - use the actual dependencies and structure detected.`;
+**Framework Detected:** ${repoAnalysis.framework}
+${repoAnalysis.framework.includes("React Native") || repoAnalysis.framework.includes("Expo") ? "⚠️ THIS IS A MOBILE APP - Do NOT use web routes!" : ""}
+
+**Main Pages/Routes:**
+${repoAnalysis.mainPages && repoAnalysis.mainPages.length > 0 ? repoAnalysis.mainPages.map((page) => `- /${page}`).join("\n") : "- No pages detected (likely mobile app or API)"}
+
+**Key Dependencies (ANALYZE THESE):**
+${repoAnalysis.dependencies
+  .slice(0, 15)
+  .map((dep) => `- ${dep}`)
+  .join("\n")}
+
+**Project Structure:**
+${repoAnalysis.structure.map((s) => `- ${s}`).join("\n")}
+
+**Detected Features:**
+${repoAnalysis.features.map((f) => `- ${f}`).join("\n")}
+
+**Available Scripts:**
+${scriptsDetails || "  - No scripts detected"}
+
+**HOW TO USE THIS DATA:**
+
+1. **Framework tells you the app type:**
+   - "React Native (Expo)" = Mobile app for iOS/Android
+   - "Next.js" = Web application with SSR
+   - "React" = Web application (SPA)
+   - "Express" = Backend API
+
+2. **Dependencies reveal functionality:**
+   - Look for AI packages (@google/genai, openai)
+   - Look for auth packages (@supabase/supabase-js)
+   - Look for navigation (@react-navigation for mobile)
+   - Look for UI libraries (@mui/material, tailwindcss)
+
+3. **Describe features based on:**
+   - Project name + description
+   - Framework type (mobile vs web)
+   - Dependencies (what they enable)
+   - Detected features from analysis
+
+4. **Installation instructions:**
+   - Use ACTUAL scripts listed above
+   - For mobile apps: Mention iOS/Android setup
+   - For web apps: Mention localhost URL
+
+**CRITICAL INSTRUCTIONS - READ CAREFULLY:**
+
+1. **ANALYZE THE PROJECT THOROUGHLY:**
+   - Read the PROJECT NAME and DESCRIPTION carefully
+   - Study the FRAMEWORK detected (React Native vs Next.js vs React)
+   - Examine ALL DEPENDENCIES to understand what the app does
+   - Look at DETECTED FEATURES from the analysis
+   - Each project is UNIQUE - don't copy features from other projects
+
+2. **DETERMINE PROJECT TYPE:**
+   - **Mobile App** (React Native/Expo): Runs on iOS/Android, uses React Navigation, Expo packages
+   - **Web App** (Next.js): Has app/ directory, uses Next.js routing
+   - **Web App** (React): Standard React app with React Router
+   - **Backend API** (Express): Has API endpoints, no frontend
+   
+3. **WRITE ACCURATE INTRO:**
+   - For mobile apps: "A mobile application for iOS and Android..."
+   - For web apps: "A web application that..."
+   - Be specific about the domain based on project name and dependencies:
+     * Coding practice app: Has coding/interview in name, uses AI for feedback
+     * Portfolio/career platform: Has portfolio/resume/job features
+     * E-commerce: Has shopping/cart/payment features
+     * Social app: Has chat/messaging/social features
+
+4. **DESCRIBE FEATURES ACCURATELY:**
+   - **For Web Apps with detected pages:** Transform routes to user actions
+   - **For Mobile Apps or apps without pages:** Infer from:
+     * Project name and description
+     * Dependencies (e.g., @google/genai = AI features, @react-navigation = multiple screens)
+     * Detected features from analysis
+   - **NEVER** list web routes (/dashboard, /projects) for mobile apps
+   - **NEVER** copy features from other projects
+
+5. **TECH STACK:**
+   - State clearly if it's a mobile or web app
+   - List ACTUAL dependencies detected
+   - For mobile: Mention iOS/Android compatibility
+   - For web: Mention deployment platform if detected
+
+6. **INSTALLATION:**
+   - Use ACTUAL scripts from package.json
+   - For Expo: "npm start" + instructions for mobile
+   - For Next.js: "npm run dev" + localhost URL
+   - For React: "npm start" + localhost URL
+
+7. **KEEP IT CONCISE** - No fluff, no repetition, no marketing speak`;
   }
 
-  return `Generate a professional README.md for this GitHub project:
+  return `Generate a PROFESSIONAL and DETAILED README.md for this GitHub project:
 
 **Project Information:**
 - Name: ${project.name}
 - Description: ${project.description || "No description provided"}
-- Technologies: ${languages}
-- Stars: ${project.stars}
+- Primary Technologies: ${languages}
+- GitHub Stars: ${project.stars}
 - Forks: ${project.forks}
-- URL: ${project.url}
+- Repository URL: ${project.url}
 ${analysisSection}
+
+**PROJECT CONTEXT:**
+This is a real project with actual code. Your job is to create comprehensive documentation that:
+1. Explains what the project does in detail
+2. Highlights its unique features and capabilities
+3. Provides clear setup and usage instructions
+4. Makes it easy for new contributors to understand and contribute
+5. Showcases the technical sophistication of the project
 
 **Template Style:** ${template}
 ${templateInstructions}
@@ -165,7 +284,15 @@ ${research.visualElements.map((v) => `- ${v}`).join("\n")}
 ${research.trendingFeatures.map((f) => `- ${f}`).join("\n")}
 
 **Badges to Include:**
-${badges}
+${config?.badges !== false ? badges : "Do not include badges"}
+
+**Sections to Include (based on user configuration):**
+${config?.installation !== false ? "- Installation section (REQUIRED)" : "- Skip Installation section"}
+${config?.usage !== false ? "- Usage section (REQUIRED)" : "- Skip Usage section"}
+${config?.api === true ? "- API Documentation section (REQUIRED)" : "- Skip API Documentation section"}
+${config?.contributing !== false ? "- Contributing section (REQUIRED)" : "- Skip Contributing section"}
+${config?.license !== false ? "- License section (REQUIRED)" : "- Skip License section"}
+${config?.demo !== false ? "- Demo/Screenshots section if applicable (REQUIRED)" : "- Skip Demo section"}
 
 **CRITICAL FORMATTING RULES - MUST FOLLOW:**
 1. Start with # for main title
@@ -180,68 +307,152 @@ ${badges}
 10. Each section must be clearly separated with proper whitespace
 
 **CONTENT REQUIREMENTS:**
-1. Write a compelling project overview based on ACTUAL analysis (not generic)
-2. If it's a web app, describe what users can DO with it
+1. Write a compelling, detailed project overview based on ACTUAL analysis (not generic)
+2. If it's a web app, describe what users can DO with it in detail
 3. For HTML/CSS/JS projects, analyze the actual functionality from files
-4. For Python projects, describe the application purpose
-5. Include SPECIFIC features found in the code, not generic assumptions
+4. For Python projects, describe the application purpose and use cases
+5. Include SPECIFIC features found in the code with detailed descriptions
 6. Installation steps must match the ACTUAL framework/language detected
-7. Usage examples should be framework-specific
+7. Usage examples should be framework-specific and comprehensive
 8. If no package.json exists, provide appropriate setup for the detected language
 9. Remove placeholder text like "(Demo link will be added once available)"
 10. Only include sections that are relevant to THIS specific project
+11. Be DETAILED and PROFESSIONAL - this should be production-ready documentation
+12. Include code examples where relevant
+13. Add emojis sparingly for visual appeal (✨ 🚀 📦 🔧 ⚙️ 🎯)
+14. Make the description engaging and highlight what makes this project unique
+
+**STYLE GUIDELINES:**
+- Write as if onboarding a new developer to the project
+- Be CONCISE but informative - avoid fluff and repetition
+- Focus on WHAT users can do, not abstract concepts
+- Use clear, direct language
+- Include practical setup instructions
+- Make it scannable with clear sections
+
+**TARGET AUDIENCE:**
+Imagine a developer joining this project for the first time. They need to:
+1. Understand what the app does in 30 seconds
+2. Know what technologies are used
+3. See what features/pages exist
+4. Get the app running locally quickly
 
 **EXAMPLE STRUCTURE WITH PROPER SPACING:**
 
 # Project Name
 
 
-Brief engaging description of what this project does.
+A clear 1-2 sentence description based on the PROJECT NAME and DESCRIPTION. If it's a mobile app, say "mobile app". If it's a web app, say "web application".
 
 
-![Badge1](url) ![Badge2](url)
+${config?.badges !== false ? "![Badge1](url) ![Badge2](url) ![Badge3](url)" : ""}
+
+
+## Overview
+
+
+2-3 sentences explaining what THIS SPECIFIC PROJECT does. Read the project name and description carefully. Don't assume it's the same as other projects.
 
 
 ## Features
 
 
-- Actual feature 1 from analysis
-- Actual feature 2 from analysis
+**ANALYZE DEPENDENCIES AND FRAMEWORK TO DETERMINE FEATURES:**
+
+**If Framework = "React Native (Expo)" or "React Native":**
+- This is a MOBILE APP - NO web routes!
+- Infer features from:
+  * Project name (e.g., "Recode" = coding practice, "FitTrack" = fitness tracking)
+  * Dependencies (@google/genai = AI features, @react-navigation = multiple screens)
+  * Project description
+- Example features for coding app: "Practice coding challenges", "Get AI-powered feedback", "Track your progress"
+
+**If Framework = "Next.js" and pages detected:**
+- This is a WEB APP
+- Transform routes to actions:
+  * /dashboard → "View analytics dashboard"
+  * /projects → "Manage your projects"
+  * /settings → "Configure preferences"
+
+**If Framework = "React" or "Express":**
+- Analyze dependencies to understand purpose
+- Describe features based on what the dependencies enable
 
 
 ## Tech Stack
 
 
-List of actual technologies used
+- **Framework:** Next.js 14 with App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth
+- **AI:** OpenAI API
+- **Other:** List other key dependencies
+
+Keep it simple - just list the main technologies.
 
 
-## Installation
+## Getting Started
 
 
-Framework-specific installation steps
+### Prerequisites
 
-\`\`\`
-npm install
-\`\`\`
+- Node.js 18+ and npm
+- For mobile apps: iOS Simulator (Mac) or Android Emulator
+- Accounts: List required accounts based on dependencies
 
+### Installation
 
-## Usage
+1. Clone the repository:
+   \`\`\`bash
+   git clone <repo-url>
+   cd project-name
+   \`\`\`
 
+2. Install dependencies:
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-How to actually use this project
+3. Set up environment variables (if needed):
+   
+   Create a \`.env\` or \`.env.local\` file with required keys
 
-
-## Contributing
-
-
-Standard contributing guidelines
+4. Run the app:
+   
+   **For Next.js/Web apps:**
+   \`\`\`bash
+   npm run dev
+   \`\`\`
+   Open [http://localhost:3000](http://localhost:3000)
+   
+   **For Expo/React Native apps:**
+   \`\`\`bash
+   npm start
+   \`\`\`
+   Scan QR code with Expo Go app or press 'i' for iOS simulator, 'a' for Android emulator
 
 
 ## License
 
 
-License information
+This project is licensed under the MIT License.
 
+
+---
+
+**CRITICAL INSTRUCTIONS FOR GENERATION:**
+1. Keep the intro SHORT (1-2 sentences max)
+2. List actual features/pages from the analysis
+3. Use actual dependencies for Tech Stack
+4. Make installation steps match the actual scripts
+5. Don't repeat information
+6. Don't use overly flowery language
+7. Focus on WHAT users can do, not abstract benefits
+8. If it's a portfolio/career app, say that clearly
+9. If it has specific pages (dashboard, projects, etc.), list them
+10. Make it scannable - a developer should understand the project in 2 minutes
 
 IMPORTANT: Return ONLY the Markdown content with proper spacing. Do NOT wrap in code blocks:`;
 }
@@ -332,9 +543,28 @@ async function callOpenAI(
       messages: [
         {
           role: "system",
-          content: `You are an expert technical writer who creates professional ${type === "project" ? "project" : "GitHub profile"} README files. 
+          content: `You are an expert technical writer creating a README for a new developer joining this project.
 
-CRITICAL FORMATTING RULES:
+YOUR GOAL:
+Write a README that helps someone understand and run the project in under 5 minutes.
+
+WRITING STYLE:
+- Be CONCISE and DIRECT - no fluff or marketing speak
+- Focus on WHAT users can do, not abstract benefits
+- Use simple, clear language
+- List actual features/pages, not vague capabilities
+- Make it scannable with clear sections
+- Use emojis sparingly (only for section headers if at all)
+
+CRITICAL RULES:
+1. Intro: 1-2 sentences MAX explaining what the app does
+2. Overview: 2-3 sentences about purpose and target users
+3. Features: List actual pages/features users can access
+4. Tech Stack: Simple bullet list of main technologies
+5. Getting Started: Clear, step-by-step installation
+6. Keep it SHORT - quality over quantity
+
+FORMATTING:
 1. Add TWO blank lines after the title
 2. Add TWO blank lines before each ## heading
 3. Add ONE blank line after each ## heading
@@ -342,9 +572,37 @@ CRITICAL FORMATTING RULES:
 5. Add ONE blank line before and after code blocks
 6. Add ONE blank line before and after lists
 7. Put badges on their own line with blank lines above and below
-8. Ensure proper spacing throughout
 
-Generate clear, well-structured Markdown with proper line breaks.`,
+AVOID:
+- Repetitive explanations
+- Marketing language ("revolutionary", "innovative", "seamless", "engaging")
+- Just listing page routes without explaining what users can do
+- Long paragraphs
+- Abstract concepts without concrete examples
+
+**DEPENDENCY-BASED FEATURE INFERENCE:**
+
+Study the dependencies to understand what the app can do:
+- **@google/genai** or **openai** → AI-powered features (code generation, feedback, chat)
+- **@supabase/supabase-js** → User authentication, database storage
+- **@react-navigation** → Multiple screens/navigation (mobile)
+- **expo-camera** → Camera functionality
+- **expo-location** → Location tracking
+- **@stripe** → Payment processing
+- **socket.io** → Real-time communication
+- **axios** or **fetch** → API integration
+
+**FRAMEWORK-SPECIFIC FEATURES:**
+- **React Native/Expo**: Mobile app features (touch gestures, notifications, offline support)
+- **Next.js**: Server-side rendering, API routes, optimized performance
+- **Express**: RESTful API, backend services
+
+**IMPORTANT:** 
+- Each project is UNIQUE - analyze its specific dependencies and framework
+- Don't assume features - derive them from actual dependencies
+- Mobile apps ≠ Web apps (different features, different installation)
+
+Generate clear, CONCISE, scannable Markdown.`,
         },
         {
           role: "user",
@@ -352,7 +610,7 @@ Generate clear, well-structured Markdown with proper line breaks.`,
         },
       ],
       temperature: 0.7,
-      max_tokens: 2000,
+      max_tokens: 3000,
     });
 
     const responseText = completion.choices[0]?.message?.content;
@@ -414,13 +672,27 @@ export function generateBadges(technologies: string[]): string {
       "![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)",
     Docker:
       "![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)",
+    Supabase:
+      "![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)",
+    PostgreSQL:
+      "![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)",
+    Vercel:
+      "![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)",
+    "Framer Motion":
+      "![Framer](https://img.shields.io/badge/Framer-black?style=for-the-badge&logo=framer&logoColor=blue)",
+    Vitest:
+      "![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)",
+    ESLint:
+      "![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)",
+    Prettier:
+      "![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=for-the-badge&logo=prettier&logoColor=black)",
   };
 
   return technologies
     .map(
       (tech) =>
         badgeMap[tech] ||
-        `![${tech}](https://img.shields.io/badge/${tech}-blue?style=for-the-badge)`
+        `![${tech}](https://img.shields.io/badge/${encodeURIComponent(tech)}-blue?style=for-the-badge)`
     )
     .join(" ");
 }

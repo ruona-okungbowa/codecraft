@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import ReadmeClient from "./client";
+import AlternativeReadmeClient from "./alternative-client";
 
 function ReadmeLoading() {
   return (
@@ -15,7 +16,7 @@ function ReadmeLoading() {
 export default function ReadmeGeneratorPage() {
   return (
     <Suspense fallback={<ReadmeLoading />}>
-      <ReadmeClient />
+      <AlternativeReadmeClient />
     </Suspense>
   );
 }

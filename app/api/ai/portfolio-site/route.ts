@@ -9,7 +9,7 @@ import { generatePortfolioHTML } from "@/lib/templates/portfolio-template";
 import { generatePortfolioReadme } from "@/lib/templates/portfolio-readme";
 import { deployToGitHubPages } from "@/lib/github/deployPortfolio";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     const {
@@ -23,6 +23,10 @@ export async function POST() {
         { status: 401 }
       );
     }
+
+    // Get configuration from request body
+    const body = await request.json();
+    const config = body.config || {};
 
     const { data: userData } = await supabase
       .from("users")
@@ -39,11 +43,19 @@ export async function POST() {
       );
     }
 
-    const { data: projects, error: projectsError } = await supabase
+    // Fetch projects based on selected IDs from config, or fall back to in_portfolio
+    let projectsQuery = supabase
       .from("projects")
       .select("*")
-      .eq("user_id", user.id)
-      .eq("in_portfolio", true)
+      .eq("user_id", user.id);
+
+    if (config.selectedProjects && config.selectedProjects.length > 0) {
+      projectsQuery = projectsQuery.in("id", config.selectedProjects);
+    } else {
+      projectsQuery = projectsQuery.eq("in_portfolio", true);
+    }
+
+    const { data: projects, error: projectsError } = await projectsQuery
       .order("stars", { ascending: false })
       .limit(6);
 
@@ -66,7 +78,10 @@ export async function POST() {
     }
 
     console.log("Generating portfolio bio...");
-    const bio = await generatePortfolioBio(projects, userData.target_role);
+    // Use custom bio if provided, otherwise generate one
+    const bio =
+      config.bio ||
+      (await generatePortfolioBio(projects, userData.target_role));
 
     console.log("Generating project descriptions...");
     const projectsWithDescriptions = await Promise.all(
@@ -88,11 +103,12 @@ export async function POST() {
     const skills = Array.from(skillsSet);
 
     console.log("Generating portfolio HTML...");
-    // Use full name if available, otherwise fall back to GitHub username
+    // Use custom name if provided, otherwise use full name or GitHub username
     const displayName =
-      userData.first_name && userData.last_name
+      config.name ||
+      (userData.first_name && userData.last_name
         ? `${userData.first_name} ${userData.last_name}`
-        : userData.github_username;
+        : userData.github_username);
 
     const htmlContent = generatePortfolioHTML(
       displayName,
@@ -101,7 +117,8 @@ export async function POST() {
       projectsWithDescriptions,
       skills,
       userData.email,
-      userData.avatar_url
+      userData.avatar_url,
+      config.sections // Pass sections configuration
     );
 
     console.log("Deploying to GitHub Pages...");

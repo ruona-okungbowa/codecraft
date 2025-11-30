@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 
 interface CategoryScore {
@@ -28,19 +28,18 @@ interface InterviewData {
   created_at: string;
 }
 
-export default function FeedbackPage() {
+export default function FeedbackClient({
+  interviewId,
+}: {
+  interviewId: string;
+}) {
   const router = useRouter();
-  const params = useParams();
-  const interviewId = params.id as string;
-
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [interview, setInterview] = useState<InterviewData | null>(null);
-  const [openAccordion, setOpenAccordion] = useState<number>(-1);
+  const [openAccordion, setOpenAccordion] = useState<number>(0);
 
   useEffect(() => {
-    if (!interviewId) return;
-
     const loadData = async () => {
       try {
         const feedbackResponse = await fetch(
@@ -206,7 +205,7 @@ export default function FeedbackPage() {
               <details
                 key={index}
                 className="group bg-white p-6 rounded-lg border border-slate-200"
-                {...(openAccordion === index ? { open: true } : {})}
+                open={openAccordion === index}
                 onToggle={() =>
                   setOpenAccordion(openAccordion === index ? -1 : index)
                 }
@@ -291,6 +290,15 @@ export default function FeedbackPage() {
                     folder_managed
                   </span>
                   Review Projects
+                </button>
+                <button
+                  onClick={() => router.push("/mock-interview")}
+                  className="w-full flex items-center justify-center gap-2 text-center bg-slate-100 text-slate-800 font-medium py-3 px-4 rounded hover:bg-slate-200 transition-colors duration-200"
+                >
+                  <span className="material-symbols-outlined">
+                    psychology_alt
+                  </span>
+                  Strengthen Answers
                 </button>
               </div>
             </div>

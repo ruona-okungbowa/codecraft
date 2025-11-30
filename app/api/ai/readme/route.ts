@@ -5,7 +5,12 @@ import { validateMarkdown } from "@/lib/utils/validateMarkdown";
 
 export async function POST(request: Request) {
   try {
-    const { projectId, enhance } = await request.json();
+    const {
+      projectId,
+      enhance,
+      template = "professional",
+      forceRegenerate = false,
+    } = await request.json();
 
     if (!projectId) {
       return NextResponse.json(
@@ -43,7 +48,7 @@ export async function POST(request: Request) {
       .limit(1)
       .single();
 
-    if (existingContent) {
+    if (existingContent && !forceRegenerate) {
       const createdAt = new Date(existingContent.created_at);
       const now = new Date();
       const hoursSinceCreation =
@@ -76,7 +81,8 @@ export async function POST(request: Request) {
       project,
       enhance ? githubToken : undefined,
       owner,
-      repo
+      repo,
+      template as "minimal" | "detailed" | "visual" | "professional"
     );
 
     const validation = validateMarkdown(readme);

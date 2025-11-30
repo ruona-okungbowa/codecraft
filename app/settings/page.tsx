@@ -1,41 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-  User,
-  Mail,
-  Github,
-  Briefcase,
-  Save,
-  Loader2,
-  CheckCircle,
-  AlertCircle,
-  LogOut,
-  Trash2,
-  Shield,
-} from "lucide-react";
-import { Newsreader, Sansation } from "next/font/google";
-import DashboardSidebar from "@/components/DashboardSidebar";
-import Image from "next/image";
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const sansation = Sansation({
-  subsets: ["latin"],
-  weight: ["400"],
-});
-
-type TargetRole = "frontend" | "backend" | "fullstack" | "devops" | null;
+import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import { createClient } from "@/lib/supabase/client";
 
 interface UserProfile {
   github_username: string;
   email?: string;
   avatar_url?: string;
-  target_role?: TargetRole;
+  target_role?: string;
   first_name?: string;
   last_name?: string;
 }
@@ -44,15 +17,12 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<{
-    type: "success" | "error" | null;
-    message: string;
-  }>({ type: null, message: "" });
+  const [syncing, setSyncing] = useState(false);
 
   // Form state
-  const [targetRole, setTargetRole] = useState<TargetRole>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [targetRole, setTargetRole] = useState("fullstack");
 
   useEffect(() => {
     fetchProfile();
@@ -64,9 +34,9 @@ export default function SettingsPage() {
       if (response.ok) {
         const data = await response.json();
         setProfile(data);
-        setTargetRole(data.target_role || null);
         setFirstName(data.first_name || "");
         setLastName(data.last_name || "");
+        setTargetRole(data.target_role || "fullstack");
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
@@ -75,383 +45,304 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleSave() {
+  async function handleSaveProfile() {
     setSaving(true);
-    setSaveStatus({ type: null, message: "" });
-
     try {
       const response = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          target_role: targetRole,
           first_name: firstName.trim() || null,
           last_name: lastName.trim() || null,
         }),
       });
 
       if (response.ok) {
-        setSaveStatus({
-          type: "success",
-          message: "Settings saved successfully!",
-        });
+        alert("Profile updated successfully!");
         await fetchProfile();
       } else {
-        const data = await response.json();
-        setSaveStatus({
-          type: "error",
-          message: data.error || "Failed to save settings",
-        });
+        alert("Failed to update profile");
       }
-    } catch {
-      setSaveStatus({
-        type: "error",
-        message: "An error occurred while saving",
-      });
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert("An error occurred");
     } finally {
       setSaving(false);
-      setTimeout(() => setSaveStatus({ type: null, message: "" }), 5000);
+    }
+  }
+
+  async function handleSaveCareerPreferences() {
+    setSaving(true);
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target_role: targetRole,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Career preferences updated successfully!");
+        await fetchProfile();
+      } else {
+        alert("Failed to update preferences");
+      }
+    } catch (error) {
+      console.error("Error saving preferences:", error);
+      alert("An error occurred");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleSyncGitHub() {
+    setSyncing(true);
+    try {
+      const response = await fetch("/api/github/repos", { method: "POST" });
+      if (response.ok) {
+        alert("GitHub synced successfully!");
+      } else {
+        alert("Failed to sync GitHub");
+      }
+    } catch (error) {
+      console.error("Error syncing GitHub:", error);
+      alert("An error occurred");
+    } finally {
+      setSyncing(false);
     }
   }
 
   async function handleLogout() {
-    window.location.href = "/api/auth/logout";
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/login";
   }
-
-  const roles = [
-    {
-      value: "frontend" as TargetRole,
-      label: "Frontend Developer",
-      description: "React, Vue, Angular, UI/UX",
-    },
-    {
-      value: "backend" as TargetRole,
-      label: "Backend Developer",
-      description: "APIs, Databases, Server-side",
-    },
-    {
-      value: "fullstack" as TargetRole,
-      label: "Full Stack Developer",
-      description: "Frontend + Backend",
-    },
-    {
-      value: "devops" as TargetRole,
-      label: "DevOps Engineer",
-      description: "CI/CD, Cloud, Infrastructure",
-    },
-  ];
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
-        <DashboardSidebar />
-        <div className="ml-0 md:ml-[72px] flex-1 flex items-center justify-center">
-          <Loader2 size={48} className="text-gray-400 animate-spin" />
-        </div>
+      <div className="flex min-h-screen bg-[#f6f7f8]">
+        <CollapsibleSidebar />
+        <main className="flex-1 p-8 ml-20 flex items-center justify-center">
+          <p className="text-slate-500">Loading...</p>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <DashboardSidebar />
+    <div className="flex min-h-screen bg-[#f6f7f8]">
+      <CollapsibleSidebar />
 
-      <div className="ml-0 md:ml-[72px] flex-1 overflow-x-hidden">
-        {/* Header */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          <div className="px-10 py-6">
-            <h1
-              className={`text-[28px] font-bold text-gray-900 ${newsreader.className}`}
-            >
-              Settings
-            </h1>
-            <p className={`text-sm text-gray-600 mt-1 ${sansation.className}`}>
-              Manage your account and preferences
-            </p>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="px-10 py-8 max-w-4xl mx-auto">
-          {/* Profile Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <User size={20} className="text-gray-700" />
-              <h2
-                className={`text-xl font-bold text-gray-900 ${newsreader.className}`}
-              >
-                Profile Information
-              </h2>
+      <main className="flex-1 p-8 md:p-12 ml-20">
+        <div className="max-w-4xl mx-auto">
+          {/* Page Heading */}
+          <div className="flex flex-wrap justify-between gap-3 pb-8">
+            <div className="flex min-w-72 flex-col gap-3">
+              <h1 className="text-slate-900 text-4xl font-black leading-tight tracking-[-0.033em]">
+                Settings
+              </h1>
+              <p className="text-slate-500 text-base font-normal leading-normal">
+                Manage your account, preferences, and data.
+              </p>
             </div>
+          </div>
 
-            <div className="space-y-4">
-              {/* Name Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="firstName"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Enter your first name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Used in portfolio and resume
-                  </p>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="lastName"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Enter your last name"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Used in portfolio and resume
-                  </p>
-                </div>
-              </div>
-
-              {/* Avatar & Username */}
-              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                {profile?.avatar_url ? (
-                  <Image
-                    src={profile.avatar_url}
-                    alt="Profile"
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-full border-2 border-gray-200"
-                  />
-                ) : (
-                  <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
-                    <User size={32} className="text-gray-600" />
+          {/* Profile Section */}
+          <div className="bg-white rounded-lg p-6 mb-8 border border-slate-200">
+            <h2 className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">
+              Profile
+            </h2>
+            <div className="flex p-4 border-b border-slate-200 mb-6">
+              <div className="flex w-full flex-col gap-4 md:flex-row md:justify-between md:items-center">
+                <div className="flex gap-4 items-center">
+                  {profile?.avatar_url ? (
+                    <div
+                      className="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-24 w-24"
+                      style={{
+                        backgroundImage: `url(${profile.avatar_url})`,
+                      }}
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-slate-300" />
+                  )}
+                  <div className="flex flex-col justify-center">
+                    <p className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em]">
+                      Update your photo
+                    </p>
+                    <p className="text-slate-500 text-base font-normal leading-normal">
+                      This will be displayed on your profile.
+                    </p>
                   </div>
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Github size={16} className="text-gray-600" />
-                    <span className="font-semibold text-gray-900">
+                </div>
+                <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#4c96e1]/10 text-[#4c96e1] text-sm font-bold leading-normal tracking-[0.015em]">
+                  <span className="truncate">Upload Image</span>
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+              <label className="flex flex-col">
+                <p className="text-slate-900 text-base font-medium leading-normal pb-2">
+                  First name
+                </p>
+                <input
+                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded text-slate-900 focus:outline-0 focus:ring-2 focus:ring-[#4c96e1]/50 border border-slate-300 bg-[#f6f7f8] h-12 placeholder:text-slate-400 p-3 text-base font-normal leading-normal"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </label>
+              <label className="flex flex-col">
+                <p className="text-slate-900 text-base font-medium leading-normal pb-2">
+                  Last name
+                </p>
+                <input
+                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded text-slate-900 focus:outline-0 focus:ring-2 focus:ring-[#4c96e1]/50 border border-slate-300 bg-[#f6f7f8] h-12 placeholder:text-slate-400 p-3 text-base font-normal leading-normal"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </label>
+              <label className="flex flex-col">
+                <p className="text-slate-900 text-base font-medium leading-normal pb-2">
+                  Email
+                </p>
+                <input
+                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded text-slate-900 focus:outline-0 focus:ring-2 focus:ring-[#4c96e1]/50 border border-slate-300 bg-[#f6f7f8] h-12 placeholder:text-slate-400 p-3 text-base font-normal leading-normal"
+                  value={profile?.email || ""}
+                  readOnly
+                />
+              </label>
+              <label className="flex flex-col">
+                <p className="text-slate-900 text-base font-medium leading-normal pb-2">
+                  GitHub Username
+                </p>
+                <input
+                  className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded text-slate-500 focus:outline-0 border border-slate-300 bg-slate-100 h-12 p-3 text-base font-normal leading-normal cursor-not-allowed"
+                  readOnly
+                  value={profile?.github_username || ""}
+                />
+              </label>
+            </div>
+            <div className="flex justify-end pt-6 px-4">
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[#4c96e1] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#3a7bc8] transition-colors disabled:opacity-50"
+              >
+                <span className="truncate">
+                  {saving ? "Saving..." : "Save Changes"}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Career Preferences Section */}
+          <div className="bg-white rounded-lg p-6 mb-8 border border-slate-200">
+            <h2 className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">
+              Career Preferences
+            </h2>
+            <div className="px-4">
+              <label className="flex flex-col max-w-md">
+                <p className="text-slate-900 text-base font-medium leading-normal pb-2">
+                  Target Role
+                </p>
+                <select
+                  className="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded text-slate-900 focus:outline-0 focus:ring-2 focus:ring-[#4c96e1]/50 border border-slate-300 bg-[#f6f7f8] h-12 p-3 text-base font-normal leading-normal"
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                >
+                  <option value="frontend">Frontend Developer</option>
+                  <option value="fullstack">Full Stack Developer</option>
+                  <option value="backend">Backend Developer</option>
+                  <option value="devops">DevOps Engineer</option>
+                </select>
+              </label>
+            </div>
+            <div className="flex justify-end pt-6 px-4">
+              <button
+                onClick={handleSaveCareerPreferences}
+                disabled={saving}
+                className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[#4c96e1] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#3a7bc8] transition-colors disabled:opacity-50"
+              >
+                <span className="truncate">
+                  {saving ? "Saving..." : "Save Changes"}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* GitHub Connection */}
+          <div className="bg-white rounded-lg p-6 mb-8 border border-slate-200">
+            <h2 className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em] pb-5">
+              GitHub Connection
+            </h2>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-green-500 text-3xl">
+                  verified
+                </span>
+                <div>
+                  <p className="text-slate-900 font-medium">
+                    Connected as{" "}
+                    <span className="font-bold text-[#4c96e1]">
                       {profile?.github_username}
                     </span>
-                  </div>
-                  {profile?.email && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Mail size={14} />
-                      <span>{profile.email}</span>
-                    </div>
-                  )}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Last synced: 5 minutes ago
+                  </p>
                 </div>
               </div>
-
-              {/* GitHub Connection Status */}
-              <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <CheckCircle size={20} className="text-green-600" />
-                  <div>
-                    <p className="font-medium text-green-900">
-                      GitHub Connected
-                    </p>
-                    <p className="text-sm text-green-700">
-                      Your account is linked to GitHub
-                    </p>
-                  </div>
-                </div>
-                <Shield size={20} className="text-green-600" />
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Career Preferences */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <Briefcase size={20} className="text-gray-700" />
-              <h2
-                className={`text-xl font-bold text-gray-900 ${newsreader.className}`}
+              <button
+                onClick={handleSyncGitHub}
+                disabled={syncing}
+                className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[#4c96e1] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#3a7bc8] transition-colors disabled:opacity-50"
               >
-                Career Preferences
-              </h2>
+                <span className="truncate">
+                  {syncing ? "Syncing..." : "Sync Now"}
+                </span>
+              </button>
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Target Role
-                </label>
-                <p className="text-sm text-gray-600 mb-4">
-                  Select your target role to get personalized skill gap analysis
-                  and project recommendations
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {roles.map((role) => (
-                    <button
-                      key={role.value}
-                      onClick={() => setTargetRole(role.value)}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        targetRole === role.value
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300 bg-white"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <span
-                          className={`font-semibold ${
-                            targetRole === role.value
-                              ? "text-blue-900"
-                              : "text-gray-900"
-                          }`}
-                        >
-                          {role.label}
-                        </span>
-                        {targetRole === role.value && (
-                          <CheckCircle size={20} className="text-blue-600" />
-                        )}
-                      </div>
-                      <p
-                        className={`text-sm ${
-                          targetRole === role.value
-                            ? "text-blue-700"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        {role.description}
-                      </p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Save Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-between"
-          >
-            <div className="flex-1">
-              {saveStatus.type && (
-                <motion.div
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={`flex items-center gap-2 ${
-                    saveStatus.type === "success"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {saveStatus.type === "success" ? (
-                    <CheckCircle size={20} />
-                  ) : (
-                    <AlertCircle size={20} />
-                  )}
-                  <span className="text-sm font-medium">
-                    {saveStatus.message}
-                  </span>
-                </motion.div>
-              )}
-            </div>
-
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              {saving ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Save size={20} />
-                  <span>Save Changes</span>
-                </>
-              )}
-            </button>
-          </motion.div>
+          </div>
 
           {/* Danger Zone */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 bg-white rounded-xl border border-red-200 shadow-sm p-6"
-          >
-            <h2
-              className={`text-xl font-bold text-red-900 mb-4 ${newsreader.className}`}
-            >
+          <div className="bg-white rounded-lg p-6 border border-red-500/50">
+            <h2 className="text-red-600 text-[22px] font-bold leading-tight tracking-[-0.015em]">
               Danger Zone
             </h2>
-
-            <div className="space-y-4">
-              {/* Logout */}
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+            <p className="text-slate-500 mt-1 mb-6 px-4">
+              These actions are permanent and cannot be undone. Please proceed
+              with caution.
+            </p>
+            <div className="space-y-4 px-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 p-4 border border-slate-200 rounded">
                 <div>
-                  <p className="font-medium text-gray-900">Log Out</p>
-                  <p className="text-sm text-gray-600">
-                    Sign out of your account
+                  <p className="font-bold text-slate-900">
+                    Delete All Generated Content
                   </p>
+                  <p className="text-sm text-slate-500">
+                    Permanently remove all portfolio materials generated by
+                    CodeCraft.
+                  </p>
+                </div>
+                <button className="flex-shrink-0 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 border border-red-600 text-red-600 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-600 hover:text-white transition-colors">
+                  Delete Content
+                </button>
+              </div>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 p-4 border border-slate-200 rounded">
+                <div>
+                  <p className="font-bold text-slate-900">Done For The Day?</p>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                  className="flex-shrink-0 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-red-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-700 transition-colors"
                 >
-                  <LogOut size={18} />
-                  <span>Log Out</span>
-                </button>
-              </div>
-
-              {/* Delete Account */}
-              <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
-                <div>
-                  <p className="font-medium text-red-900">Delete Account</p>
-                  <p className="text-sm text-red-700">
-                    Permanently delete your account and all data
-                  </p>
-                </div>
-                <button
-                  onClick={() =>
-                    alert(
-                      "Account deletion is not yet implemented. Please contact support."
-                    )
-                  }
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                >
-                  <Trash2 size={18} />
-                  <span>Delete</span>
+                  Log Out
                 </button>
               </div>
             </div>
-          </motion.div>
-        </main>
-      </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
