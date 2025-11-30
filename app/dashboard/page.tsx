@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lightbulb, Briefcase, Mic, Folder, TrendingUp } from "lucide-react";
+import { Lightbulb, Briefcase, Mic, Folder } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ProjectRow } from "@/types";
@@ -9,9 +9,12 @@ import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 
 interface PortfolioScore {
   overallScore: number;
+  rank?: string;
   projectQualityScore: number;
   techDiversityScore: number;
   documentationScore: number;
+  consistencyScore: number;
+  professionalismScore?: number;
 }
 
 export default function DashboardPage() {
@@ -21,8 +24,6 @@ export default function DashboardPage() {
   );
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("there");
-  const [userEmail, setUserEmail] = useState("");
-  const [userAvatar, setUserAvatar] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -38,8 +39,6 @@ export default function DashboardPage() {
               user.email?.split("@")[0] ||
               "there"
           );
-          setUserEmail(user.email || "");
-          setUserAvatar(user.user_metadata?.avatar_url || "");
         }
 
         const [projectsRes, scoreRes] = await Promise.all([
@@ -67,13 +66,41 @@ export default function DashboardPage() {
   }, []);
 
   const score = portfolioScore?.overallScore || 0;
-  const readmeScore = Math.round(
-    (portfolioScore?.documentationScore || 0) * 10
+  const rank = portfolioScore?.rank || "C";
+
+  // Convert 0-100 scores to 0-10 scale for display
+  const projectQualityDisplay = Math.round(
+    (portfolioScore?.projectQualityScore || 0) / 10
   );
-  const codeScore = Math.round((portfolioScore?.projectQualityScore || 0) * 10);
-  const diversityScore = Math.round(
-    (portfolioScore?.techDiversityScore || 0) * 10
+  const documentationDisplay = Math.round(
+    (portfolioScore?.documentationScore || 0) / 10
   );
+  const techDiversityDisplay = Math.round(
+    (portfolioScore?.techDiversityScore || 0) / 10
+  );
+  const consistencyDisplay = Math.round(
+    (portfolioScore?.consistencyScore || 0) / 10
+  );
+  const professionalismDisplay = Math.round(
+    (portfolioScore?.professionalismScore || 0) / 10
+  );
+
+  const getScoreLabel = (score: number): string => {
+    if (score >= 85) return "Excellent";
+    if (score >= 70) return "Good";
+    if (score >= 50) return "Fair";
+    return "Needs Work";
+  };
+
+  const getScoreMessage = (score: number): string => {
+    if (score >= 85)
+      return "Your portfolio is in great shape and ready to impress recruiters!";
+    if (score >= 70)
+      return "Your portfolio is good, but there's room for improvement.";
+    if (score >= 50)
+      return "Your portfolio needs some work to be interview-ready.";
+    return "Focus on building quality projects and documentation.";
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
@@ -145,35 +172,53 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="text-2xl font-bold mb-2 text-black">
-                    Excellent Portfolio Score!
-                  </h3>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-2xl font-bold text-black">
+                      {getScoreLabel(score)} Portfolio Score!
+                    </h3>
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">
+                      Rank: {rank}
+                    </span>
+                  </div>
                   <p className="text-black mb-6 max-w-sm">
-                    Your portfolio is looking strong. Keep up the great work and
-                    refine your projects to reach a perfect score.
+                    {getScoreMessage(score)}
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-green-500"></span>
-                      <span className="text-sm">
-                        README Quality: {readmeScore}/10
-                      </span>
-                    </div>
+                  <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-blue-500"></span>
                       <span className="text-sm">
-                        Code Best Practices: {codeScore}/10
+                        Project Quality: {projectQualityDisplay}/10
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                      <span className="text-sm">
+                        Documentation: {documentationDisplay}/10
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-3 h-3 rounded-full bg-purple-500"></span>
+                      <span className="text-sm">
+                        Tech Diversity: {techDiversityDisplay}/10
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
                       <span className="text-sm">
-                        Project Diversity: {diversityScore}/10
+                        Consistency: {consistencyDisplay}/10
                       </span>
                     </div>
+                    {professionalismDisplay > 0 && (
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-pink-500"></span>
+                        <span className="text-sm">
+                          Professionalism: {professionalismDisplay}/10
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <Link
-                    href="/portfolio-score"
+                    href="/portfolio-score/detailed"
                     className="font-semibold hover:underline"
                     style={{ color: "#4c96e1" }}
                   >
@@ -235,64 +280,6 @@ export default function DashboardPage() {
                   </p>
                 </Link>
               </div>
-
-              {/* Recent Activity */}
-              <div className="bg-white p-6 rounded-xl shadow-sm">
-                <h3 className="text-xl font-bold mb-4 text-black">
-                  Recent Activity & Updates
-                </h3>
-                <ul className="space-y-4">
-                  {loading ? (
-                    <li className="text-gray-500">Loading...</li>
-                  ) : (
-                    <>
-                      <li className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-green-500/10 flex-shrink-0 flex items-center justify-center mt-1">
-                          <TrendingUp className="w-5 h-5 text-green-500" />
-                        </div>
-                        <div>
-                          <p>
-                            <strong>
-                              Portfolio Score: {Math.round(score)}/100
-                            </strong>
-                          </p>
-                          <time className="text-sm text-gray-600">
-                            Just now
-                          </time>
-                        </div>
-                      </li>
-                      {projects.slice(0, 3).map((project) => (
-                        <li key={project.id} className="flex items-start gap-4">
-                          <div
-                            className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center mt-1"
-                            style={{
-                              backgroundColor: "rgba(76, 150, 225, 0.1)",
-                            }}
-                          >
-                            <Folder
-                              className="w-5 h-5"
-                              style={{ color: "#4c96e1" }}
-                            />
-                          </div>
-                          <div>
-                            <p>
-                              Synced project:{" "}
-                              <span className="font-semibold">
-                                {project.name}
-                              </span>
-                            </p>
-                            <time className="text-sm text-gray-600">
-                              {new Date(
-                                project.created_at
-                              ).toLocaleDateString()}
-                            </time>
-                          </div>
-                        </li>
-                      ))}
-                    </>
-                  )}
-                </ul>
-              </div>
             </div>
 
             {/* Right Column */}
@@ -340,7 +327,7 @@ export default function DashboardPage() {
                             className="flex items-center gap-3"
                           >
                             <div
-                              className={`w-8 h-8 flex-shrink-0 rounded ${color.bg} ${color.text} flex items-center justify-center font-bold text-sm`}
+                              className={`w-8 h-8 shrink-0 rounded ${color.bg} ${color.text} flex items-center justify-center font-bold text-sm`}
                             >
                               {project.name.substring(0, 2).toUpperCase()}
                             </div>
