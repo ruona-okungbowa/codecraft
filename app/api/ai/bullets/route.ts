@@ -71,8 +71,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Try to get repo analysis for enhanced context
+    let repoAnalysis;
+    try {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      if (authUser?.user_metadata?.provider_token) {
+        const urlParts = project.url.split("/");
+        const owner = urlParts[urlParts.length - 2];
+        const repo = urlParts[urlParts.length - 1];
+
+        const { analyzeRepository } = await import("@/lib/readme/analyze-repo");
+        repoAnalysis = await analyzeRepository(
+          owner,
+          repo,
+          authUser.user_metadata.provider_token
+        );
+      }
+    } catch (error) {
+      console.log("Could not fetch repo analysis, using basic context");
+    }
+
     // Generate resume bullets using OpenAI
-    const bullets = await generateResumeBullets(project);
+    const bullets = await generateResumeBullets(project, repoAnalysis);
 
     // Store generated content in database
     const { error: insertError } = await supabase

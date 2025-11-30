@@ -26,38 +26,58 @@ interface ResumeBullet {
  * - Collaboration (teamwork, open source)
  */
 export async function generateResumeBullets(
-  project: Project
+  project: Project,
+  repoAnalysis?: {
+    framework: string;
+    dependencies: string[];
+    features: string[];
+    structure: string[];
+  }
 ): Promise<ResumeBullet[]> {
   // Extract tech stack
   const techStack = project.languages
     ? Object.keys(project.languages).slice(0, 5).join(", ")
     : "various technologies";
 
-  // Build context for AI
-  const context = `
-Project: ${project.name}
+  // Build enhanced context
+  let context = `---------------------------------------
+📌 PROJECT CONTEXT (REAL DATA)
+---------------------------------------
+Name: ${project.name}
 Description: ${project.description || "No description provided"}
-Tech Stack: ${techStack}
+Technologies/Languages: ${techStack}
 GitHub Stars: ${project.stars || 0}
-GitHub Forks: ${project.forks || 0}
-URL: ${project.url}
-  `.trim();
+GitHub Forks: ${project.forks || 0}`;
 
-  const prompt = `You are a professional resume writer helping a software engineer create compelling resume bullet points.
+  if (repoAnalysis) {
+    context += `
+Framework: ${repoAnalysis.framework}
+Features Implemented: ${repoAnalysis.features.slice(0, 8).join(", ")}
+Dependencies Used: ${repoAnalysis.dependencies.slice(0, 10).join(", ")}
+Architecture / Structure: ${repoAnalysis.structure.slice(0, 5).join(", ")}`;
+  }
+
+  const prompt = `You are an expert resume writer. Generate 5-8 resume bullet points based ONLY on the real project data below.
 
 ${context}
 
-Generate 3-5 resume bullet points for this project. Follow these strict requirements:
+---------------------------------------
+📌 REQUIREMENTS
+---------------------------------------
+Each bullet point must:
 
-1. **Action Verbs**: Start each bullet with a strong action verb (Developed, Implemented, Built, Designed, Optimized, Created, Engineered, Architected)
-2. **Quantified Achievements**: Include metrics when possible (e.g., "serving 100+ users", "reduced load time by 40%", "handling 1000+ requests/day")
-3. **Technical Specificity**: Mention specific technologies and frameworks
-4. **Length Constraint**: Each bullet MUST be 150 characters or less
-5. **Professional Tone**: Use professional language suitable for a resume
-6. **Variety**: Provide different emphasis:
-   - 2 bullets emphasizing technical depth (architecture, technologies, implementation)
-   - 2 bullets emphasizing impact (metrics, results, user value)
-   - 1 bullet emphasizing collaboration or open source (if applicable)
+- Start with a strong action verb (Developed, Implemented, Built, Engineered, Architected, Optimized, Designed, Created)
+- Highlight YOUR contributions, not generic features
+- Include technical depth (frameworks, tools, architecture)
+- Show measurable or meaningful impact when possible
+- Avoid guessing — use ONLY verified project data from above
+- Be concise, ATS-friendly, and achievement-based
+- Each bullet MUST be 150 characters or less
+
+Provide variety:
+- 3-4 bullets emphasizing technical implementation (architecture, technologies, features)
+- 2-3 bullets emphasizing impact (performance, scalability, user value)
+- 1-2 bullets emphasizing collaboration or best practices (if applicable)
 
 Format your response as a JSON array of objects with this structure:
 [
@@ -142,12 +162,19 @@ function parseResumeBullets(responseText: string): ResumeBullet[] {
       throw new Error("Response is not an array");
     }
 
-    return parsed.map((item: any) => ({
-      text: item.text || "",
-      emphasis: item.emphasis || "technical",
-      characterCount: (item.text || "").length,
-      actionVerb: item.actionVerb || extractActionVerb(item.text || ""),
-    }));
+    return parsed.map(
+      (item: { text?: string; emphasis?: string; actionVerb?: string }) => {
+        const validEmphasis: "technical" | "impact" | "collaboration" =
+          (item.emphasis as "technical" | "impact" | "collaboration") ||
+          "technical";
+        return {
+          text: item.text || "",
+          emphasis: validEmphasis,
+          characterCount: (item.text || "").length,
+          actionVerb: item.actionVerb || extractActionVerb(item.text || ""),
+        };
+      }
+    );
   } catch (error) {
     console.error("Error parsing resume bullets:", error);
     throw new Error("Failed to parse resume bullets from AI response");
