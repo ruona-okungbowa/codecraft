@@ -1,21 +1,40 @@
 import type { Project } from "@/types";
 
 export const PROMPTS = {
-  story: `You are a professional career coach helping developers create compelling interview stories.
-Generate STAR format stories (Situation, Task, Action, Result) that:
-- Are concise and impactful (200-300 words)
-- Use action verbs and quantified achievements
-- Focus on technical skills and problem-solving
-- Sound natural and conversational
-- Highlight the developer's contributions`,
+  story: `You are an expert resume and interview writer. Generate 2–4 STAR stories based on the project data provided.
 
-  bullet: `You are a professional resume writer specializing in tech resumes.
-Generate resume bullet points that:
-- Start with strong action verbs (Developed, Implemented, Optimized, etc.)
-- Include quantified results when possible
-- Are concise (under 150 characters)
-- Focus on impact and technical skills
-- Follow professional resume standards`,
+Use ONLY the actual project details provided. Do NOT invent technologies or accomplishments.
+
+Each STAR story must include:
+
+⭐ **Situation** — The problem, context, or challenge
+⭐ **Task** — What YOU were responsible for
+⭐ **Action** — Steps YOU took (technical breakdown)
+⭐ **Result** — Impact with measurable outcome when possible
+
+Tone: professional, clear, results-oriented.
+Length: 4–6 sentences per story.
+
+Format each story as:
+**Situation:** [text]
+**Task:** [text]
+**Action:** [text]
+**Result:** [text]
+
+Generate multiple stories focusing on different aspects (architecture, features, performance, etc.).`,
+
+  bullet: `You are an expert resume writer. Generate 5–8 resume bullet points based ONLY on the real project data provided.
+
+Each bullet point must:
+- Start with a strong action verb (Developed, Implemented, Built, Engineered, Architected, Optimized, etc.)
+- Highlight YOUR contributions, not generic features
+- Include technical depth (frameworks, tools, architecture)
+- Show measurable or meaningful impact
+- Avoid guessing — use ONLY verified project data
+- Be concise, ATS-friendly, and achievement-based
+- Be under 150 characters each
+
+Return only the bullet points, one per line, starting with "•".`,
 
   readme: `You are a technical writer creating professional README files.
 Generate README content that:
@@ -58,36 +77,75 @@ URL: ${project.url}
 `.trim();
 }
 
-// Story generation prompt
-export function buildStoryPrompt(project: Project): string {
-  const context = buildProjectContext(project);
+// Story generation prompt with enhanced context
+export function buildStoryPrompt(
+  project: Project,
+  repoAnalysis?: {
+    framework: string;
+    dependencies: string[];
+    features: string[];
+    structure: string[];
+  }
+): string {
+  const languages = Object.keys(project.languages || {}).join(", ");
 
-  return `${context}
+  let prompt = `--------------------------------------- 
+📌 PROJECT CONTEXT (REAL DATA)
+---------------------------------------
+Name: ${project.name}
+Description: ${project.description || "No description provided"}
+Technologies/Languages: ${languages}
+Stars: ${project.stars}
+Forks: ${project.forks}`;
 
-Generate a STAR format interview story for this project. Structure it as:
+  if (repoAnalysis) {
+    prompt += `
+Framework: ${repoAnalysis.framework}
+Dependencies: ${repoAnalysis.dependencies.slice(0, 10).join(", ")}
+Features: ${repoAnalysis.features.slice(0, 5).join(", ")}
+Structure: ${repoAnalysis.structure.slice(0, 5).join(", ")}`;
+  }
 
-**Situation:** Brief context about the project and why it was needed
-**Task:** What you needed to accomplish
-**Action:** Specific steps you took, technologies you used, challenges you solved
-**Result:** Quantified outcomes and impact
+  prompt += `
 
-Make it compelling and interview-ready.`;
+Generate 2-4 STAR stories for this project now.`;
+
+  return prompt;
 }
 
-// Resume bullet prompt
-export function buildBulletPrompt(project: Project, count: number = 3): string {
-  const context = buildProjectContext(project);
+// Resume bullet prompt with enhanced context
+export function buildBulletPrompt(
+  project: Project,
+  count: number = 5,
+  repoAnalysis?: {
+    framework: string;
+    dependencies: string[];
+    features: string[];
+    structure: string[];
+  }
+): string {
+  const languages = Object.keys(project.languages || {}).join(", ");
 
-  return `${context}
+  let prompt = `--------------------------------------- 
+📌 PROJECT CONTEXT (REAL DATA)
+---------------------------------------
+Name: ${project.name}
+Description: ${project.description || "No description provided"}
+Technologies/Languages: ${languages}`;
 
-Generate ${count} resume bullet points for this project. Each bullet should:
-- Start with a strong action verb
-- Highlight technical skills and technologies
-- Include quantified results if possible
-- Be under 150 characters
-- Focus on different aspects of the project
+  if (repoAnalysis) {
+    prompt += `
+Framework: ${repoAnalysis.framework}
+Features Implemented: ${repoAnalysis.features.slice(0, 8).join(", ")}
+Dependencies Used: ${repoAnalysis.dependencies.slice(0, 10).join(", ")}
+Architecture / Structure: ${repoAnalysis.structure.slice(0, 5).join(", ")}`;
+  }
 
-Return only the bullet points, one per line, starting with "•".`;
+  prompt += `
+
+Generate ${count} resume bullet points for this project now.`;
+
+  return prompt;
 }
 
 // README generation prompt

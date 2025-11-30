@@ -58,18 +58,40 @@ export async function POST(request: Request) {
       }
     }
 
+    // Try to get repo analysis for enhanced context
+    let repoAnalysis;
+    try {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
+      if (authUser?.user_metadata?.provider_token) {
+        const urlParts = project.url.split("/");
+        const owner = urlParts[urlParts.length - 2];
+        const repo = urlParts[urlParts.length - 1];
+
+        const { analyzeRepository } = await import("@/lib/readme/analyze-repo");
+        repoAnalysis = await analyzeRepository(
+          owner,
+          repo,
+          authUser.user_metadata.provider_token
+        );
+      }
+    } catch (error) {
+      console.log("Could not fetch repo analysis, using basic context");
+    }
+
     // Generate story with OpenAI
     console.log("Generating story for project:", project.name);
 
     const story = await generateCompletion(
       [
         { role: "system", content: PROMPTS.story },
-        { role: "user", content: buildStoryPrompt(project) },
+        { role: "user", content: buildStoryPrompt(project, repoAnalysis) },
       ],
       {
         model: "gpt-4o-mini",
         temperature: 0.7,
-        maxTokens: 800,
+        maxTokens: 1200,
       }
     );
 
