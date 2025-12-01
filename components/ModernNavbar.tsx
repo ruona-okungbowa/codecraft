@@ -81,8 +81,8 @@ export default function ModernNavbar() {
             href="/login"
             className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-11 px-6 text-white text-base font-bold leading-normal tracking-wide shadow-lg transition-all duration-300 transform hover:scale-105"
             style={{
-              backgroundColor: "#4c96e1",
-              boxShadow: "0 10px 15px -3px rgba(76, 150, 225, 0.3)",
+              backgroundColor: "#a855f7",
+              boxShadow: "0 10px 15px -3px rgba(168, 85, 247, 0.3)",
             }}
           >
             <span className="truncate">Sign Up</span>

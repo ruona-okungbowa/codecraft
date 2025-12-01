@@ -40,24 +40,34 @@ export async function POST(request: Request) {
     }
 
     if (!interview.responses || interview.responses.length === 0) {
+      console.error(
+        `Interview ${interviewId} has no responses. Interview data:`,
+        JSON.stringify(interview, null, 2)
+      );
       return NextResponse.json(
-        { error: "Interview has no responses to analyze" },
+        {
+          error: "No responses found",
+          details: `Interview has ${interview.responses?.length || 0} responses. Expected at least 1.`,
+          interviewId,
+        },
         { status: 400 }
       );
     }
 
-    const { data: existingFeedback } = await supabase
+    // Get existing feedback count to determine attempt number
+    const { count: feedbackCount } = await supabase
       .from("feedback")
-      .select("id")
-      .eq("interview_id", interviewId)
-      .single();
+      .select("id", { count: "exact" })
+      .eq("interview_id", interviewId);
 
-    if (existingFeedback) {
-      return NextResponse.json(
-        { error: "Feedback already exists for this interview" },
-        { status: 409 }
-      );
-    }
+    const attemptNumber = (feedbackCount || 0) + 1;
+    console.log(
+      `Generating feedback attempt #${attemptNumber} for interview ${interviewId}`
+    );
+
+    console.log(
+      `Generating feedback for interview ${interviewId} with ${interview.responses.length} responses`
+    );
 
     const transcript = interview.responses.flatMap(
       (response: { question: string; answer: string }) => [
@@ -66,15 +76,25 @@ export async function POST(request: Request) {
       ]
     );
 
-    const feedback = await generateInterviewFeedback(transcript);
+    // Pass both transcript and original questions for better context
+    const feedback = await generateInterviewFeedback(
+      transcript,
+      interview.questions || []
+    );
+
+    console.log(
+      `Feedback generated successfully for interview ${interviewId}. Total score: ${feedback.totalScore}`
+    );
 
     const { data: savedFeedback, error: saveError } = await supabase
       .from("feedback")
       .insert({
         interview_id: interviewId,
         user_id: user.id,
+        attempt_number: attemptNumber,
         total_score: feedback.totalScore,
         category_scores: feedback.categoryScores,
+        question_breakdown: feedback.questionBreakdown,
         strengths: feedback.strengths,
         areas_for_improvement: feedback.areasForImprovement,
         final_assessment: feedback.finalAssessment,
@@ -97,8 +117,38 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error generating feedback:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error("Error details:", {
+      message: errorMessage,
+      stack: errorStack,
+    });
+
+    // Check if it's a rate limit error
+    if (
+      errorMessage.includes("429") ||
+      errorMessage.toLowerCase().includes("rate limit")
+    ) {
+      const retryMatch = errorMessage.match(/try again in ([^.]+)/i);
+      const retryAfter = retryMatch ? retryMatch[1] : "a few minutes";
+
+      return NextResponse.json(
+        {
+          error: "Rate limit exceeded",
+          details: `OpenAI API rate limit reached. Please try again in ${retryAfter}.`,
+          retryAfter,
+          code: "RATE_LIMIT_EXCEEDED",
+        },
+        { status: 429 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        details: errorMessage,
+        stack: process.env.NODE_ENV === "development" ? errorStack : undefined,
+      },
       { status: 500 }
     );
   }

@@ -35,6 +35,7 @@ export interface InterviewRow {
   tech_stack: string[];
   questions: any; // JSONB
   responses?: InterviewResponse[]; // JSONB - stores user answers
+  current_question_index?: number; // Tracks progress during interview
   finalised: boolean;
   created_at: string;
   updated_at: string;

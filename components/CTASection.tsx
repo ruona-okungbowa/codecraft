@@ -49,18 +49,18 @@ export default function CTASection() {
             href="/login"
             className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-16 px-10 text-white text-lg font-bold leading-normal tracking-wide transition-all duration-300 transform hover:scale-105 mt-4 group"
             style={{
-              backgroundColor: "#4c96e1",
-              boxShadow: "0 10px 15px -3px rgba(76, 150, 225, 0.4)",
+              backgroundColor: "#a855f7",
+              boxShadow: "0 10px 15px -3px rgba(168, 85, 247, 0.4)",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = "0.9";
               e.currentTarget.style.boxShadow =
-                "0 20px 25px -5px rgba(76, 150, 225, 0.6)";
+                "0 20px 25px -5px rgba(168, 85, 247, 0.6)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.opacity = "1";
               e.currentTarget.style.boxShadow =
-                "0 10px 15px -3px rgba(76, 150, 225, 0.4)";
+                "0 10px 15px -3px rgba(168, 85, 247, 0.4)";
             }}
           >
             <span className="truncate transition-transform duration-300 group-hover:scale-110">

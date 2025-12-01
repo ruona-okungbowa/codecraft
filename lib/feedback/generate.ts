@@ -7,44 +7,64 @@ interface TranscriptMessage {
 }
 
 export async function generateInterviewFeedback(
-  transcript: TranscriptMessage[]
+  transcript: TranscriptMessage[],
+  originalQuestions: string[] = []
 ): Promise<Feedback> {
-  const formattedTranscript = transcript
-    .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
-    .join("\n\n");
+  try {
+    console.log("Starting feedback generation with:", {
+      transcriptLength: transcript.length,
+      questionsCount: originalQuestions.length,
+    });
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Return your response as valid JSON only.",
-      },
-      {
-        role: "user",
-        content: `You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
+    const formattedTranscript = transcript
+      .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
+      .join("\n\n");
 
-Transcript:
-${formattedTranscript}
+    // Format original questions for context
+    const originalQuestionsText =
+      originalQuestions.length > 0
+        ? `\n\nOriginal Interview Questions:\n${originalQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
+        : "";
 
-Please score the candidate from 0 to 100 in the following areas. Do not add categories other than the ones provided:
-- **Communication Skills**: Clarity, articulation, structured responses.
-- **Technical Knowledge**: Understanding of key concepts for the role.
-- **Problem-Solving**: Ability to analyze problems and propose solutions.
-- **Cultural & Role Fit**: Alignment with company values and job role.
-- **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
+    console.log("Calling OpenAI API...");
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on their actual responses. Return your response as valid JSON only.",
+        },
+        {
+          role: "user",
+          content: `Analyze this mock interview and provide detailed, personalized feedback based on the candidate's actual responses.
+
+Full Transcript:
+${formattedTranscript}${originalQuestionsText}
 
 Provide:
-1. A score (0-100) for each category with detailed feedback
-2. An overall total score (average of all categories)
-3. 3-5 specific strengths demonstrated
-4. 3-5 specific areas for improvement
-5. A comprehensive final assessment (2-3 paragraphs)
+1. An overall total score (0-100) based on all responses
+2. Overall category scores with feedback:
+   - Communication Skills: Clarity, articulation, structured responses
+   - Technical Knowledge: Understanding of key concepts
+   - Problem-Solving: Ability to analyze and propose solutions
+   - Cultural & Role Fit: Alignment with role expectations
+   - Confidence & Clarity: Confidence and engagement
 
-Be honest and constructive. Point out both positives and negatives clearly.
+3. Question-by-question breakdown with:
+   - The exact question asked (use the original questions if provided)
+   - Score for that specific answer (0-100)
+   - What they did well in their answer
+   - What could be improved
+   - Specific actionable tips for improvement (3-5 tips)
 
-Return your response as a JSON object with this exact structure:
+4. 3-5 overall strengths demonstrated across the interview
+5. 3-5 overall areas for improvement
+6. A personalized final assessment (2-3 paragraphs) that references specific things they said
+
+Be honest and constructive. Reference actual quotes or examples from their responses.
+
+Return as JSON with this structure:
 {
   "totalScore": number,
   "categoryScores": [
@@ -74,23 +94,44 @@ Return your response as a JSON object with this exact structure:
       "feedback": "detailed feedback"
     }
   ],
+  "questionBreakdown": [
+    {
+      "questionNumber": 1,
+      "question": "exact question text",
+      "score": number,
+      "whatWentWell": "specific positive aspects",
+      "whatToImprove": "specific areas to improve",
+      "improvementTips": ["tip 1", "tip 2", "tip 3"]
+    }
+  ],
   "strengths": ["strength 1", "strength 2", ...],
   "areasForImprovement": ["area 1", "area 2", ...],
-  "finalAssessment": "comprehensive assessment"
+  "finalAssessment": "personalized assessment referencing their actual responses"
 }`,
-      },
-    ],
-    temperature: 0.7,
-    max_tokens: 2000,
-    response_format: { type: "json_object" },
-  });
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 3000,
+      response_format: { type: "json_object" },
+    });
 
-  const responseText = completion.choices[0]?.message?.content;
+    console.log("OpenAI API call completed");
+    const responseText = completion.choices[0]?.message?.content;
 
-  if (!responseText) {
-    throw new Error("No response from OpenAI");
+    if (!responseText) {
+      throw new Error("No response from OpenAI");
+    }
+
+    console.log("Parsing OpenAI response...");
+    const feedback: Feedback = JSON.parse(responseText);
+    console.log("Feedback parsed successfully");
+    return feedback;
+  } catch (error) {
+    console.error("Error in generateInterviewFeedback:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    throw error;
   }
-
-  const feedback: Feedback = JSON.parse(responseText);
-  return feedback;
 }
