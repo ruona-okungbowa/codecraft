@@ -53,6 +53,34 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, role, level, techstack, amount } = body;
 
+    console.log("Generate interview request:", {
+      type,
+      role,
+      level,
+      techstack,
+      amount,
+      userId,
+    });
+
+    // Validate required fields
+    if (!role) {
+      return NextResponse.json({ error: "Role is required" }, { status: 400 });
+    }
+
+    if (!type) {
+      return NextResponse.json(
+        { error: "Interview type is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!level) {
+      return NextResponse.json(
+        { error: "Experience level is required" },
+        { status: 400 }
+      );
+    }
+
     // Validate amount
     if (!amount || amount < 1 || amount > 10) {
       return NextResponse.json(
@@ -121,7 +149,6 @@ Generate exactly ${amount} questions now:`,
       level,
       techstack: techstack.split(",").map((tech: string) => tech.trim()),
       questions: parsedQuestions,
-      question_count: parsedQuestions.length,
       finalised: true,
     };
 
@@ -146,8 +173,17 @@ Generate exactly ${amount} questions now:`,
       userInterview,
     });
   } catch (error) {
-    console.error("Error generating interview questions", error);
-    return NextResponse.json({ success: false, error }, { status: 500 });
+    console.error("Error generating interview questions:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to generate interview",
+        details: errorMessage,
+      },
+      { status: 500 }
+    );
   }
 }
 
