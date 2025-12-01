@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi/vapi.sdk";
 import { Message } from "@/types/vapi";
 import { createClient } from "@/lib/supabase/client";
+import { interviewer } from "@/lib/vapi/interviewer";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -355,35 +356,20 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    const assistantId = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID;
+    console.log("Starting call with dynamic assistant");
+    console.log("Questions:", questions);
 
-    if (!assistantId) {
-      console.error("NEXT_PUBLIC_VAPI_ASSISTANT_ID is not configured");
-      setCallStatus(CallStatus.INACTIVE);
-      return;
-    }
+    // Format questions as a numbered list
+    const formattedQuestions = questions
+      .map((q, i) => `${i + 1}. ${q}`)
+      .join("\n");
 
-    console.log("Starting call with assistant:", assistantId);
-    console.log("Variables:", {
-      userName,
-      interviewId,
-      role,
-      level,
-      totalQuestions,
-      questions: questions.length,
-    });
+    console.log("Formatted questions:", formattedQuestions);
 
     try {
-      await vapi.start(assistantId, {
+      await vapi.start(interviewer, {
         variableValues: {
-          userName,
-          interviewId,
-          role: role || "Software Engineer",
-          level: level || "junior",
-          totalQuestions: totalQuestions.toString(),
-          currentQuestionIndex: "0",
-          // Pass the actual questions as a JSON string
-          questions: JSON.stringify(questions),
+          questions: formattedQuestions,
         },
       });
     } catch (error) {
