@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { AuthContextProvider } from "@/lib/auth/AuthProvider";
+import AutoLogoutProvider from "@/lib/auth/AutoLogoutProvider";
 import { Newsreader, Sansation } from "next/font/google";
-import UserMenu from "@/components/UserMenu";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import Link from "next/link";
 
 const newsreader = Newsreader({
   style: ["normal"],
@@ -31,16 +30,15 @@ export default function RootLayout({
       lang="en"
       className={`${newsreader.className} ${sansation.className}`}
     >
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body>
         <AuthContextProvider>
-          <Toaster />
-          <main>{children}</main>
+          <AutoLogoutProvider
+            inactivityTimeout={30 * 60 * 1000}
+            warningTime={5 * 60 * 1000}
+          >
+            <Toaster />
+            <main>{children}</main>
+          </AutoLogoutProvider>
         </AuthContextProvider>
       </body>
     </html>
