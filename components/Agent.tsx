@@ -356,8 +356,15 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    console.log("Starting call with dynamic assistant");
+    console.log("=== Starting VAPI Call ===");
     console.log("Questions:", questions);
+    console.log("Total questions:", questions.length);
+
+    if (!questions || questions.length === 0) {
+      console.error("No questions available!");
+      setCallStatus(CallStatus.INACTIVE);
+      return;
+    }
 
     // Format questions as a numbered list
     const formattedQuestions = questions
@@ -365,15 +372,19 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
       .join("\n");
 
     console.log("Formatted questions:", formattedQuestions);
+    console.log("Interviewer config:", interviewer);
 
     try {
-      await vapi.start(interviewer, {
+      console.log("Calling vapi.start...");
+      const result = await vapi.start(interviewer, {
         variableValues: {
           questions: formattedQuestions,
         },
       });
+      console.log("VAPI start result:", result);
     } catch (error) {
       console.error("Failed to start call:", error);
+      console.error("Error details:", JSON.stringify(error, null, 2));
       setCallStatus(CallStatus.INACTIVE);
     }
   };

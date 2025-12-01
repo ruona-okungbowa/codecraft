@@ -11,11 +11,11 @@ export const interviewer: CreateAssistantDTO = {
   },
   voice: {
     provider: "11labs",
-    voiceId: "21m00Tcm4TlvDq8ikWAM",
+    voiceId: "sarah",
   },
   model: {
     provider: "openai",
-    model: "gpt-4",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
