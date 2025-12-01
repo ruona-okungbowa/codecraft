@@ -47,6 +47,8 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [responsesSaved, setResponsesSaved] = useState(false);
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [questionsLoading, setQuestionsLoading] = useState(true);
   const [interviewProgress, setInterviewProgress] = useState({
     current: 0,
     total: 0,
@@ -102,8 +104,11 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
 
   // Fetch total questions when component mounts
   useEffect(() => {
+    if (!interviewId) return;
+
     const fetchQuestions = async () => {
       try {
+        setQuestionsLoading(true);
         const response = await fetch("/api/vapi/get-questions", {
           method: "POST",
           headers: {
@@ -115,16 +120,18 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
 
         if (response.ok) {
           const data = await response.json();
+          setQuestions(data.questions || []);
           setTotalQuestions(data.questions?.length || 0);
+          console.log("Fetched questions for interview:", data.questions);
         }
       } catch (error) {
         console.error("Error fetching questions:", error);
+      } finally {
+        setQuestionsLoading(false);
       }
     };
 
-    if (interviewId) {
-      fetchQuestions();
-    }
+    fetchQuestions();
   }, [interviewId]);
 
   const handleDisconnect = useCallback(() => {
@@ -363,6 +370,7 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
       role,
       level,
       totalQuestions,
+      questions: questions.length,
     });
 
     try {
@@ -374,6 +382,8 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
           level: level || "junior",
           totalQuestions: totalQuestions.toString(),
           currentQuestionIndex: "0",
+          // Pass the actual questions as a JSON string
+          questions: JSON.stringify(questions),
         },
       });
     } catch (error) {
@@ -535,7 +545,7 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
         {callStatus !== CallStatus.ACTIVE ? (
           <button
             onClick={handleCall}
-            disabled={callStatus === CallStatus.CONNECTING}
+            disabled={callStatus === CallStatus.CONNECTING || questionsLoading}
             className="relative inline-flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {callStatus === CallStatus.CONNECTING && (
@@ -543,7 +553,11 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
             )}
             <Phone size={24} className="relative z-10" />
             <span className="relative z-10">
-              {isCallInactiveOrFinished ? "Call" : ". . ."}
+              {questionsLoading
+                ? "Loading..."
+                : isCallInactiveOrFinished
+                  ? "Call"
+                  : ". . ."}
             </span>
           </button>
         ) : (
