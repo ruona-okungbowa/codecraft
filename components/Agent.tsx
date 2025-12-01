@@ -24,6 +24,22 @@ interface SavedMessage {
 const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const router = useRouter();
 
+  // Helper to detect greeting messages that shouldn't count as interview questions
+  const isGreetingMessage = (content: string): boolean => {
+    const lower = content.toLowerCase();
+    return (
+      lower.includes("ready to begin") ||
+      lower.includes("let's get started") ||
+      lower.includes("welcome") ||
+      lower.includes("hello") ||
+      lower.includes("hi there") ||
+      lower.includes("good morning") ||
+      lower.includes("good afternoon") ||
+      lower.includes("good evening") ||
+      (!content.includes("?") && content.length < 100)
+    );
+  };
+
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
@@ -31,6 +47,11 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [responsesSaved, setResponsesSaved] = useState(false);
+  const [interviewProgress, setInterviewProgress] = useState({
+    current: 0,
+    total: 0,
+    percentage: 0,
+  });
 
   useEffect(() => {
     const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
@@ -111,39 +132,28 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   }, []);
 
   useEffect(() => {
-    // Filter out greetings and only count actual interview questions
-    const assistantQuestions = messages.filter((m) => {
-      if (m.role !== "assistant") return false;
+    // Count Q&A pairs (questions that have been answered)
+    const answeredQuestions = messages.filter((m, index) => {
+      if (m.role !== "assistant" || !m.content.includes("?")) return false;
+      if (isGreetingMessage(m.content)) return false;
 
-      const content = m.content.toLowerCase();
-
-      // Exclude common greetings and non-questions
-      const isGreeting =
-        content.includes("ready to begin") ||
-        content.includes("let's get started") ||
-        content.includes("welcome") ||
-        content.includes("hello") ||
-        content.includes("hi there") ||
-        content.includes("good morning") ||
-        content.includes("good afternoon") ||
-        content.includes("good evening") ||
-        (!content.includes("?") && content.length < 100); // Short non-questions
-
-      // Must contain a question mark and not be a greeting
-      return m.content.includes("?") && !isGreeting;
+      // Check if there's a user response after this question
+      const nextMessage = messages[index + 1];
+      return nextMessage && nextMessage.role === "user";
     });
 
+    // Only end interview when all questions have been ANSWERED
     if (
-      assistantQuestions.length >= totalQuestions &&
+      answeredQuestions.length >= totalQuestions &&
       totalQuestions > 0 &&
       callStatus === CallStatus.ACTIVE
     ) {
       console.log(
-        `All ${totalQuestions} questions completed. Ending interview.`
+        `All ${totalQuestions} questions answered. Ending interview in 5 seconds...`
       );
       const timeoutId = setTimeout(() => {
         handleDisconnect();
-      }, 3000);
+      }, 5000); // Give 5 seconds after last answer
 
       return () => clearTimeout(timeoutId);
     }
@@ -177,16 +187,11 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
           const current = messages[i];
           const next = messages[i + 1];
 
-          const isGreeting =
-            current.content.toLowerCase().includes("ready to begin") ||
-            current.content.toLowerCase().includes("let's get started") ||
-            current.content.toLowerCase().includes("welcome");
-
           // If assistant asks question and user answers
           if (
             current.role === "assistant" &&
             current.content.includes("?") &&
-            !isGreeting &&
+            !isGreetingMessage(current.content) &&
             next.role === "user"
           ) {
             pairs.push({
@@ -235,6 +240,46 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
     saveResponses();
   }, [callStatus, messages, interviewId, responsesSaved]);
 
+  useEffect(() => {
+    if (callStatus !== CallStatus.ACTIVE) return;
+
+    const pollProgress = async () => {
+      try {
+        const supabase = createClient();
+        const { data: interview } = await supabase
+          .from("interviews")
+          .select("responses, questions, current_question_index")
+          .eq("id", interviewId)
+          .single();
+
+        if (interview) {
+          const current = interview.responses?.length || 0;
+          const total = interview.questions?.length || 0;
+          const percentage =
+            total > 0 ? Math.round((current / total) * 100) : 0;
+
+          setInterviewProgress({ current, total, percentage });
+
+          // Auto-end when complete
+          if (current >= total && total > 0) {
+            console.log("All questions answered, ending interview...");
+            setTimeout(() => handleDisconnect(), 5000);
+          }
+        }
+      } catch (error) {
+        console.error("Error polling progress:", error);
+      }
+    };
+
+    // Poll every 2 seconds
+    const interval = setInterval(pollProgress, 2000);
+
+    // Initial poll
+    pollProgress();
+
+    return () => clearInterval(interval);
+  }, [callStatus, interviewId, handleDisconnect]);
+
   // Generate feedback after responses are saved
   useEffect(() => {
     let isMounted = true;
@@ -273,13 +318,20 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
         if (!isMounted) return;
 
         if (data.success) {
+          console.log("Feedback generated successfully, redirecting...");
           toast.success("Feedback generated successfully!");
 
+          // Dismiss the loading modal first
+          setFeedbackGenerating(false);
+
+          // Then redirect
           setTimeout(() => {
-            if (isMounted) {
-              router.push(`/interview/${interviewId}/feedback`);
-            }
-          }, 1000);
+            console.log(
+              "Redirecting to feedback page:",
+              `/interview/${interviewId}/feedback`
+            );
+            router.push(`/interview/${interviewId}/feedback`);
+          }, 500);
         } else {
           throw new Error("Feedback generation failed");
         }
@@ -293,15 +345,12 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
 
         toast.error(`Failed to generate feedback: ${errorMessage}`);
 
+        setFeedbackGenerating(false);
+
         setTimeout(() => {
-          if (isMounted) {
-            router.push("/mock-interview");
-          }
+          console.log("Redirecting to interview list after error");
+          router.push("/mock-interview");
         }, 3000);
-      } finally {
-        if (isMounted) {
-          setFeedbackGenerating(false);
-        }
       }
     };
 
@@ -353,27 +402,14 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const isCallInactiveOrFinished =
     callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
-  // Count only actual interview questions, not greetings
-  const assistantQuestions = messages.filter((m) => {
-    if (m.role !== "assistant") return false;
-
-    const content = m.content.toLowerCase();
-
-    // Exclude common greetings
-    const isGreeting =
-      content.includes("ready to begin") ||
-      content.includes("let's get started") ||
-      content.includes("welcome") ||
-      content.includes("hello") ||
-      content.includes("hi there") ||
-      content.includes("good morning") ||
-      content.includes("good afternoon") ||
-      content.includes("good evening") ||
-      (!content.includes("?") && content.length < 100);
-
-    return m.content.includes("?") && !isGreeting;
+  // Count questions asked (including current unanswered question)
+  const questionsAsked = messages.filter((m) => {
+    if (m.role !== "assistant" || !m.content.includes("?")) return false;
+    return !isGreetingMessage(m.content);
   });
-  const currentQuestionCount = assistantQuestions.length;
+
+  // Show the current question being asked (or answered count if all answered)
+  const currentQuestionCount = questionsAsked.length;
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-5xl mx-auto">
@@ -443,14 +479,14 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
               Interview Progress
             </span>
             <span className="text-sm font-semibold text-blue-600">
-              Question {currentQuestionCount} of {totalQuestions}
+              Question {interviewProgress.current} of {interviewProgress.total}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
               style={{
-                width: `${Math.min((currentQuestionCount / totalQuestions) * 100, 100)}%`,
+                width: `${interviewProgress.percentage}%`,
               }}
             ></div>
           </div>

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       questionIndex,
     });
 
-    if (!interviewId || !question || !answer) {
+    if (!interviewId || !question || !answer || questionIndex === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     // Get existing interview
     const { data: interview, error: fetchError } = await supabase
       .from("interviews")
-      .select("responses")
+      .select("responses, questions")
       .eq("id", interviewId)
       .single();
 
@@ -62,9 +62,15 @@ export async function POST(request: Request) {
       timestamp: new Date().toISOString(),
     });
 
+    const totalQuestions = interview.questions?.length || 0;
+    const progress = Math.round((responses.length / totalQuestions) * 100);
+
     const { error: updateError } = await supabase
       .from("interviews")
-      .update({ responses })
+      .update({
+        responses,
+        current_question_index: questionIndex + 1,
+      })
       .eq("id", interviewId);
 
     if (updateError) {
@@ -76,14 +82,18 @@ export async function POST(request: Request) {
     }
 
     console.log(
-      "Response saved successfully. Total responses:",
-      responses.length
+      `Response saved successfully. Progress: ${responses.length}/${totalQuestions} (${progress}%)`
     );
 
     return NextResponse.json({
       success: true,
       message: "Response saved successfully",
       totalResponses: responses.length,
+      totalQuestions: totalQuestions,
+      progress: progress,
+      nextQuestionIndex: questionIndex + 1,
+      isComplete: responses.length >= totalQuestions,
+      generatedAt: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Error saving interview response:", error);
