@@ -22,7 +22,16 @@ export default function AutoLogoutProvider({
   const supabase = createClient();
 
   const logout = useCallback(async () => {
-    toast.error("You have been logged out due to inactivity");
+    toast.error("You have been logged out due to inactivity", {
+      duration: 5000,
+      position: "top-right",
+      style: {
+        background: "#ef4444",
+        color: "#fff",
+        borderRadius: "8px",
+        padding: "12px 16px",
+      },
+    });
     await supabase.auth.signOut();
     router.push("/login");
   }, [router, supabase.auth]);
@@ -44,6 +53,13 @@ export default function AutoLogoutProvider({
           {
             icon: "⚠️",
             duration: 5000,
+            position: "top-right",
+            style: {
+              background: "#f59e0b",
+              color: "#fff",
+              borderRadius: "8px",
+              padding: "12px 16px",
+            },
           }
         );
       }, inactivityTimeout - warningTime);
