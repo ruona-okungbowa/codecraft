@@ -220,26 +220,10 @@ codecraft/
 - Calculates coverage percentage
 - Provides actionable recommendations
 
-## 🚢 Deployment
-
-### Vercel (Recommended)
-
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
-
-### Environment Variables for Production
-
-Ensure all environment variables from `.env.local` are added to your deployment platform.
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📧 Contact
 
