@@ -1,6 +1,6 @@
 # Product Overview
 
-GitStory is an AI-powered career readiness platform that transforms GitHub repositories into interview-ready portfolio materials.
+CodeCraft is an AI-powered career readiness platform that transforms GitHub repositories into interview-ready portfolio materials.
 
 ## Core Features
 
