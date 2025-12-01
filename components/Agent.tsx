@@ -2,7 +2,7 @@
 
 import { AgentProps } from "@/types/interview";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Phone, PhoneOff, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi/vapi.sdk";
@@ -52,6 +52,7 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
     total: 0,
     percentage: 0,
   });
+  const isSavingRef = useRef(false);
 
   useEffect(() => {
     const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
@@ -131,49 +132,37 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
     vapi.stop();
   }, []);
 
+  // Auto-end interview when all questions answered (using server-side progress)
   useEffect(() => {
-    // Count Q&A pairs (questions that have been answered)
-    const answeredQuestions = messages.filter((m, index) => {
-      if (m.role !== "assistant" || !m.content.includes("?")) return false;
-      if (isGreetingMessage(m.content)) return false;
-
-      // Check if there's a user response after this question
-      const nextMessage = messages[index + 1];
-      return nextMessage && nextMessage.role === "user";
-    });
-
-    // Only end interview when all questions have been ANSWERED
     if (
-      answeredQuestions.length >= totalQuestions &&
-      totalQuestions > 0 &&
-      callStatus === CallStatus.ACTIVE
+      callStatus === CallStatus.ACTIVE &&
+      interviewProgress.current >= interviewProgress.total &&
+      interviewProgress.total > 0
     ) {
       console.log(
-        `All ${totalQuestions} questions answered. Ending interview in 5 seconds...`
+        `All ${interviewProgress.total} questions answered. Ending interview in 5 seconds...`
       );
       const timeoutId = setTimeout(() => {
         handleDisconnect();
-      }, 5000); // Give 5 seconds after last answer
+      }, 5000);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [messages, totalQuestions, callStatus, handleDisconnect]);
+  }, [interviewProgress, callStatus, handleDisconnect]);
 
   // Save responses when interview ends (client-side backup)
   useEffect(() => {
-    let isSaving = false;
-
     const saveResponses = async () => {
       if (
         callStatus !== CallStatus.FINISHED ||
         responsesSaved ||
         messages.length === 0 ||
-        isSaving
+        isSavingRef.current
       ) {
         return;
       }
 
-      isSaving = true;
+      isSavingRef.current = true;
 
       try {
         // Extract Q&A pairs from messages
@@ -240,6 +229,7 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
     saveResponses();
   }, [callStatus, messages, interviewId, responsesSaved]);
 
+  // Poll interview progress from database during active call
   useEffect(() => {
     if (callStatus !== CallStatus.ACTIVE) return;
 
@@ -259,12 +249,6 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
             total > 0 ? Math.round((current / total) * 100) : 0;
 
           setInterviewProgress({ current, total, percentage });
-
-          // Auto-end when complete
-          if (current >= total && total > 0) {
-            console.log("All questions answered, ending interview...");
-            setTimeout(() => handleDisconnect(), 5000);
-          }
         }
       } catch (error) {
         console.error("Error polling progress:", error);
@@ -278,7 +262,7 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
     pollProgress();
 
     return () => clearInterval(interval);
-  }, [callStatus, interviewId, handleDisconnect]);
+  }, [callStatus, interviewId]);
 
   // Generate feedback after responses are saved
   useEffect(() => {
@@ -401,15 +385,6 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const latestMessage = messages[messages.length - 1]?.content;
   const isCallInactiveOrFinished =
     callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
-
-  // Count questions asked (including current unanswered question)
-  const questionsAsked = messages.filter((m) => {
-    if (m.role !== "assistant" || !m.content.includes("?")) return false;
-    return !isGreetingMessage(m.content);
-  });
-
-  // Show the current question being asked (or answered count if all answered)
-  const currentQuestionCount = questionsAsked.length;
 
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-5xl mx-auto">
