@@ -7,6 +7,7 @@ import { Phone, PhoneOff, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi/vapi.sdk";
 import { Message } from "@/types/vapi";
+import { createClient } from "@/lib/supabase/client";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -29,6 +30,7 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const [feedbackGenerating, setFeedbackGenerating] = useState(false);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  const [responsesSaved, setResponsesSaved] = useState(false);
 
   useEffect(() => {
     const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
@@ -109,9 +111,28 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   }, []);
 
   useEffect(() => {
-    const assistantQuestions = messages.filter(
-      (m) => m.role === "assistant" && m.content.includes("?")
-    );
+    // Filter out greetings and only count actual interview questions
+    const assistantQuestions = messages.filter((m) => {
+      if (m.role !== "assistant") return false;
+
+      const content = m.content.toLowerCase();
+
+      // Exclude common greetings and non-questions
+      const isGreeting =
+        content.includes("ready to begin") ||
+        content.includes("let's get started") ||
+        content.includes("welcome") ||
+        content.includes("hello") ||
+        content.includes("hi there") ||
+        content.includes("good morning") ||
+        content.includes("good afternoon") ||
+        content.includes("good evening") ||
+        (!content.includes("?") && content.length < 100); // Short non-questions
+
+      // Must contain a question mark and not be a greeting
+      return m.content.includes("?") && !isGreeting;
+    });
+
     if (
       assistantQuestions.length >= totalQuestions &&
       totalQuestions > 0 &&
@@ -128,13 +149,107 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
     }
   }, [messages, totalQuestions, callStatus, handleDisconnect]);
 
+  // Save responses when interview ends (client-side backup)
+  useEffect(() => {
+    let isSaving = false;
+
+    const saveResponses = async () => {
+      if (
+        callStatus !== CallStatus.FINISHED ||
+        responsesSaved ||
+        messages.length === 0 ||
+        isSaving
+      ) {
+        return;
+      }
+
+      isSaving = true;
+
+      try {
+        // Extract Q&A pairs from messages
+        const pairs: Array<{
+          question: string;
+          answer: string;
+          questionIndex: number;
+        }> = [];
+
+        for (let i = 0; i < messages.length - 1; i++) {
+          const current = messages[i];
+          const next = messages[i + 1];
+
+          const isGreeting =
+            current.content.toLowerCase().includes("ready to begin") ||
+            current.content.toLowerCase().includes("let's get started") ||
+            current.content.toLowerCase().includes("welcome");
+
+          // If assistant asks question and user answers
+          if (
+            current.role === "assistant" &&
+            current.content.includes("?") &&
+            !isGreeting &&
+            next.role === "user"
+          ) {
+            pairs.push({
+              question: current.content,
+              answer: next.content,
+              questionIndex: pairs.length,
+            });
+          }
+        }
+
+        if (pairs.length === 0) {
+          console.warn("No Q&A pairs found in messages");
+          return;
+        }
+
+        console.log(`Saving ${pairs.length} responses client-side...`);
+
+        const supabase = createClient();
+        const { error } = await supabase
+          .from("interviews")
+          .update({
+            responses: pairs.map((pair) => ({
+              question: pair.question,
+              answer: pair.answer,
+              questionIndex: pair.questionIndex,
+              timestamp: new Date().toISOString(),
+            })),
+          })
+          .eq("id", interviewId);
+
+        if (error) {
+          console.error("Error saving responses:", error);
+          const toast = (await import("react-hot-toast")).default;
+          toast.error("Failed to save interview responses");
+        } else {
+          console.log(`Successfully saved ${pairs.length} responses`);
+          setResponsesSaved(true);
+        }
+      } catch (error) {
+        console.error("Error in saveResponses:", error);
+        const toast = (await import("react-hot-toast")).default;
+        toast.error("Failed to save interview responses");
+      }
+    };
+
+    saveResponses();
+  }, [callStatus, messages, interviewId, responsesSaved]);
+
+  // Generate feedback after responses are saved
   useEffect(() => {
     let isMounted = true;
 
     const generateFeedback = async () => {
-      if (callStatus !== CallStatus.FINISHED || feedbackGenerating) {
+      if (
+        callStatus !== CallStatus.FINISHED ||
+        feedbackGenerating ||
+        !responsesSaved
+      ) {
         return;
       }
+
+      // Wait a moment for responses to be fully saved
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setFeedbackGenerating(true);
       setFeedbackError(null);
@@ -195,7 +310,7 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
     return () => {
       isMounted = false;
     };
-  }, [callStatus, interviewId, router, feedbackGenerating]);
+  }, [callStatus, interviewId, router, feedbackGenerating, responsesSaved]);
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
@@ -238,9 +353,26 @@ const Agent = ({ userName, interviewId, role, level }: AgentProps) => {
   const isCallInactiveOrFinished =
     callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
-  const assistantQuestions = messages.filter(
-    (m) => m.role === "assistant" && m.content.includes("?")
-  );
+  // Count only actual interview questions, not greetings
+  const assistantQuestions = messages.filter((m) => {
+    if (m.role !== "assistant") return false;
+
+    const content = m.content.toLowerCase();
+
+    // Exclude common greetings
+    const isGreeting =
+      content.includes("ready to begin") ||
+      content.includes("let's get started") ||
+      content.includes("welcome") ||
+      content.includes("hello") ||
+      content.includes("hi there") ||
+      content.includes("good morning") ||
+      content.includes("good afternoon") ||
+      content.includes("good evening") ||
+      (!content.includes("?") && content.length < 100);
+
+    return m.content.includes("?") && !isGreeting;
+  });
   const currentQuestionCount = assistantQuestions.length;
 
   return (

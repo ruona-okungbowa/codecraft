@@ -14,7 +14,7 @@ import {
   Mic,
   FileText,
   Settings,
-  Github,
+  Github as GithubIcon,
   ChevronDown,
   LogOut,
   User,
@@ -184,7 +184,7 @@ export default function CollapsibleSidebar() {
               color: "#4c96e1",
             }}
           >
-            <Github className="w-5 h-5 shrink-0" />
+            <GithubIcon className="w-5 h-5 shrink-0" />
             <span
               className={`text-sm whitespace-nowrap transition-opacity duration-300 ${
                 isExpanded ? "opacity-100" : "opacity-0 w-0"
