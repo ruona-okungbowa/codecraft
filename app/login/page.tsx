@@ -120,7 +120,7 @@ export default function LoginPage() {
                 e.currentTarget.style.opacity = "1";
               }}
             >
-              Just Sign In{" "}
+              Sign In{" "}
             </span>
             <br />
             An account will be created
