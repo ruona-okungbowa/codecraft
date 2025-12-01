@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 import { InterviewRow } from "@/types/interview";
+import { getScoreColor } from "@/lib/utils/scoring";
 
 interface InterviewWithFeedback extends InterviewRow {
   feedback?: {
@@ -87,16 +88,28 @@ export default function MockInterviewClient() {
       else if (focusArea === "systems") type = "system design";
       else if (focusArea === "mixed") type = "mixed";
 
+      const requestBody: {
+        role: string;
+        level: string;
+        type: string;
+        amount: number;
+        techstack?: string;
+      } = {
+        role: role || "Software Developer",
+        level: difficulty,
+        type,
+        amount: questionCount,
+      };
+
+      // Only include techstack for technical and mixed interviews
+      if (type === "technical" || type === "mixed") {
+        requestBody.techstack = techStack || "JavaScript, React, Node.js";
+      }
+
       const response = await fetch("/api/vapi/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          role: role || "Software Developer",
-          level: difficulty,
-          techstack: techStack || "JavaScript, React, Node.js",
-          type,
-          amount: questionCount,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
@@ -133,12 +146,6 @@ export default function MockInterviewClient() {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-600 dark:text-green-400";
-    if (score >= 60) return "text-orange-500 dark:text-orange-400";
-    return "text-red-500 dark:text-red-400";
   };
 
   const getGradientImage = (index: number) => {
@@ -293,22 +300,24 @@ export default function MockInterviewClient() {
                       </div>
                     </div>
 
-                    {/* Tech Stack */}
-                    <div className="col-span-3">
-                      <h3 className="text-gray-900 text-lg font-bold leading-tight tracking-tight pb-2">
-                        Tech Stack
-                      </h3>
-                      <input
-                        type="text"
-                        value={techStack}
-                        onChange={(e) => setTechStack(e.target.value)}
-                        placeholder="e.g., JavaScript, React, Node.js, PostgreSQL"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Separate multiple technologies with commas
-                      </p>
-                    </div>
+                    {/* Tech Stack - Only show for technical and mixed interviews */}
+                    {(focusArea === "technical" || focusArea === "mixed") && (
+                      <div className="col-span-3">
+                        <h3 className="text-gray-900 text-lg font-bold leading-tight tracking-tight pb-2">
+                          Tech Stack
+                        </h3>
+                        <input
+                          type="text"
+                          value={techStack}
+                          onChange={(e) => setTechStack(e.target.value)}
+                          placeholder="e.g., JavaScript, React, Node.js, PostgreSQL"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Separate multiple technologies with commas
+                        </p>
+                      </div>
+                    )}
 
                     {/* Start Interview Button */}
                     <div className="flex justify-end mt-8 col-span-3">

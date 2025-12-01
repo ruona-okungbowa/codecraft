@@ -89,15 +89,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // Build prompt based on interview type
+    let promptDetails = `Job Details:
+- Role: ${role}
+- Experience Level: ${level}
+- Interview Type: ${type}`;
+
+    // Only include tech stack for technical and mixed interviews
+    if ((type === "technical" || type === "mixed") && techstack) {
+      promptDetails += `\n- Tech Stack: ${techstack}`;
+    }
+
     const { text: questions } = await generateText({
       model: openai("gpt-4o-mini"),
       prompt: `Generate EXACTLY ${amount} interview questions for a ${role} position.
 
-Job Details:
-- Role: ${role}
-- Experience Level: ${level}
-- Tech Stack: ${techstack}
-- Interview Type: ${type}
+${promptDetails}
 
 CRITICAL REQUIREMENTS:
 1. Generate EXACTLY ${amount} questions - no more, no less
@@ -147,9 +154,13 @@ Generate exactly ${amount} questions now:`,
       role,
       type,
       level,
-      techstack: techstack.split(",").map((tech: string) => tech.trim()),
       questions: parsedQuestions,
       finalised: true,
+      // Use empty array for non-technical interviews, or parse techstack if provided
+      techstack:
+        (type === "technical" || type === "mixed") && techstack
+          ? techstack.split(",").map((tech: string) => tech.trim())
+          : [],
     };
 
     const supabase = await createClient();
