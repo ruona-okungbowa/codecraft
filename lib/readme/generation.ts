@@ -339,25 +339,38 @@ Imagine a developer joining this project for the first time. They need to:
 
 **EXAMPLE STRUCTURE WITH PROPER SPACING:**
 
-# Project Name
+# 🚀 Project Name
+
+> A compelling tagline that captures the essence of the project in one sentence
 
 
-A clear 1-2 sentence description based on the PROJECT NAME and DESCRIPTION. If it's a mobile app, say "mobile app". If it's a web app, say "web application".
+A clear 1-2 sentence description based on the PROJECT NAME and DESCRIPTION. If it's a mobile app, say "mobile app for iOS and Android". If it's a web app, say "web application".
 
 
 ${config?.badges !== false ? "![Badge1](url) ![Badge2](url) ![Badge3](url)" : ""}
 
 
-## Overview
+## 📋 Overview
 
 
-2-3 sentences explaining what THIS SPECIFIC PROJECT does. Read the project name and description carefully. Don't assume it's the same as other projects.
+2-3 sentences explaining what THIS SPECIFIC PROJECT does. Include:
+- What problem it solves
+- Who it's for (target users)
+- Key value proposition
+
+Read the project name and description carefully. Don't assume it's the same as other projects.
 
 
-## Features
+## ✨ Features
 
 
 **ANALYZE DEPENDENCIES AND FRAMEWORK TO DETERMINE FEATURES:**
+
+Group features by category for better organization:
+- **Core Features**: Main functionality
+- **AI/Smart Features**: If using AI dependencies
+- **User Management**: If using auth
+- **Additional Features**: Other capabilities
 
 **If Framework = "React Native (Expo)" or "React Native":**
 - This is a MOBILE APP - NO web routes!
@@ -379,47 +392,72 @@ ${config?.badges !== false ? "![Badge1](url) ![Badge2](url) ![Badge3](url)" : ""
 - Describe features based on what the dependencies enable
 
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 
-- **Framework:** Next.js 14 with App Router
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Database:** Supabase (PostgreSQL)
-- **Authentication:** Supabase Auth
-- **AI:** OpenAI API
-- **Other:** List other key dependencies
+### Core
+- **Framework**: Next.js 16 with App Router (or detected framework)
+- **Language**: TypeScript (or detected language)
+- **Runtime**: Node.js 20+ (if applicable)
 
-Keep it simple - just list the main technologies.
+### Styling
+- **CSS Framework**: Tailwind CSS (or detected)
+- **UI Library**: (if applicable)
+
+### Backend & Database
+- **Database**: Supabase (PostgreSQL) (or detected)
+- **Authentication**: Supabase Auth (or detected)
+- **Storage**: (if applicable)
+
+### AI & APIs
+- **AI Model**: OpenAI GPT-4o-mini (if using AI)
+- **External APIs**: List any APIs used
+
+### Code Quality
+- **Linting**: ESLint (if detected)
+- **Formatting**: Prettier (if detected)
+- **Testing**: Vitest/Jest (if detected)
+
+Keep it organized by category - only include sections that apply to THIS project.
 
 
-## Getting Started
+## 🚀 Getting Started
 
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- For mobile apps: iOS Simulator (Mac) or Android Emulator
-- Accounts: List required accounts based on dependencies
+- **Node.js** 18+ and npm (or detected runtime)
+- **For mobile apps**: iOS Simulator (Mac) or Android Emulator
+- **Accounts**: List required accounts based on dependencies (Supabase, OpenAI, etc.)
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository**
    \`\`\`bash
    git clone <repo-url>
    cd project-name
    \`\`\`
 
-2. Install dependencies:
+2. **Install dependencies**
    \`\`\`bash
    npm install
    \`\`\`
 
-3. Set up environment variables (if needed):
+3. **Set up environment variables**
    
-   Create a \`.env\` or \`.env.local\` file with required keys
+   Create a \`.env.local\` file in the root directory:
+   \`\`\`env
+   # List actual environment variables needed
+   # Based on dependencies detected
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   OPENAI_API_KEY=your_openai_key
+   \`\`\`
 
-4. Run the app:
+4. **Set up database** (if applicable)
+   
+   Run migrations or setup instructions
+
+5. **Run the development server**
    
    **For Next.js/Web apps:**
    \`\`\`bash
@@ -431,28 +469,108 @@ Keep it simple - just list the main technologies.
    \`\`\`bash
    npm start
    \`\`\`
-   Scan QR code with Expo Go app or press 'i' for iOS simulator, 'a' for Android emulator
+   - Scan QR code with Expo Go app
+   - Press 'i' for iOS simulator
+   - Press 'a' for Android emulator
 
 
-## License
+## 📦 Available Scripts
+
+\`\`\`bash
+# List ACTUAL scripts from package.json
+npm run dev              # Start development server
+npm run build            # Build for production
+npm test                 # Run tests
+\`\`\`
 
 
-This project is licensed under the MIT License.
+## 📁 Project Structure (Optional - only if helpful)
+
+
+\`\`\`
+project-name/
+├── app/                    # Next.js App Router (or src/)
+│   ├── api/               # API routes
+│   ├── dashboard/         # Dashboard page
+│   └── ...
+├── components/            # React components
+├── lib/                   # Utility functions
+└── public/                # Static assets
+\`\`\`
+
+
+## 🚢 Deployment (Optional)
+
+
+### Vercel (or detected platform)
+
+1. Push code to GitHub
+2. Import project in Vercel
+3. Add environment variables
+4. Deploy
+
+Include deployment instructions only if relevant to the project type.
+
+
+## 📄 License
+
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+
+## 🤝 Contributing (Optional)
+
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+
+## 📧 Contact (Optional)
+
+
+- **Author**: (if available)
+- **GitHub**: [@username](github-url)
+- **Project Link**: [repo-url](repo-url)
+
+
+## 🙏 Acknowledgments (Optional)
+
+
+- Built with [Framework](url)
+- Powered by [Service](url)
+
+Only include if there are notable acknowledgments.
+
+
+---
+
+**Made with ❤️ by [Author]** (optional footer)
 
 
 ---
 
 **CRITICAL INSTRUCTIONS FOR GENERATION:**
-1. Keep the intro SHORT (1-2 sentences max)
-2. List actual features/pages from the analysis
-3. Use actual dependencies for Tech Stack
-4. Make installation steps match the actual scripts
-5. Don't repeat information
-6. Don't use overly flowery language
-7. Focus on WHAT users can do, not abstract benefits
-8. If it's a portfolio/career app, say that clearly
-9. If it has specific pages (dashboard, projects, etc.), list them
-10. Make it scannable - a developer should understand the project in 2 minutes
+1. **Use emojis** for section headers (📋 ✨ 🛠️ 🚀 📦 📁 🚢 📄 🤝 📧 🙏)
+2. **Add tagline** under title with > blockquote
+3. **Group features** by category for better organization
+4. **Organize tech stack** by sections (Core, Styling, Backend, etc.)
+5. **Number installation steps** clearly
+6. **Include actual scripts** from package.json
+7. **Add project structure** only if it helps understanding
+8. **Keep intro SHORT** (1-2 sentences max)
+9. **List actual features** from analysis, not generic ones
+10. **Make it scannable** - developer should understand in 2 minutes
+11. **Use badges** at the top for visual appeal
+12. **Add proper spacing** between all sections
+13. **Focus on WHAT users can do**, not abstract benefits
+14. **Be specific** about the domain and purpose
+15. **Include deployment** only if relevant
+
+**STYLE NOTES:**
+- Professional but friendly tone
+- Clear, direct language
+- No marketing fluff
+- Practical, actionable information
+- Well-organized with visual hierarchy
 
 IMPORTANT: Return ONLY the Markdown content with proper spacing. Do NOT wrap in code blocks:`;
 }
