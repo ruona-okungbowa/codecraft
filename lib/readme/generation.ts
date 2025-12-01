@@ -339,7 +339,7 @@ Imagine a developer joining this project for the first time. They need to:
 
 **EXAMPLE STRUCTURE WITH PROPER SPACING:**
 
-# 🚀 Project Name
+# Project Name
 
 > A compelling tagline that captures the essence of the project in one sentence
 
@@ -350,7 +350,7 @@ A clear 1-2 sentence description based on the PROJECT NAME and DESCRIPTION. If i
 ${config?.badges !== false ? "![Badge1](url) ![Badge2](url) ![Badge3](url)" : ""}
 
 
-## 📋 Overview
+## Overview
 
 
 2-3 sentences explaining what THIS SPECIFIC PROJECT does. Include:
@@ -361,7 +361,7 @@ ${config?.badges !== false ? "![Badge1](url) ![Badge2](url) ![Badge3](url)" : ""
 Read the project name and description carefully. Don't assume it's the same as other projects.
 
 
-## ✨ Features
+## Features
 
 
 **ANALYZE DEPENDENCIES AND FRAMEWORK TO DETERMINE FEATURES:**
@@ -392,7 +392,7 @@ Group features by category for better organization:
 - Describe features based on what the dependencies enable
 
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 
 ### Core
@@ -421,7 +421,7 @@ Group features by category for better organization:
 Keep it organized by category - only include sections that apply to THIS project.
 
 
-## 🚀 Getting Started
+## Getting Started
 
 
 ### Prerequisites
@@ -474,7 +474,7 @@ Keep it organized by category - only include sections that apply to THIS project
    - Press 'a' for Android emulator
 
 
-## 📦 Available Scripts
+## Available Scripts
 
 \`\`\`bash
 # List ACTUAL scripts from package.json
@@ -484,7 +484,7 @@ npm test                 # Run tests
 \`\`\`
 
 
-## 📁 Project Structure (Optional - only if helpful)
+## Project Structure (Optional - only if helpful)
 
 
 \`\`\`
@@ -499,7 +499,7 @@ project-name/
 \`\`\`
 
 
-## 🚢 Deployment (Optional)
+## Deployment (Optional)
 
 
 ### Vercel (or detected platform)
@@ -512,19 +512,19 @@ project-name/
 Include deployment instructions only if relevant to the project type.
 
 
-## 📄 License
+## License
 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
-## 🤝 Contributing (Optional)
+## Contributing (Optional)
 
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 
-## 📧 Contact (Optional)
+## Contact (Optional)
 
 
 - **Author**: (if available)
@@ -532,7 +532,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - **Project Link**: [repo-url](repo-url)
 
 
-## 🙏 Acknowledgments (Optional)
+## Acknowledgments (Optional)
 
 
 - Built with [Framework](url)
@@ -549,7 +549,7 @@ Only include if there are notable acknowledgments.
 ---
 
 **CRITICAL INSTRUCTIONS FOR GENERATION:**
-1. **Use emojis** for section headers (📋 ✨ 🛠️ 🚀 📦 📁 🚢 📄 🤝 📧 🙏)
+1. **NO emojis** in section headers - keep them clean and professional
 2. **Add tagline** under title with > blockquote
 3. **Group features** by category for better organization
 4. **Organize tech stack** by sections (Core, Styling, Backend, etc.)
