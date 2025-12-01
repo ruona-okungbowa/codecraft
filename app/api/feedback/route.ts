@@ -16,6 +16,7 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const interviewId = searchParams.get("interviewId");
+    const attemptNumber = searchParams.get("attemptNumber");
 
     if (!interviewId) {
       return NextResponse.json(
@@ -24,20 +25,49 @@ export async function GET(request: Request) {
       );
     }
 
-    const { data: feedback, error } = await supabase
+    // If attemptNumber is specified, get that specific attempt
+    if (attemptNumber) {
+      const parsedAttempt = parseInt(attemptNumber);
+      if (isNaN(parsedAttempt) || parsedAttempt < 1) {
+        return NextResponse.json(
+          { error: "Invalid attempt number" },
+          { status: 400 }
+        );
+      }
+      const { data: feedback, error } = await supabase
+        .from("feedback")
+        .select("*")
+        .eq("interview_id", interviewId)
+        .eq("user_id", user.id)
+        .eq("attempt_number", parsedAttempt)
+        .single();
+
+      if (error) {
+        if (error.code === "PGRST116") {
+          return NextResponse.json(
+            { error: "Feedback not found" },
+            { status: 404 }
+          );
+        }
+        console.error("Error fetching feedback:", error);
+        return NextResponse.json(
+          { error: "Failed to fetch feedback" },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({ feedback });
+    }
+
+    // Otherwise, get all attempts for this interview, ordered by attempt number
+    const { data: feedbackList, error } = await supabase
       .from("feedback")
       .select("*")
       .eq("interview_id", interviewId)
       .eq("user_id", user.id)
-      .single();
+      .order("attempt_number", { ascending: false });
 
     if (error) {
-      if (error.code === "PGRST116") {
-        return NextResponse.json(
-          { error: "Feedback not found" },
-          { status: 404 }
-        );
-      }
       console.error("Error fetching feedback:", error);
       return NextResponse.json(
         { error: "Failed to fetch feedback" },
@@ -45,7 +75,19 @@ export async function GET(request: Request) {
       );
     }
 
-    return NextResponse.json({ feedback });
+    if (!feedbackList || feedbackList.length === 0) {
+      return NextResponse.json(
+        { error: "Feedback not found" },
+        { status: 404 }
+      );
+    }
+
+    // Return the latest attempt as primary, with all attempts in an array
+    return NextResponse.json({
+      feedback: feedbackList[0],
+      allAttempts: feedbackList,
+      totalAttempts: feedbackList.length,
+    });
   } catch (error) {
     console.error("Error fetching feedback:", error);
     return NextResponse.json(

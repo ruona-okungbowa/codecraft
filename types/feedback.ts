@@ -4,9 +4,19 @@ export interface CategoryScore {
   feedback: string;
 }
 
+export interface QuestionBreakdown {
+  questionNumber: number;
+  question: string;
+  score: number;
+  whatWentWell: string;
+  whatToImprove: string;
+  improvementTips: string[];
+}
+
 export interface Feedback {
   totalScore: number;
   categoryScores: CategoryScore[];
+  questionBreakdown: QuestionBreakdown[];
   strengths: string[];
   areasForImprovement: string[];
   finalAssessment: string;
@@ -16,8 +26,10 @@ export interface FeedbackRow {
   id: string;
   interview_id: string;
   user_id: string;
+  attempt_number: number;
   total_score: number;
   category_scores: CategoryScore[];
+  question_breakdown: QuestionBreakdown[];
   strengths: string[];
   areas_for_improvement: string[];
   final_assessment: string;
