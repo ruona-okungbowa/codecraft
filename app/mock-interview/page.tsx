@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import { InterviewRow } from "@/types/interview";
 import { getScoreColor } from "@/lib/utils/scoring";
 
@@ -159,8 +160,9 @@ export default function MockInterviewClient() {
 
   return (
     <div className="relative flex w-full min-h-screen bg-white">
+      <MobileNav />
       <CollapsibleSidebar />
-      <main className="flex-1 p-8 ml-20">
+      <main className="pt-16 md:pt-0 flex-1 p-4 sm:p-6 lg:p-8 ml-0 md:ml-20">
         <div className="mx-auto max-w-4xl">
           <div className="space-y-8">
             <div className="flex flex-wrap justify-between gap-3">

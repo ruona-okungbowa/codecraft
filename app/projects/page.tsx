@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ProjectRow } from "@/types";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import Link from "next/link";
 
 // Material Symbols icons as SVG components
@@ -352,9 +353,10 @@ export default function ProjectsPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f6f7f8]">
+      <MobileNav />
       <CollapsibleSidebar />
 
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 ml-0 md:ml-20">
+      <main className="pt-16 md:pt-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 ml-0 md:ml-20">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <header className="mb-6 sm:mb-8">
@@ -551,19 +553,19 @@ export default function ProjectsPage() {
                 return (
                   <div
                     key={project.id}
-                    className="bg-white p-6 rounded-xl shadow-sm flex flex-col group hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                    className="bg-white p-4 sm:p-6 rounded-xl shadow-sm flex flex-col group hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                   >
                     {/* Project Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-2">
+                      <div className="flex-1 min-w-0">
                         <Link href={`/projects/${project.id}`}>
-                          <h3 className="font-bold text-lg text-black hover:text-[#4c96e1] transition-colors cursor-pointer">
+                          <h3 className="font-bold text-base sm:text-lg text-black hover:text-[#4c96e1] transition-colors cursor-pointer truncate">
                             {project.name}
                           </h3>
                         </Link>
-                        <div className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 mt-1">
                           <div
-                            className="w-2 h-2 rounded-full"
+                            className="w-2 h-2 rounded-full shrink-0"
                             style={{ backgroundColor: langColor }}
                           ></div>
                           <span>{primaryLang}</span>
@@ -571,7 +573,7 @@ export default function ProjectsPage() {
                       </div>
                       {project.in_portfolio && (
                         <div
-                          className="text-xs font-semibold py-1 px-2.5 rounded-full"
+                          className="text-xs font-semibold py-1 px-2.5 rounded-full self-start whitespace-nowrap"
                           style={{
                             backgroundColor: "rgba(34, 197, 94, 0.1)",
                             color: "#16a34a",
@@ -586,7 +588,7 @@ export default function ProjectsPage() {
                       {project.description || "No description available"}
                     </p>
 
-                    <div className="flex items-center justify-between text-sm text-gray-600 border-y border-gray-200 py-3 my-3">
+                    <div className="flex flex-wrap items-center justify-between text-xs sm:text-sm text-gray-600 border-y border-gray-200 py-3 my-3 gap-2">
                       <div className="flex items-center gap-1.5">
                         <MaterialIcon name="star" />
                         <span className="font-medium">{project.stars}</span>
@@ -595,15 +597,15 @@ export default function ProjectsPage() {
                         <ForkIcon />
                         <span className="font-medium">{project.forks}</span>
                       </div>
-                      <span>
-                        Last commit: {formatTimeAgo(project.last_commit_date)}
+                      <span className="text-xs">
+                        {formatTimeAgo(project.last_commit_date)}
                       </span>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4">
                       <button
-                        className="flex-1 text-sm text-center font-semibold py-2 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20"
+                        className="flex-1 text-xs sm:text-sm text-center font-semibold py-2.5 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 min-w-0"
                         style={{
                           backgroundColor: "rgba(76, 150, 225, 0.1)",
                           color: "#4c96e1",
@@ -614,7 +616,7 @@ export default function ProjectsPage() {
                       <button
                         onClick={() => handleGenerateReadme(project.id)}
                         disabled={generatingReadme === project.id}
-                        className="flex-1 text-sm text-center font-semibold py-2 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 text-xs sm:text-sm text-center font-semibold py-2.5 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
                         style={{
                           backgroundColor: "rgba(76, 150, 225, 0.1)",
                           color: "#4c96e1",
@@ -622,9 +624,9 @@ export default function ProjectsPage() {
                       >
                         {generatingReadme === project.id
                           ? "Generating..."
-                          : "Generate README"}
+                          : "README"}
                       </button>
-                      <div className="relative">
+                      <div className="relative sm:flex-shrink-0">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -632,7 +634,7 @@ export default function ProjectsPage() {
                               openDropdown === project.id ? null : project.id
                             );
                           }}
-                          className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+                          className="w-full sm:w-auto p-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center"
                         >
                           <MaterialIcon name="more_horiz" />
                         </button>
@@ -679,20 +681,20 @@ export default function ProjectsPage() {
                 return (
                   <div
                     key={project.id}
-                    className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300"
+                    className="bg-white p-4 sm:p-6 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300"
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                       {/* Left: Project Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
                           <Link href={`/projects/${project.id}`}>
-                            <h3 className="font-bold text-lg text-black truncate hover:text-[#4c96e1] transition-colors cursor-pointer">
+                            <h3 className="font-bold text-base sm:text-lg text-black truncate hover:text-[#4c96e1] transition-colors cursor-pointer">
                               {project.name}
                             </h3>
                           </Link>
                           {project.in_portfolio && (
                             <div
-                              className="text-xs font-semibold py-1 px-2.5 rounded-full whitespace-nowrap"
+                              className="text-xs font-semibold py-1 px-2.5 rounded-full whitespace-nowrap self-start"
                               style={{
                                 backgroundColor: "rgba(34, 197, 94, 0.1)",
                                 color: "#16a34a",
@@ -702,13 +704,13 @@ export default function ProjectsPage() {
                             </div>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+                        <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">
                           {project.description || "No description available"}
                         </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
                           <div className="flex items-center gap-1.5">
                             <div
-                              className="w-2 h-2 rounded-full"
+                              className="w-2 h-2 rounded-full shrink-0"
                               style={{ backgroundColor: langColor }}
                             ></div>
                             <span>{primaryLang}</span>
@@ -721,17 +723,20 @@ export default function ProjectsPage() {
                             <ForkIcon />
                             <span className="font-medium">{project.forks}</span>
                           </div>
-                          <span>
+                          <span className="hidden sm:inline">
                             Last commit:{" "}
+                            {formatTimeAgo(project.last_commit_date)}
+                          </span>
+                          <span className="sm:hidden">
                             {formatTimeAgo(project.last_commit_date)}
                           </span>
                         </div>
                       </div>
 
                       {/* Right: Actions */}
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                         <button
-                          className="text-sm font-semibold py-2 px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap"
+                          className="text-xs sm:text-sm font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap"
                           style={{
                             backgroundColor: "rgba(76, 150, 225, 0.1)",
                             color: "#4c96e1",
@@ -742,7 +747,7 @@ export default function ProjectsPage() {
                         <button
                           onClick={() => handleGenerateReadme(project.id)}
                           disabled={generatingReadme === project.id}
-                          className="text-sm font-semibold py-2 px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="text-xs sm:text-sm font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                           style={{
                             backgroundColor: "rgba(76, 150, 225, 0.1)",
                             color: "#4c96e1",

@@ -114,7 +114,7 @@ export default function CollapsibleSidebar() {
     <aside
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
-      className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 flex flex-col p-4 transition-all duration-300 z-50 ${
+      className={`hidden md:flex fixed left-0 top-0 h-screen bg-white border-r border-gray-200 flex-col p-4 transition-all duration-300 z-50 ${
         isExpanded ? "w-64" : "w-20"
       }`}
     >
