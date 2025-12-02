@@ -3,15 +3,23 @@ import type {
   FilterState,
 } from "@/types/recommendations";
 
-/**
- * Maps time estimate strings to time commitment categories
- */
 function getTimeCommitment(
   timeEstimate: string
 ): "weekend" | "week" | "extended" {
   const lower = timeEstimate.toLowerCase();
 
-  // Weekend: 1-2 days, 8-16 hours, weekend project
+  // Extended: 2+ weeks, 40+ hours, month-long (check first)
+  if (
+    lower.includes("weeks") ||
+    lower.includes("2+") ||
+    lower.includes("month") ||
+    lower.includes("40+ hour") ||
+    lower.includes("50+ hour")
+  ) {
+    return "extended";
+  }
+
+  // Weekend: 1-2 days, 8-16 hours, weekend project (check before "week")
   if (
     lower.includes("weekend") ||
     lower.includes("1-2 day") ||
@@ -21,17 +29,21 @@ function getTimeCommitment(
     return "weekend";
   }
 
-  // Week: 3-7 days, 20-40 hours, week-long
+  // Week: 3-7 days, 20-40 hours, week-long, 1 week
+  // Note: "weekend" and "weeks" (plural) are already handled above
   if (
-    lower.includes("week") ||
+    lower.match(/\bweek\b/) || // Match "week" as a whole word
     lower.includes("3-5 day") ||
+    lower.includes("5-7 day") ||
     lower.includes("20-40 hour") ||
-    lower.includes("30-40 hour")
+    lower.includes("30-40 hour") ||
+    lower.includes("week-long") ||
+    lower.includes("1 week")
   ) {
     return "week";
   }
 
-  // Extended: 2+ weeks, 40+ hours, month-long
+  // Default to extended for unknown patterns
   return "extended";
 }
 
@@ -87,6 +99,17 @@ function matchesSkills(
 }
 
 /**
+ * Checks if a project matches the priority level filter
+ */
+function matchesPriority(
+  project: ProjectRecommendation,
+  priorityLevel: FilterState["priorityLevel"]
+): boolean {
+  if (!priorityLevel || priorityLevel === "all") return true;
+  return project.priority === priorityLevel;
+}
+
+/**
  * Applies all active filters to the recommendations list
  * Uses AND logic - projects must match ALL active filters
  */
@@ -100,7 +123,8 @@ export function applyFilters(
       matchesDifficulty(project, filters.difficulty) &&
       matchesCategory(project, filters.category) &&
       matchesTimeCommitment(project, filters.timeCommitment) &&
-      matchesSkills(project, filters.skills)
+      matchesSkills(project, filters.skills) &&
+      matchesPriority(project, filters.priorityLevel)
     );
   });
 }
@@ -118,10 +142,6 @@ function sortByPriority(
   });
 }
 
-/**
- * Sorts recommendations by difficulty level
- * Default is ascending (beginner -> intermediate -> advanced)
- */
 function sortByDifficulty(
   recommendations: ProjectRecommendation[],
   ascending: boolean = true
@@ -136,10 +156,6 @@ function sortByDifficulty(
   });
 }
 
-/**
- * Sorts recommendations by time estimate
- * Default is ascending (weekend -> week -> extended)
- */
 function sortByTime(
   recommendations: ProjectRecommendation[],
   ascending: boolean = true
@@ -156,9 +172,6 @@ function sortByTime(
   });
 }
 
-/**
- * Sorts recommendations by number of skills taught (most to least)
- */
 function sortBySkills(
   recommendations: ProjectRecommendation[],
   ascending: boolean = false
@@ -171,21 +184,26 @@ function sortBySkills(
 
 /**
  * Sorts recommendations based on the selected sort criteria
+ * Each sort type has its own natural default order:
+ * - priority: descending (high to low)
+ * - difficulty: ascending (beginner to advanced)
+ * - time: ascending (weekend to extended)
+ * - skills: descending (most to least)
  */
 export function sortRecommendations(
   recommendations: ProjectRecommendation[],
   sortBy: FilterState["sortBy"],
-  ascending: boolean = false
+  ascending?: boolean
 ): ProjectRecommendation[] {
   switch (sortBy) {
     case "priority":
-      return sortByPriority(recommendations, ascending);
+      return sortByPriority(recommendations, ascending ?? false);
     case "difficulty":
-      return sortByDifficulty(recommendations, ascending);
+      return sortByDifficulty(recommendations, ascending ?? true);
     case "time":
-      return sortByTime(recommendations, ascending);
+      return sortByTime(recommendations, ascending ?? true);
     case "skills":
-      return sortBySkills(recommendations, ascending);
+      return sortBySkills(recommendations, ascending ?? false);
     default:
       return recommendations;
   }

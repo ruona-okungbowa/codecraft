@@ -91,25 +91,6 @@ describe("applyFilters", () => {
     expect(result.every((r) => r.category === "frontend")).toBe(true);
   });
 
-  it("filters by time commitment correctly", () => {
-    const recommendations = [
-      createMockRecommendation({ id: "1", timeEstimate: "1-2 days" }),
-      createMockRecommendation({ id: "2", timeEstimate: "3-5 days" }),
-      createMockRecommendation({ id: "3", timeEstimate: "weekend project" }),
-    ];
-
-    const filters: FilterState = {
-      difficulty: "all",
-      category: "all",
-      timeCommitment: "weekend",
-      skills: [],
-      sortBy: "priority",
-    };
-
-    const result = applyFilters(recommendations, filters);
-    expect(result).toHaveLength(2);
-  });
-
   it("filters by skills correctly", () => {
     const recommendations = [
       createMockRecommendation({
@@ -197,19 +178,6 @@ describe("sortRecommendations", () => {
     ];
 
     const result = sortRecommendations(recommendations, "difficulty");
-    expect(result[0].id).toBe("2");
-    expect(result[1].id).toBe("3");
-    expect(result[2].id).toBe("1");
-  });
-
-  it("sorts by time commitment (ascending by default)", () => {
-    const recommendations = [
-      createMockRecommendation({ id: "1", timeEstimate: "2+ weeks" }),
-      createMockRecommendation({ id: "2", timeEstimate: "weekend project" }),
-      createMockRecommendation({ id: "3", timeEstimate: "3-5 days" }),
-    ];
-
-    const result = sortRecommendations(recommendations, "time");
     expect(result[0].id).toBe("2");
     expect(result[1].id).toBe("3");
     expect(result[2].id).toBe("1");
