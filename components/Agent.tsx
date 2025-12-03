@@ -258,6 +258,11 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
         if (response.ok) {
           const data = await response.json();
           setQuestions(data.questions || []);
+          // Initialize progress with total questions
+          setInterviewProgress((prev) => ({
+            ...prev,
+            total: data.questions?.length || 0,
+          }));
           console.log("Fetched questions for interview:", data.questions);
         }
       } catch (error) {
@@ -278,11 +283,12 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
       interviewProgress.total > 0
     ) {
       console.log(
-        `All ${interviewProgress.total} questions answered. Ending interview in 5 seconds...`
+        `All ${interviewProgress.total} questions answered. Waiting for assistant to finish speaking before ending...`
       );
+      // Give the assistant 15 seconds to say goodbye and wrap up
       const timeoutId = setTimeout(() => {
         handleDisconnect();
-      }, 5000);
+      }, 15000);
 
       return () => clearTimeout(timeoutId);
     }
@@ -313,6 +319,7 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
           const percentage =
             total > 0 ? Math.round((current / total) * 100) : 0;
 
+          console.log("Progress update:", { current, total, percentage });
           setInterviewProgress({ current, total, percentage });
 
           // Stop polling if all questions answered
@@ -478,7 +485,8 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
     };
 
     generateFeedback();
-  }, [callStatus, feedbackGenerating, interviewId, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callStatus, interviewId, router]); // Removed feedbackGenerating to prevent double generation
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
@@ -525,8 +533,49 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
   const isCallInactiveOrFinished =
     callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
+  // Determine current status
+  const getCurrentStatus = () => {
+    if (callStatus === CallStatus.INACTIVE) return "idle";
+    if (callStatus === CallStatus.CONNECTING) return "connecting";
+    if (callStatus === CallStatus.FINISHED) return "finished";
+    if (isSpeaking) return "speaking";
+    if (isUserSpeaking) return "listening";
+    return "processing";
+  };
+
+  const status = getCurrentStatus();
+
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-5xl mx-auto">
+      {/* Current Question Display */}
+      {callStatus === CallStatus.ACTIVE && currentQuestion && (
+        <div className="w-full bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-start gap-3">
+            <div className="shrink-0">
+              <div
+                className={`w-3 h-3 rounded-full mt-1 ${
+                  status === "listening"
+                    ? "bg-green-500 animate-pulse"
+                    : status === "processing"
+                      ? "bg-yellow-500 animate-pulse"
+                      : status === "speaking"
+                        ? "bg-blue-500 animate-pulse"
+                        : "bg-gray-300"
+                }`}
+              />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-medium">
+                Current Question
+              </p>
+              <p className="text-base sm:text-lg font-medium text-gray-900 leading-relaxed">
+                {currentQuestion}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Feedback Generation Loading */}
       {feedbackGenerating && (
         <div
@@ -582,18 +631,47 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[320px] shadow-sm">
-          <div className="relative mb-4">
-            <div className="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center relative">
+        {/* AI Interviewer Card */}
+        <div
+          className={`bg-white border-2 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[320px] shadow-sm transition-all duration-300 ${
+            isSpeaking && callStatus === CallStatus.ACTIVE
+              ? "border-blue-500 shadow-blue-100 shadow-lg"
+              : "border-gray-200"
+          }`}
+        >
+          <div className="relative mb-12">
+            <div
+              className={`w-32 h-32 rounded-full flex items-center justify-center relative transition-all duration-300 ${
+                isSpeaking && callStatus === CallStatus.ACTIVE
+                  ? "bg-blue-200 scale-110"
+                  : "bg-blue-100"
+              }`}
+            >
               <Image
                 src="/ai-avatar.png"
                 alt="AI Interviewer"
                 width={80}
                 height={80}
-                className="object-contain"
+                className="object-contain w-16 h-16 sm:w-20 sm:h-20"
               />
               {isSpeaking && callStatus === CallStatus.ACTIVE && (
-                <span className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-30" />
+                <>
+                  <span className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-30" />
+                  {/* Audio wave animation */}
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1 bg-blue-500 rounded-full animate-pulse"
+                        style={{
+                          height: "16px",
+                          animationDelay: `${i * 0.1}s`,
+                          animationDuration: "0.6s",
+                        }}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
             {callStatus === CallStatus.ACTIVE && (
@@ -605,21 +683,58 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
           <h3 className="text-xl font-semibold text-gray-900">
             AI Interviewer
           </h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <p
+            className={`text-sm mt-1 font-medium ${
+              isSpeaking && callStatus === CallStatus.ACTIVE
+                ? "text-blue-600"
+                : "text-gray-500"
+            }`}
+          >
             {callStatus === CallStatus.ACTIVE
-              ? "Speaking..."
+              ? isSpeaking
+                ? "🗣️ Speaking..."
+                : "👂 Listening..."
               : callStatus === CallStatus.CONNECTING
-                ? "Connecting..."
-                : "Ready to interview"}
+                ? "🔄 Connecting..."
+                : callStatus === CallStatus.FINISHED
+                  ? "✅ Interview Complete"
+                  : "⏸️ Ready to interview"}
           </p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[320px] shadow-sm">
-          <div className="relative mb-4">
-            <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden relative">
+        {/* User Card */}
+        <div
+          className={`bg-white border-2 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[320px] shadow-sm transition-all duration-300 ${
+            isUserSpeaking
+              ? "border-green-500 shadow-green-100 shadow-lg"
+              : "border-gray-200"
+          }`}
+        >
+          <div className="relative mb-12">
+            <div
+              className={`w-32 h-32 rounded-full flex items-center justify-center overflow-hidden relative transition-all duration-300 ${
+                isUserSpeaking ? "bg-green-200 scale-110" : "bg-gray-200"
+              }`}
+            >
               <User size={64} className="text-gray-400" />
               {isUserSpeaking && (
-                <span className="absolute inset-0 animate-ping rounded-full bg-gray-400 opacity-30" />
+                <>
+                  <span className="absolute inset-0 animate-ping rounded-full bg-green-400 opacity-30" />
+                  {/* Audio wave animation */}
+                  <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1 bg-green-500 rounded-full animate-pulse"
+                        style={{
+                          height: "16px",
+                          animationDelay: `${i * 0.1}s`,
+                          animationDuration: "0.6s",
+                        }}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
             {callStatus === CallStatus.ACTIVE && (
@@ -629,21 +744,27 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
             )}
           </div>
           <h3 className="text-xl font-semibold text-gray-900">{userName}</h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <p
+            className={`text-sm mt-1 font-medium ${
+              isUserSpeaking ? "text-green-600" : "text-gray-500"
+            }`}
+          >
             {callStatus === CallStatus.ACTIVE
               ? isUserSpeaking
-                ? "Speaking..."
-                : "Listening..."
+                ? "🎤 Speaking..."
+                : "👂 Listening..."
               : callStatus === CallStatus.CONNECTING
-                ? "Joining..."
-                : "You"}
+                ? "🔄 Joining..."
+                : callStatus === CallStatus.FINISHED
+                  ? "✅ Done"
+                  : "You"}
           </p>
         </div>
       </div>
 
       {messages.length > 0 && latestMessage && (
-        <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-6 py-4 shadow-sm">
-          <p className="text-gray-800 text-center text-base animate-fade-in">
+        <div className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
+          <p className="text-gray-800 text-center text-sm sm:text-base animate-fade-in">
             {latestMessage}
           </p>
         </div>
@@ -654,26 +775,26 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
           <button
             onClick={handleCall}
             disabled={callStatus === CallStatus.CONNECTING || questionsLoading}
-            className="relative inline-flex items-center gap-2 px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="relative inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {callStatus === CallStatus.CONNECTING && (
               <span className="absolute inset-0 animate-ping rounded-full bg-green-400 opacity-75" />
             )}
-            <Phone size={24} className="relative z-10" />
+            <Phone size={20} className="relative z-10 sm:w-6 sm:h-6" />
             <span className="relative z-10">
               {questionsLoading
                 ? "Loading..."
                 : isCallInactiveOrFinished
-                  ? "Call"
+                  ? "Start Call"
                   : ". . ."}
             </span>
           </button>
         ) : (
           <button
             onClick={handleDisconnect}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+            className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all"
           >
-            <PhoneOff size={24} />
+            <PhoneOff size={20} className="sm:w-6 sm:h-6" />
             <span>End Call</span>
           </button>
         )}

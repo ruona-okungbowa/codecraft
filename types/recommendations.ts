@@ -1,5 +1,3 @@
-import type { Role } from "./skills";
-
 export interface SkillMatch {
   skill: string;
   type: "new" | "fills_gap" | "reinforces";
@@ -41,6 +39,7 @@ export interface FilterState {
   timeCommitment: "all" | "weekend" | "week" | "extended";
   skills: string[];
   sortBy: "priority" | "difficulty" | "time" | "skills";
+  priorityLevel?: "all" | "high" | "medium" | "low";
 }
 
 export interface UserProject {

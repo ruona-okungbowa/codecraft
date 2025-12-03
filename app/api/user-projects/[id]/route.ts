@@ -105,6 +105,23 @@ export async function DELETE(
     }
 
     const { id } = await params;
+
+    // Verify project exists and user owns it
+    const { data: existing, error: fetchError } = await supabase
+      .from("user_projects")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (fetchError || !existing) {
+      return NextResponse.json(
+        { error: "Project not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the project
     const { error: deleteError } = await supabase
       .from("user_projects")
       .delete()

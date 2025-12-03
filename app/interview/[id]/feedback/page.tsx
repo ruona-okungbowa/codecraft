@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import {
   getScoreColor,
   getScoreBackgroundColor,
@@ -91,16 +92,17 @@ export default function FeedbackPage() {
     loadData();
   }, [interviewId, router]);
 
-  const calculateStrokeDashoffset = (score: number) => {
+  const calculateStrokeDashoffset = useCallback((score: number) => {
     const circumference = 2 * Math.PI * 54;
     return circumference - (score / 100) * circumference;
-  };
+  }, []);
 
   if (loading) {
     return (
       <div className="relative flex w-full min-h-screen bg-white">
+        <MobileNav />
         <CollapsibleSidebar />
-        <main className="flex-1 p-8 ml-20 flex items-center justify-center">
+        <main className="pt-16 md:pt-0 flex-1 p-4 sm:p-8 ml-0 md:ml-20 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading feedback...</p>
@@ -113,8 +115,9 @@ export default function FeedbackPage() {
   if (!feedback || !interview) {
     return (
       <div className="relative flex w-full min-h-screen bg-white">
+        <MobileNav />
         <CollapsibleSidebar />
-        <main className="flex-1 p-8 ml-20 flex items-center justify-center">
+        <main className="pt-16 md:pt-0 flex-1 p-4 sm:p-8 ml-0 md:ml-20 flex items-center justify-center">
           <p className="text-gray-500">Feedback not found</p>
         </main>
       </div>
@@ -123,34 +126,37 @@ export default function FeedbackPage() {
 
   return (
     <div className="relative flex w-full min-h-screen bg-white">
+      <MobileNav />
       <CollapsibleSidebar />
 
-      {/* Back Button - Fixed in top left */}
-      <div className="fixed top-8 left-28 z-10">
+      {/* Back Button - Fixed in top left, below mobile nav on small screens */}
+      <div className="fixed top-20 left-4 md:top-8 md:left-28 z-60">
         <button
           onClick={() => router.push("/mock-interview")}
-          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-slate-200"
+          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors bg-white px-3 py-2 md:px-4 md:py-2 rounded-lg shadow-sm border border-slate-200"
         >
-          <span className="material-symbols-outlined">arrow_back</span>
-          <span className="font-medium">Back to Interviews</span>
+          <span className="material-symbols-outlined text-xl">arrow_back</span>
+          <span className="font-medium text-sm md:text-base hidden sm:inline">
+            Back to Interviews
+          </span>
         </button>
       </div>
 
-      <main className="flex-1 p-8 md:p-12 ml-20">
+      <main className="pt-20 md:pt-0 flex-1 p-4 sm:p-6 md:p-8 lg:p-12 ml-0 md:ml-20">
         <div className="max-w-4xl mx-auto flex flex-col gap-8">
           {/* Page Heading */}
           <div className="flex flex-col items-center gap-4">
-            <h1 className="text-black text-4xl font-black leading-tight tracking-tight">
+            <h1 className="text-black text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-tight text-center">
               Interview Feedback
             </h1>
 
             {/* Attempt Selector */}
             {allAttempts.length > 1 && (
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
                 <span className="text-sm text-slate-600 font-medium">
                   Attempt:
                 </span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 justify-center">
                   {allAttempts.map((attempt) => (
                     <button
                       key={attempt.id}
@@ -158,14 +164,14 @@ export default function FeedbackPage() {
                         setSelectedAttempt(attempt.attempt_number);
                         setFeedback(attempt);
                       }}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-all text-sm ${
                         selectedAttempt === attempt.attempt_number
                           ? "bg-blue-600 text-white shadow-md"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
                       #{attempt.attempt_number}
-                      <span className="ml-2 text-sm opacity-75">
+                      <span className="ml-2 text-xs sm:text-sm opacity-75">
                         ({attempt.total_score})
                       </span>
                     </button>
@@ -176,13 +182,13 @@ export default function FeedbackPage() {
           </div>
 
           {/* Overall Performance Card */}
-          <div className="bg-white p-6 md:p-8 rounded-lg border border-slate-200">
-            <h2 className="text-black text-[22px] font-bold leading-tight tracking-tight mb-6">
+          <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg border border-slate-200">
+            <h2 className="text-black text-lg sm:text-xl md:text-[22px] font-bold leading-tight tracking-tight mb-4 sm:mb-6">
               Overall Performance
             </h2>
-            <div className="grid md:grid-cols-3 gap-8 items-center">
+            <div className="grid md:grid-cols-3 gap-6 sm:gap-8 items-center">
               {/* Circular Progress */}
-              <div className="relative flex justify-center items-center w-40 h-40 mx-auto">
+              <div className="relative flex justify-center items-center w-32 h-32 sm:w-40 sm:h-40 mx-auto">
                 <svg
                   className="transform -rotate-90"
                   width="100%"
@@ -212,20 +218,22 @@ export default function FeedbackPage() {
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center">
-                  <span className="text-black text-4xl font-bold">
+                  <span className="text-black text-3xl sm:text-4xl font-bold">
                     {feedback.total_score}
                   </span>
-                  <span className="text-slate-500 text-sm">/ 100</span>
+                  <span className="text-slate-500 text-xs sm:text-sm">
+                    / 100
+                  </span>
                 </div>
               </div>
 
               {/* Performance Summary */}
-              <div className="md:col-span-2 flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <p className="text-black text-xl font-medium leading-normal">
+              <div className="md:col-span-2 flex flex-col gap-3 text-center md:text-left">
+                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-3">
+                  <p className="text-black text-lg sm:text-xl font-medium leading-normal">
                     {getPerformanceLabel(feedback.total_score)}
                   </p>
-                  <span className="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                  <span className="px-3 py-1 text-xs sm:text-sm font-medium rounded-full bg-green-100 text-green-800">
                     {getPercentile(feedback.total_score)}
                   </span>
                 </div>
@@ -238,36 +246,37 @@ export default function FeedbackPage() {
 
           {/* Question-by-Question Breakdown */}
           <div className="flex flex-col gap-4">
-            <h2 className="text-black text-[22px] font-bold leading-tight tracking-tight px-4">
+            <h2 className="text-black text-lg sm:text-xl md:text-[22px] font-bold leading-tight tracking-tight px-2 sm:px-4">
               Question-by-Question Breakdown
             </h2>
 
             {feedback.question_breakdown?.map((question, index) => (
               <details
                 key={index}
-                className="group bg-white p-6 rounded-lg border border-slate-200"
-                {...(openAccordion === index ? { open: true } : {})}
-                onToggle={() =>
-                  setOpenAccordion(openAccordion === index ? -1 : index)
-                }
+                className="group bg-white p-4 sm:p-6 rounded-lg border border-slate-200"
+                open={openAccordion === index}
+                onToggle={(e) => {
+                  e.preventDefault();
+                  setOpenAccordion(openAccordion === index ? -1 : index);
+                }}
               >
-                <summary className="flex justify-between items-center cursor-pointer list-none">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-blue-600 font-semibold text-sm">
+                <summary className="flex justify-between items-start cursor-pointer list-none">
+                  <div className="flex-1 min-w-0 pr-2">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="text-blue-600 font-semibold text-xs sm:text-sm">
                         Question {question.questionNumber}
                       </span>
                       <span
-                        className={`text-sm font-medium ${getScoreColor(question.score)}`}
+                        className={`text-xs sm:text-sm font-medium ${getScoreColor(question.score)}`}
                       >
                         {question.score}/100
                       </span>
                     </div>
-                    <p className="text-slate-800 font-medium">
+                    <p className="text-slate-800 font-medium text-sm sm:text-base">
                       {question.question}
                     </p>
                   </div>
-                  <span className="material-symbols-outlined text-slate-500 transition-transform duration-300 group-open:rotate-180 ml-4">
+                  <span className="material-symbols-outlined text-slate-500 transition-transform duration-300 group-open:rotate-180 ml-2 shrink-0">
                     expand_more
                   </span>
                 </summary>
@@ -329,8 +338,8 @@ export default function FeedbackPage() {
           {/* Areas for Improvement & Recommended Actions */}
           <div className="grid md:grid-cols-2 gap-8">
             {/* Areas for Improvement */}
-            <div className="bg-white p-6 md:p-8 rounded-lg border border-slate-200">
-              <h2 className="text-black text-[22px] font-bold leading-tight tracking-tight mb-6">
+            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg border border-slate-200">
+              <h2 className="text-black text-lg sm:text-xl md:text-[22px] font-bold leading-tight tracking-tight mb-4 sm:mb-6">
                 Areas for Improvement
               </h2>
               <div className="flex flex-col gap-4">
@@ -351,23 +360,25 @@ export default function FeedbackPage() {
             </div>
 
             {/* Recommended Actions */}
-            <div className="bg-white p-6 md:p-8 rounded-lg border border-slate-200">
-              <h2 className="text-black text-[22px] font-bold leading-tight tracking-tight mb-6">
+            <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg border border-slate-200">
+              <h2 className="text-black text-lg sm:text-xl md:text-[22px] font-bold leading-tight tracking-tight mb-4 sm:mb-6">
                 Recommended Actions
               </h2>
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => router.push(`/interview/${interviewId}`)}
-                  className="w-full flex items-center justify-center gap-2 text-center bg-blue-600 text-white font-medium py-3 px-4 rounded hover:bg-blue-700 transition-colors duration-200"
+                  className="w-full flex items-center justify-center gap-2 text-center bg-blue-600 text-white font-medium py-3 px-4 rounded hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base"
                 >
-                  <span className="material-symbols-outlined">refresh</span>
+                  <span className="material-symbols-outlined text-xl">
+                    refresh
+                  </span>
                   Practice Again
                 </button>
                 <button
                   onClick={() => router.push("/projects")}
-                  className="w-full flex items-center justify-center gap-2 text-center bg-slate-100 text-slate-800 font-medium py-3 px-4 rounded hover:bg-slate-200 transition-colors duration-200"
+                  className="w-full flex items-center justify-center gap-2 text-center bg-slate-100 text-slate-800 font-medium py-3 px-4 rounded hover:bg-slate-200 transition-colors duration-200 text-sm sm:text-base"
                 >
-                  <span className="material-symbols-outlined">
+                  <span className="material-symbols-outlined text-xl">
                     folder_managed
                   </span>
                   Review Projects

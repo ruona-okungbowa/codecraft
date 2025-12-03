@@ -30,10 +30,10 @@ export default function FeaturesSection() {
   return (
     <section
       id="features"
-      className="py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-[#dbe6f31a]"
+      className="py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-[#dbe6f31a]"
     >
       <div
-        className="absolute -top-32 -left-32 rounded-full blur-3xl opacity-60"
+        className="hidden sm:block absolute -top-32 -left-32 rounded-full blur-3xl opacity-60"
         style={{
           width: "500px",
           height: "500px",
@@ -43,7 +43,7 @@ export default function FeaturesSection() {
         }}
       ></div>
       <div
-        className="absolute -bottom-32 -right-32 rounded-full blur-3xl opacity-60"
+        className="hidden sm:block absolute -bottom-32 -right-32 rounded-full blur-3xl opacity-60"
         style={{
           width: "500px",
           height: "500px",
@@ -54,18 +54,18 @@ export default function FeaturesSection() {
       ></div>
 
       <div className="container mx-auto">
-        <div className="text-center mb-16 relative">
-          <h2 className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight text-gray-900">
+        <div className="text-center mb-12 sm:mb-16 relative">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-gray-900 px-4">
             Your Code, Reimagined
           </h2>
-          <p className="mt-4 text-lg md:text-xl font-normal leading-relaxed text-gray-600 max-w-2xl mx-auto">
+          <p className="mt-4 text-base sm:text-lg md:text-xl font-normal leading-relaxed text-gray-600 max-w-2xl mx-auto px-4">
             CodeCraft goes beyond just displaying your repositories. It
             intelligently analyzes, visualizes, and packages your work to catch
             the eye of top recruiters.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 relative z-10">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             const colorMap = {
@@ -90,7 +90,7 @@ export default function FeaturesSection() {
             return (
               <div
                 key={index}
-                className="bg-white p-8 rounded-lg flex flex-col items-start gap-4 transition-all duration-300 transform hover:scale-[1.03] hover:-translate-y-2"
+                className="bg-white p-6 sm:p-8 rounded-lg flex flex-col items-start gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-[1.03] hover:-translate-y-2"
                 style={{
                   boxShadow: "0 4px 6px -4px rgba(0, 0, 0, 0.1)",
                 }}
@@ -103,15 +103,15 @@ export default function FeaturesSection() {
                 }}
               >
                 <div
-                  className="flex items-center justify-center size-16 rounded-full"
+                  className="flex items-center justify-center size-14 sm:size-16 rounded-full"
                   style={{ backgroundColor: colors.bg, color: colors.text }}
                 >
-                  <Icon className="w-10 h-10" />
+                  <Icon className="w-8 h-8 sm:w-10 sm:h-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mt-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mt-2">
                   {feature.title}
                 </h3>
-                <p className="text-base text-gray-600 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                   {feature.description}
                 </p>
               </div>

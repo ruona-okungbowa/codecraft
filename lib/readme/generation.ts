@@ -88,7 +88,15 @@ export async function generateProfileReadme(
   user: User,
   projects: Project[],
   template: ReadmeTemplate,
-  research: ReadmeResearch
+  research: ReadmeResearch,
+  config?: {
+    includeStats?: boolean;
+    includeTopLanguages?: boolean;
+    includeProjects?: boolean;
+    includeSkills?: boolean;
+    includeContact?: boolean;
+    includeSocials?: boolean;
+  }
 ): Promise<GeneratedReadme> {
   // Select top projects
   const topProjects = selectTopProjects(projects, 6);
@@ -105,8 +113,13 @@ export async function generateProfileReadme(
     },
   };
 
-  // Build the prompt with research context
-  const prompt = buildProfileReadmePrompt(profileData, template, research);
+  // Build the prompt with research context and config
+  const prompt = buildProfileReadmePrompt(
+    profileData,
+    template,
+    research,
+    config
+  );
 
   // Call OpenAI
   const content = await callOpenAI(prompt, "profile");
@@ -339,7 +352,7 @@ Imagine a developer joining this project for the first time. They need to:
 
 **EXAMPLE STRUCTURE WITH PROPER SPACING:**
 
-# 🚀 Project Name
+# Project Name
 
 > A compelling tagline that captures the essence of the project in one sentence
 
@@ -350,7 +363,7 @@ A clear 1-2 sentence description based on the PROJECT NAME and DESCRIPTION. If i
 ${config?.badges !== false ? "![Badge1](url) ![Badge2](url) ![Badge3](url)" : ""}
 
 
-## 📋 Overview
+## Overview
 
 
 2-3 sentences explaining what THIS SPECIFIC PROJECT does. Include:
@@ -361,7 +374,7 @@ ${config?.badges !== false ? "![Badge1](url) ![Badge2](url) ![Badge3](url)" : ""
 Read the project name and description carefully. Don't assume it's the same as other projects.
 
 
-## ✨ Features
+## Features
 
 
 **ANALYZE DEPENDENCIES AND FRAMEWORK TO DETERMINE FEATURES:**
@@ -392,7 +405,7 @@ Group features by category for better organization:
 - Describe features based on what the dependencies enable
 
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 
 ### Core
@@ -421,7 +434,7 @@ Group features by category for better organization:
 Keep it organized by category - only include sections that apply to THIS project.
 
 
-## 🚀 Getting Started
+## Getting Started
 
 
 ### Prerequisites
@@ -474,7 +487,7 @@ Keep it organized by category - only include sections that apply to THIS project
    - Press 'a' for Android emulator
 
 
-## 📦 Available Scripts
+## Available Scripts
 
 \`\`\`bash
 # List ACTUAL scripts from package.json
@@ -484,7 +497,7 @@ npm test                 # Run tests
 \`\`\`
 
 
-## 📁 Project Structure (Optional - only if helpful)
+## Project Structure (Optional - only if helpful)
 
 
 \`\`\`
@@ -499,7 +512,7 @@ project-name/
 \`\`\`
 
 
-## 🚢 Deployment (Optional)
+## Deployment (Optional)
 
 
 ### Vercel (or detected platform)
@@ -512,19 +525,19 @@ project-name/
 Include deployment instructions only if relevant to the project type.
 
 
-## 📄 License
+## License
 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
-## 🤝 Contributing (Optional)
+## Contributing (Optional)
 
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 
-## 📧 Contact (Optional)
+## Contact (Optional)
 
 
 - **Author**: (if available)
@@ -532,7 +545,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - **Project Link**: [repo-url](repo-url)
 
 
-## 🙏 Acknowledgments (Optional)
+## Acknowledgments (Optional)
 
 
 - Built with [Framework](url)
@@ -549,7 +562,7 @@ Only include if there are notable acknowledgments.
 ---
 
 **CRITICAL INSTRUCTIONS FOR GENERATION:**
-1. **Use emojis** for section headers (📋 ✨ 🛠️ 🚀 📦 📁 🚢 📄 🤝 📧 🙏)
+1. **NO emojis** in section headers - keep them clean and professional
 2. **Add tagline** under title with > blockquote
 3. **Group features** by category for better organization
 4. **Organize tech stack** by sections (Core, Styling, Backend, etc.)
@@ -581,7 +594,15 @@ IMPORTANT: Return ONLY the Markdown content with proper spacing. Do NOT wrap in 
 function buildProfileReadmePrompt(
   profileData: ProfileReadmeData,
   template: ReadmeTemplate,
-  research: ReadmeResearch
+  research: ReadmeResearch,
+  config?: {
+    includeStats?: boolean;
+    includeTopLanguages?: boolean;
+    includeProjects?: boolean;
+    includeSkills?: boolean;
+    includeContact?: boolean;
+    includeSocials?: boolean;
+  }
 ): string {
   const templateInstructions = getTemplateInstructions(template);
 
@@ -616,16 +637,27 @@ ${research.visualElements.map((v) => `- ${v}`).join("\n")}
 **Trending Features:**
 ${research.trendingFeatures.map((f) => `- ${f}`).join("\n")}
 
+**Configuration (User Preferences):**
+${config?.includeStats !== false ? "✅ Include GitHub Stats widget" : "❌ Skip GitHub Stats"}
+${config?.includeTopLanguages !== false ? "✅ Include Top Languages chart" : "❌ Skip Top Languages"}
+${config?.includeProjects !== false ? "✅ Highlight featured projects" : "❌ Skip featured projects section"}
+${config?.includeSkills !== false ? "✅ Add skill badges and tech stack" : "❌ Skip skills section"}
+${config?.includeContact !== false ? "✅ Include contact information" : "❌ Skip contact info"}
+${config?.includeSocials !== false ? "✅ Add social media links" : "❌ Skip social links"}
+
 **Instructions:**
 1. Create an engaging profile README that showcases the developer
-2. Include GitHub stats widgets using:
-   - \`![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${profileData.username}&show_icons=true&theme=radical)\`
-   - \`![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${profileData.username}&layout=compact&theme=radical)\`
-3. Add skill badges for technologies
-4. Highlight top projects with links
-5. Make it personal and engaging
-6. Use emojis appropriately
-7. Return ONLY the Markdown content, no wrapper code blocks
+${config?.includeStats !== false ? `2. Include GitHub stats widget: \`![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${profileData.username}&show_icons=true&theme=radical)\`` : ""}
+${config?.includeTopLanguages !== false ? `3. Include top languages chart: \`![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${profileData.username}&layout=compact&theme=radical)\`` : ""}
+${config?.includeSkills !== false ? "4. Add skill badges for technologies using shields.io" : ""}
+${config?.includeProjects !== false ? "5. Highlight top projects with links and descriptions" : ""}
+${config?.includeContact !== false ? "6. Add contact information (email, ways to reach)" : ""}
+${config?.includeSocials !== false ? "7. Include social media links (LinkedIn, Twitter, portfolio)" : ""}
+8. Make it personal and engaging
+9. Use emojis appropriately
+10. Return ONLY the Markdown content, no wrapper code blocks
+
+**IMPORTANT:** Only include sections that are enabled in the configuration above. Skip any sections marked with ❌.
 
 Generate the profile README now:`;
 }

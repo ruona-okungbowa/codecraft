@@ -84,19 +84,21 @@ export default function InterviewSessionPage({
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
+          className="text-center mb-6 sm:mb-8"
         >
           <h1
-            className={`text-3xl font-bold text-gray-900 mb-2 ${newsreader.className}`}
+            className={`text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 ${newsreader.className}`}
           >
             Interview in Progress
           </h1>
-          <p className={`text-gray-600 ${sansation.className}`}>
+          <p
+            className={`text-sm sm:text-base text-gray-600 ${sansation.className}`}
+          >
             Answer the questions naturally and take your time
           </p>
         </motion.div>

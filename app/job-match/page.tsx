@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import Link from "next/link";
 
 interface JobMatchResult {
@@ -83,9 +84,10 @@ export default function JobMatchPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
+      <MobileNav />
       <CollapsibleSidebar />
 
-      <main className="flex-1 p-8 overflow-y-auto ml-20">
+      <main className="pt-16 md:pt-0 flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto ml-0 md:ml-20">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Page Heading */}
           <div className="flex flex-col gap-2">
