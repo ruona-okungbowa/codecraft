@@ -72,7 +72,7 @@ export default function SkillGapPage() {
         alert("Failed to analyze skills");
       }
     } catch (error) {
-      console.error("Error analyzing:", error);
+      console.error("Error analysing:", error);
       alert("An error occurred");
     } finally {
       setLoading(false);
@@ -143,7 +143,7 @@ export default function SkillGapPage() {
                 className="min-w-[84px] rounded-full h-14 px-6 text-sm font-bold text-white transition-colors disabled:opacity-50"
                 style={{ backgroundColor: "#4c96e1" }}
               >
-                {loading ? "Analyzing..." : "Analyze"}
+                {loading ? "Analysing..." : "Analyse"}
               </button>
             </div>
           </div>

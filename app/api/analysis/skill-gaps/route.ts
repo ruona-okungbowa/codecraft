@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch user's projects (prioritize portfolio and recent projects)
+    // Fetch user's projects (prioritise portfolio and recent projects)
     const { data: projects, error: projectsError } = await supabase
       .from("projects")
       .select("*")
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
         preferred: analysis.missingSkills.preferred,
         niceToHave: analysis.missingSkills.niceToHave,
       },
-      // analyzed_at will be set automatically by DEFAULT NOW() in database
+      // analysed_at will be set automatically by DEFAULT NOW() in database
     });
 
     if (insertError) {
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
       analysedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Error analyzing skill gaps:", error);
+    console.error("Error analysing skill gaps:", error);
     return NextResponse.json(
       {
         error: "Failed to analyze skill gaps",

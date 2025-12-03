@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 import { createClient } from "@/lib/supabase/client";
+import { Upload } from "lucide-react";
 
 interface UserProfile {
   github_username: string;
@@ -18,6 +19,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form state
   const [firstName, setFirstName] = useState("");
@@ -114,6 +117,73 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) throw new Error("Not authenticated");
+
+      // Upload to Supabase Storage
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("user-uploads")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("user-uploads").getPublicUrl(filePath);
+
+      // Update user profile
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar_url: publicUrl }),
+      });
+
+      if (response.ok) {
+        const { showSuccess } = await import("@/lib/utils/toast");
+        showSuccess("Profile photo updated successfully!");
+        await fetchProfile();
+      } else {
+        throw new Error("Failed to update profile");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      const { showError } = await import("@/lib/utils/toast");
+      showError("Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -176,9 +246,32 @@ export default function SettingsPage() {
                     </p>
                   </div>
                 </div>
-                <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-4 bg-[#4c96e1]/10 text-[#4c96e1] text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span className="truncate">Upload Image</span>
-                </button>
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full h-10 px-4 bg-[#4c96e1] text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-[#3a7bc8] transition-colors disabled:opacity-50"
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span className="truncate">Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        <span className="truncate">Upload Image</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
@@ -305,41 +398,24 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Danger Zone */}
-          <div className="bg-white rounded-lg p-6 border border-red-500/50">
-            <h2 className="text-red-600 text-[22px] font-bold leading-tight tracking-[-0.015em]">
-              Danger Zone
+          {/* Logout Section */}
+          <div className="bg-white rounded-lg p-6 border border-slate-200">
+            <h2 className="text-slate-900 text-[22px] font-bold leading-tight tracking-[-0.015em] pb-3">
+              Session
             </h2>
-            <p className="text-slate-500 mt-1 mb-6 px-4">
-              These actions are permanent and cannot be undone. Please proceed
-              with caution.
-            </p>
-            <div className="space-y-4 px-4">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 p-4 border border-slate-200 rounded">
-                <div>
-                  <p className="font-bold text-slate-900">
-                    Delete All Generated Content
-                  </p>
-                  <p className="text-sm text-slate-500">
-                    Permanently remove all portfolio materials generated by
-                    CodeCraft.
-                  </p>
-                </div>
-                <button className="flex-shrink-0 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 border border-red-600 text-red-600 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-600 hover:text-white transition-colors">
-                  Delete Content
-                </button>
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 border border-slate-200 rounded">
+              <div>
+                <p className="font-bold text-slate-900">Done For The Day?</p>
+                <p className="text-sm text-slate-500 mt-1">
+                  Sign out of your account securely
+                </p>
               </div>
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 p-4 border border-slate-200 rounded">
-                <div>
-                  <p className="font-bold text-slate-900">Done For The Day?</p>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="flex-shrink-0 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-red-600 text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-red-700 transition-colors"
-                >
-                  Log Out
-                </button>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="shrink-0 min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-slate-100 text-slate-700 text-sm font-bold leading-normal tracking-[0.015em] hover:bg-slate-200 transition-colors"
+              >
+                Log Out
+              </button>
             </div>
           </div>
         </div>

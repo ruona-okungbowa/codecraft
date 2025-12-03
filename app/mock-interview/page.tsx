@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import InterviewStatsCard from "@/components/InterviewStatsCard";
 import { InterviewRow } from "@/types/interview";
 import { getScoreColor } from "@/lib/utils/scoring";
 
@@ -21,6 +22,8 @@ export default function MockInterviewClient() {
   const [interviews, setInterviews] = useState<InterviewWithFeedback[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [stats, setStats] = useState<any>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   // Setup form state
   const [focusArea, setFocusArea] = useState<FocusArea>("technical");
@@ -32,7 +35,22 @@ export default function MockInterviewClient() {
 
   useEffect(() => {
     fetchInterviews();
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch("/api/interviews/stats");
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data.stats);
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   const fetchInterviews = async () => {
     setLoading(true);
@@ -333,6 +351,13 @@ export default function MockInterviewClient() {
                 </div>
               )}
             </div>
+
+            {/* Stats Card */}
+            {!loadingStats && stats && stats.completedInterviews > 0 && (
+              <div className="mt-8 mb-8">
+                <InterviewStatsCard stats={stats} />
+              </div>
+            )}
 
             <div className="flex flex-wrap justify-between items-center gap-4 mb-8 mt-12">
               <h1 className="text-black text-4xl font-black leading-tight tracking-tight min-w-72">
