@@ -17,7 +17,11 @@ export async function researchProjectReadmeBestPractices(
 
     return research;
   } catch (error) {
-    console.error("MCP research failed, using fallback template:", error);
+    // Web research failed or timed out, using fallback template
+    console.info(
+      `Using fallback template for project type: ${projectType}`,
+      error instanceof Error ? error.message : "Unknown error"
+    );
     return getProjectFallbackTemplate(projectType);
   }
 }
@@ -31,7 +35,11 @@ export async function researchProfileReadmeBestPractices(): Promise<ReadmeResear
 
     return research;
   } catch (error) {
-    console.error("MCP research failed, using fallback template:", error);
+    // Web research failed or timed out, using fallback template
+    console.info(
+      "Using fallback template for profile README",
+      error instanceof Error ? error.message : "Unknown error"
+    );
     return getProfileFallbackTemplate();
   }
 }
@@ -40,49 +48,89 @@ async function fetchProjectBestPractices(
   projectType: string
 ): Promise<ReadmeResearch> {
   const currentYear = new Date().getFullYear();
-  const searchQuery = `best README practices ${currentYear} ${projectType} project`;
+  const searchQuery = `best README practices ${currentYear} ${projectType} project GitHub markdown`;
 
   try {
-    // Simulate MCP fetch call
-    // In production, this would be: await mcpClient.fetch({ url: searchUrl })
-    const mockMcpResponse = await simulateMcpFetch(searchQuery);
+    // Use DuckDuckGo HTML search (no API key required, works in production)
+    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
 
-    return parseMcpResponse(mockMcpResponse, "project");
+    const response = await fetch(searchUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      signal: AbortSignal.timeout(MCP_TIMEOUT),
+    });
+
+    if (!response.ok) {
+      console.warn(
+        `DuckDuckGo search failed with status ${response.status}, using fallback`
+      );
+      throw new Error("Search failed");
+    }
+
+    const htmlContent = await response.text();
+    const parsed = parseWebContent(htmlContent, "project");
+
+    // If parsing yielded no useful data, use fallback
+    if (parsed.sections.length === 0 && parsed.trendingFeatures.length === 0) {
+      console.warn("Web parsing yielded no data, using fallback");
+      throw new Error("No data extracted");
+    }
+
+    return parsed;
   } catch (error) {
-    throw new Error(`MCP fetch failed: ${error}`);
+    console.warn("Web research failed, using fallback template:", error);
+    throw error;
   }
 }
 
 async function fetchProfileBestPractices(): Promise<ReadmeResearch> {
   const currentYear = new Date().getFullYear();
-  const searchQuery = `best GitHub profile README ${currentYear}`;
+  const searchQuery = `best GitHub profile README ${currentYear} examples trending`;
 
   try {
-    // Simulate MCP fetch call
-    const mockMcpResponse = await simulateMcpFetch(searchQuery);
+    // Use DuckDuckGo HTML search (no API key required, works in production)
+    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQuery)}`;
 
-    return parseMcpResponse(mockMcpResponse, "profile");
+    const response = await fetch(searchUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      signal: AbortSignal.timeout(MCP_TIMEOUT),
+    });
+
+    if (!response.ok) {
+      console.warn(
+        `DuckDuckGo search failed with status ${response.status}, using fallback`
+      );
+      throw new Error("Search failed");
+    }
+
+    const htmlContent = await response.text();
+    const parsed = parseWebContent(htmlContent, "profile");
+
+    // If parsing yielded no useful data, use fallback
+    if (parsed.sections.length === 0 && parsed.trendingFeatures.length === 0) {
+      console.warn("Web parsing yielded no data, using fallback");
+      throw new Error("No data extracted");
+    }
+
+    return parsed;
   } catch (error) {
-    throw new Error(`MCP fetch failed: ${error}`);
+    console.warn("Web research failed, using fallback template:", error);
+    throw error;
   }
 }
 
-async function simulateMcpFetch(_query: string): Promise<string> {
-  // This is a placeholder that simulates MCP being unavailable
-  // In production, replace this with actual MCP fetch tool call:
-  // const response = await fetch(`https://search-api.com?q=${encodeURIComponent(query)}`);
-  // return await response.text();
-
-  throw new Error("MCP not configured - using fallback templates");
-}
-
-/**
- * Parses MCP response to extract README best practices
- * @param htmlContent - HTML content from MCP fetch
- * @param type - Type of README (project or profile)
- * @returns Structured research data
- */
-function parseMcpResponse(
+function parseWebContent(
   htmlContent: string,
   type: "project" | "profile"
 ): ReadmeResearch {
@@ -90,42 +138,68 @@ function parseMcpResponse(
   const badgeStyles: string[] = [];
   const visualElements: string[] = [];
   const trendingFeatures: string[] = [];
-  const exampleStructures: string[] = [];
 
-  const sectionMatches = htmlContent.match(
-    /(?:sections?|include|should have):\s*([^\n]+)/gi
-  );
-  if (sectionMatches) {
-    sectionMatches.forEach((match) => {
-      const extracted = match
-        .replace(/(?:sections?|include|should have):\s*/i, "")
-        .split(/[,;]/)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
-      sections.push(...extracted);
-    });
-  }
+  // Convert to lowercase for case-insensitive matching
+  const lowerContent = htmlContent.toLowerCase();
+
+  // Extract sections from content - look for common README section keywords
+  const sectionKeywords =
+    type === "project"
+      ? [
+          "installation",
+          "usage",
+          "features",
+          "documentation",
+          "contributing",
+          "license",
+          "getting started",
+          "prerequisites",
+          "deployment",
+          "testing",
+          "api reference",
+        ]
+      : [
+          "about me",
+          "skills",
+          "projects",
+          "experience",
+          "contact",
+          "stats",
+          "technologies",
+          "portfolio",
+        ];
+
+  sectionKeywords.forEach((keyword) => {
+    if (lowerContent.includes(keyword)) {
+      sections.push(
+        keyword
+          .split(" ")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ")
+      );
+    }
+  });
 
   // Extract badge information
-  const badgeMatches = htmlContent.match(/shields\.io|badge|img\.shields/gi);
-  if (badgeMatches) {
-    badgeStyles.push("https://img.shields.io/badge/style-flat-square");
-    badgeStyles.push("https://img.shields.io/badge/style-for-the-badge");
+  if (lowerContent.match(/shields\.io|badge|img\.shields|status badge/gi)) {
+    badgeStyles.push("flat-square", "for-the-badge", "plastic");
   }
 
   // Extract visual elements
-  const visualMatches = htmlContent.match(
-    /screenshot|demo|gif|diagram|image|visual/gi
-  );
-  if (visualMatches) {
+  if (
+    lowerContent.match(
+      /screenshot|demo|gif|diagram|image|visual|preview|example/gi
+    )
+  ) {
     visualElements.push("Screenshots", "Demo GIF", "Architecture diagram");
   }
 
   // Extract trending features
-  const trendingMatches = htmlContent.match(
-    /github actions|ci\/cd|coverage|stats|analytics/gi
-  );
-  if (trendingMatches) {
+  if (
+    lowerContent.match(
+      /github actions|ci\/cd|coverage|stats|analytics|workflow|automation/gi
+    )
+  ) {
     trendingFeatures.push(
       "GitHub Actions badges",
       "Code coverage",
@@ -133,46 +207,73 @@ function parseMcpResponse(
     );
   }
 
-  return {
-    sections: sections.length > 0 ? sections : getDefaultSections(type),
-    badgeStyles: badgeStyles.length > 0 ? badgeStyles : getDefaultBadgeStyles(),
-    visualElements:
-      visualElements.length > 0 ? visualElements : getDefaultVisualElements(),
-    trendingFeatures:
-      trendingFeatures.length > 0
-        ? trendingFeatures
-        : getDefaultTrendingFeatures(),
-    exampleStructures: exampleStructures,
-    source: "mcp",
-  };
-}
+  // Deduplicate arrays
+  const uniqueSections = [...new Set(sections)];
+  const uniqueBadgeStyles = [...new Set(badgeStyles)];
+  const uniqueVisualElements = [...new Set(visualElements)];
+  const uniqueTrendingFeatures = [...new Set(trendingFeatures)];
 
-function createTimeout(ms: number): Promise<never> {
-  return new Promise((_, reject) => {
-    setTimeout(() => reject(new Error("MCP request timed out")), ms);
-  });
+  return {
+    sections:
+      uniqueSections.length > 0 ? uniqueSections : getDefaultSections(type),
+    badgeStyles:
+      uniqueBadgeStyles.length > 0
+        ? uniqueBadgeStyles
+        : getDefaultBadgeStyles(),
+    visualElements:
+      uniqueVisualElements.length > 0
+        ? uniqueVisualElements
+        : getDefaultVisualElements(),
+    trendingFeatures:
+      uniqueTrendingFeatures.length > 0
+        ? uniqueTrendingFeatures
+        : getDefaultTrendingFeatures(),
+    exampleStructures: [],
+    source: "web" as const,
+  };
 }
 
 function getDefaultSections(type: "project" | "profile"): string[] {
   if (type === "profile") {
-    return ["About Me", "Projects", "Skills", "Contact"];
+    return [
+      "About Me",
+      "Tech Stack",
+      "Featured Projects",
+      "GitHub Stats",
+      "Contact",
+    ];
   }
-  return ["Overview", "Features", "Installation", "Usage"];
-}
-
-function getDefaultBadgeStyles(): string[] {
   return [
-    "https://img.shields.io/badge/style-flat-square",
-    "https://img.shields.io/badge/style-for-the-badge",
+    "Overview",
+    "Features",
+    "Installation",
+    "Usage",
+    "Contributing",
+    "License",
   ];
 }
 
+function getDefaultBadgeStyles(): string[] {
+  return ["flat-square", "for-the-badge", "plastic"];
+}
+
 function getDefaultVisualElements(): string[] {
-  return ["Screenshots", "Demo", "Diagrams"];
+  return ["Screenshots", "Demo GIF", "Architecture Diagram"];
 }
 
 function getDefaultTrendingFeatures(): string[] {
-  return ["GitHub Actions", "Badges", "Stats"];
+  return [
+    "GitHub Actions CI/CD",
+    "Code Coverage Badges",
+    "Version Badges",
+    "Social Badges",
+  ];
+}
+
+function createTimeout(ms: number): Promise<never> {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error("Research request timed out")), ms);
+  });
 }
 
 interface CacheEntry {

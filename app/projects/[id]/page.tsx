@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ProjectRow } from "@/types";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import Link from "next/link";
 import { marked } from "marked";
 import { showSuccess, showError } from "@/lib/utils/toast";
@@ -301,8 +302,9 @@ export default function ProjectDetailPage() {
   if (loading) {
     return (
       <div className="flex h-screen overflow-hidden bg-[#f6f7f8]">
+        <MobileNav />
         <CollapsibleSidebar />
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10 ml-20">
+        <main className="pt-16 md:pt-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 ml-0 md:ml-20">
           <div className="text-center py-20">
             <p className="text-gray-500">Loading project...</p>
           </div>
@@ -321,16 +323,17 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f6f7f8]">
+      <MobileNav />
       <CollapsibleSidebar />
 
-      <main className="flex-1 overflow-y-auto p-6 lg:p-10 ml-20">
+      <main className="pt-16 md:pt-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10 ml-0 md:ml-20">
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
-          <header className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
+          <header className="mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
               <Link
                 href="/projects"
-                className="text-gray-600 text-lg font-medium hover:text-[#4c96e1] transition-colors"
+                className="text-gray-600 text-sm sm:text-lg font-medium hover:text-[#4c96e1] transition-colors"
               >
                 Projects
               </Link>
@@ -343,15 +346,15 @@ export default function ProjectDetailPage() {
               >
                 <path d="M9.29 6.71a.996.996 0 0 0 0 1.41L13.17 12l-3.88 3.88a.996.996 0 1 0 1.41 1.41l4.59-4.59a.996.996 0 0 0 0-1.41L10.7 6.7c-.38-.38-1.02-.38-1.41.01z" />
               </svg>
-              <span className="text-lg font-medium text-black">
+              <span className="text-sm sm:text-lg font-medium text-black truncate">
                 {project.name}
               </span>
             </div>
 
             {/* Project Header */}
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h2 className="text-3xl font-bold text-black">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-2xl sm:text-3xl font-bold text-black break-words">
                   {project.name}
                 </h2>
                 <p className="text-gray-600 mt-1 max-w-2xl">
@@ -413,7 +416,7 @@ export default function ProjectDetailPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto">
                 {project.in_portfolio && (
                   <div
                     className="text-sm font-semibold py-1.5 px-3 rounded-full flex items-center gap-1.5"
@@ -436,7 +439,7 @@ export default function ProjectDetailPage() {
                 <button
                   onClick={handleGenerateAll}
                   disabled={generating}
-                  className="flex items-center justify-center gap-2 rounded-lg h-11 px-6 font-semibold transition-all duration-300 transform hover:scale-105 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-lg h-11 px-4 sm:px-6 font-semibold transition-all duration-300 transform hover:scale-105 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   style={{ backgroundColor: "#4c96e1", color: "white" }}
                 >
                   <svg
@@ -454,11 +457,11 @@ export default function ProjectDetailPage() {
           </header>
 
           {/* Tabs */}
-          <div className="border-b border-gray-300 mb-6">
-            <div className="flex items-center gap-2">
+          <div className="border-b border-gray-300 mb-6 overflow-x-auto">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-max">
               <button
                 onClick={() => setActiveTab("summary")}
-                className={`px-4 py-2.5 border-b-2 font-semibold transition-colors duration-200 flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2.5 border-b-2 font-semibold transition-colors duration-200 flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap ${
                   activeTab === "summary"
                     ? "border-[#4c96e1] text-[#4c96e1]"
                     : "border-transparent text-gray-600 hover:text-black"
@@ -476,7 +479,7 @@ export default function ProjectDetailPage() {
               </button>
               <button
                 onClick={() => setActiveTab("stories")}
-                className={`px-4 py-2.5 border-b-2 font-medium transition-colors duration-200 flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2.5 border-b-2 font-medium transition-colors duration-200 flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap ${
                   activeTab === "stories"
                     ? "border-[#4c96e1] text-[#4c96e1]"
                     : "border-transparent text-gray-600 hover:text-black"
@@ -494,7 +497,7 @@ export default function ProjectDetailPage() {
               </button>
               <button
                 onClick={() => setActiveTab("bullets")}
-                className={`px-4 py-2.5 border-b-2 font-medium transition-colors duration-200 flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2.5 border-b-2 font-medium transition-colors duration-200 flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap ${
                   activeTab === "bullets"
                     ? "border-[#4c96e1] text-[#4c96e1]"
                     : "border-transparent text-gray-600 hover:text-black"
@@ -512,7 +515,7 @@ export default function ProjectDetailPage() {
               </button>
               <button
                 onClick={() => setActiveTab("readme")}
-                className={`px-4 py-2.5 border-b-2 font-medium transition-colors duration-200 flex items-center gap-2 ${
+                className={`px-3 sm:px-4 py-2.5 border-b-2 font-medium transition-colors duration-200 flex items-center gap-1.5 sm:gap-2 text-sm sm:text-base whitespace-nowrap ${
                   activeTab === "readme"
                     ? "border-[#4c96e1] text-[#4c96e1]"
                     : "border-transparent text-gray-600 hover:text-black"
@@ -1103,7 +1106,7 @@ export default function ProjectDetailPage() {
       </main>
 
       {generating && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
           <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full mx-4">
             <h3 className="text-2xl font-bold mb-6 text-black text-center">
               Generating Content

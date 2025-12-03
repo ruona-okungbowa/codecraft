@@ -118,7 +118,9 @@ export async function POST(request: Request) {
       skills,
       userData.email,
       userData.avatar_url,
-      config.sections // Pass sections configuration
+      config.sections, // Pass sections configuration
+      config.colorMode, // Pass color mode
+      config.accentColor // Pass accent color
     );
 
     console.log("Deploying to GitHub Pages...");

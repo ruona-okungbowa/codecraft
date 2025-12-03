@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateRecommendations } from "@/lib/recommendations/engine";
+import { generateRecommendationsAsync } from "@/lib/recommendations/engine";
 import type { SkillGapAnalysis } from "@/types/skills";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 1. Authenticate user
     const supabase = await createClient();
@@ -48,8 +48,11 @@ export async function GET(request: NextRequest) {
       ),
     };
 
-    // 4. Generate recommendations
-    const recommendations = generateRecommendations(skillGapAnalysis);
+    // 4. Generate recommendations (use local data only for now)
+    const recommendations = await generateRecommendationsAsync(
+      skillGapAnalysis,
+      false
+    );
 
     // 5. Fetch user's saved and started projects
     const { data: userProjects } = await supabase

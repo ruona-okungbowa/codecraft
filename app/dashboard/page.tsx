@@ -6,6 +6,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ProjectRow } from "@/types";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
+import OnboardingTour from "@/components/OnboardingTour";
 
 interface PortfolioScore {
   overallScore: number;
@@ -121,8 +123,9 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
+        <MobileNav />
         <CollapsibleSidebar />
-        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
           <div className="max-w-7xl mx-auto">
             <div className="mb-6 sm:mb-8 lg:mb-10">
               <div className="h-10 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
@@ -189,8 +192,9 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
+        <MobileNav />
         <CollapsibleSidebar />
-        <main className="ml-0 md:ml-20 flex-1 flex items-center justify-center p-4">
+        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 flex items-center justify-center p-4">
           <div className="text-center max-w-md mx-auto">
             <div className="text-red-500 text-4xl sm:text-5xl mb-4">⚠️</div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
@@ -211,10 +215,12 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
+      <MobileNav />
+      <OnboardingTour />
       <CollapsibleSidebar />
 
       {/* Main Content */}
-      <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+      <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
         <div className="max-w-7xl mx-auto">
           {/* Welcome */}
           <div className="mb-6 sm:mb-8 lg:mb-10">
@@ -235,7 +241,10 @@ export default function DashboardPage() {
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
               {/* Portfolio Score Card */}
-              <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+              <div
+                id="dashboard-score"
+                className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col md:flex-row items-center gap-6 sm:gap-8"
+              >
                 <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 flex items-center justify-center shrink-0">
                   <svg
                     className="w-full h-full transform -rotate-90"
@@ -344,7 +353,10 @@ export default function DashboardPage() {
               </div>
 
               {/* Quick Actions */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <div
+                id="dashboard-actions"
+                className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"
+              >
                 <Link
                   href="/job-match"
                   className="bg-white p-5 sm:p-6 rounded-xl shadow-sm flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-1 hover:scale-105 transition-all duration-300 group"

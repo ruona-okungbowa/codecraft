@@ -1,13 +1,14 @@
 # Implementation Plan
 
-- [ ] 1. Set up database schema and cache infrastructure
+- [x] 1. Set up database schema and cache infrastructure
   - Create Supabase migration for `project_templates_cache` table
   - Add indexes for `expires_at`, `source`, and `template_id`
   - Set up table with JSONB column for flexible template storage
   - _Requirements: 3.1, 3.2_
 
-- [ ] 2. Implement core template parser
-- [ ] 2.1 Create template parser with validation
+- [x] 2. Implement core template parser
+
+- [x] 2.1 Create template parser with validation
   - Write `TemplateParser` class in `lib/templates/parser.ts`
   - Implement `parse()` method to transform raw data to ProjectTemplate
   - Implement `validate()` method to check required fields
@@ -32,8 +33,9 @@
   - Test category inference from tech stack
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
 
-- [ ] 3. Implement cache manager
-- [ ] 3.1 Create cache manager class
+- [x] 3. Implement cache manager
+
+- [x] 3.1 Create cache manager class
   - Write `TemplateCacheManager` class in `lib/templates/cache.ts`
   - Implement `get()` method to retrieve cached templates
   - Implement `set()` method to store templates with metadata
@@ -62,14 +64,15 @@
   - Test cleanup removes only expired entries
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 4. Implement source-specific fetchers
-- [ ] 4.1 Create base SourceFetcher interface
+- [x] 4. Implement source-specific fetchers
+
+- [x] 4.1 Create base SourceFetcher interface
   - Define `SourceFetcher` interface in `lib/templates/sources/types.ts`
   - Define `RawTemplate` interface for intermediate data
   - Define `FetchResult` interface for fetch responses
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 4.2 Implement GitHub Trending fetcher
+- [x] 4.2 Implement GitHub Trending fetcher
   - Create `GitHubTrendingFetcher` class in `lib/templates/sources/github.ts`
   - Use MCP fetch tool to retrieve trending repos page
   - Parse HTML to extract repo name, description, language, stars
@@ -77,7 +80,7 @@
   - Handle timeout and network errors
   - _Requirements: 1.1, 1.5_
 
-- [ ] 4.3 Implement Dev.to fetcher
+- [x] 4.3 Implement Dev.to fetcher
   - Create `DevToFetcher` class in `lib/templates/sources/devto.ts`
   - Fetch tutorial articles tagged with "project"
   - Parse article structure to extract project ideas
@@ -85,7 +88,7 @@
   - Handle timeout and network errors
   - _Requirements: 1.2, 1.5_
 
-- [ ] 4.4 Implement FreeCodeCamp fetcher
+- [x] 4.4 Implement FreeCodeCamp fetcher
   - Create `FreeCodeCampFetcher` class in `lib/templates/sources/freecodecamp.ts`
   - Fetch project tutorial articles
   - Parse FCC article structure
@@ -93,7 +96,7 @@
   - Handle timeout and network errors
   - _Requirements: 1.3, 1.5_
 
-- [ ] 4.5 Implement Roadmap.sh fetcher
+- [x] 4.5 Implement Roadmap.sh fetcher
   - Create `RoadmapFetcher` class in `lib/templates/sources/roadmap.ts`
   - Fetch project ideas from roadmap.sh/projects
   - Parse roadmap project structure
@@ -112,8 +115,9 @@
   - Test parsing of valid source data
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 5. Implement main template fetcher service
-- [ ] 5.1 Create TemplateFetcher orchestrator
+- [x] 5. Implement main template fetcher service
+
+- [x] 5.1 Create TemplateFetcher orchestrator
   - Write `TemplateFetcher` class in `lib/templates/fetcher.ts`
   - Implement `fetchAll()` to coordinate all sources
   - Implement `fetchFromSource()` for individual sources
@@ -123,14 +127,14 @@
   - Add circuit breaker for failing sources
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 3.3, 3.4, 7.1, 7.2_
 
-- [ ] 5.2 Implement fallback template system
+- [x] 5.2 Implement fallback template system
   - Create `getFallbackTemplates()` method
   - Define at least 10 diverse fallback templates
   - Store fallbacks in `lib/templates/fallbacks.ts`
   - Ensure fallbacks cover different difficulty levels
   - _Requirements: 4.3, 4.4_
 
-- [ ] 5.3 Add parallel fetching with Promise.allSettled
+- [x] 5.3 Add parallel fetching with Promise.allSettled
   - Fetch from all sources concurrently
   - Don't block on slow sources
   - Collect successful results

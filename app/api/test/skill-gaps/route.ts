@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     const presentSkills = await extractSkillsFromProjects(mockProjects);
     console.log("Present skills:", presentSkills);
 
-    console.log(`Analyzing gaps for ${role} role...`);
+    console.log(`Analysing gaps for ${role} role...`);
     const analysis = calculateSkillGaps(presentSkills, role);
     const summary = getSkillGapSummary(analysis);
 

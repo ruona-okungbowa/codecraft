@@ -152,7 +152,7 @@ function InterviewContent() {
             Generate Interview
           </h1>
           <p className={`text-gray-600 ${sansation.className}`}>
-            Customize your mock interview experience
+            Customise your mock interview experience
           </p>
         </div>
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
-import { motion } from "framer-motion";
+import { AlertCircle, ArrowRight } from "lucide-react";
 
 interface PriorityCalloutProps {
   criticalGaps: string[];
@@ -14,34 +13,43 @@ export default function PriorityCallout({
   targetRole,
   onViewCritical,
 }: PriorityCalloutProps) {
-  if (criticalGaps.length === 0) return null;
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-orange-50 border border-orange-200 border-l-4 border-l-orange-500 rounded-lg p-5 mx-10 mb-6"
-    >
-      <div className="flex items-start gap-4">
-        <AlertTriangle
-          size={24}
-          className="text-orange-600 flex-shrink-0 mt-0.5"
-        />
-        <div className="flex-1">
-          <h3 className="text-base font-bold text-orange-900 mb-1">
+    <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+      <div className="flex items-start gap-3 sm:gap-4">
+        {/* Alert Icon */}
+        <div className="shrink-0">
+          <AlertCircle size={20} className="text-orange-600 sm:w-6 sm:h-6" />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          {/* Title */}
+          <h3 className="text-base sm:text-lg font-semibold text-orange-900 mb-2">
             Critical skill gaps detected
           </h3>
-          <p className="text-sm text-orange-700 mb-3">
-            These projects address your most urgent needs for {targetRole} roles
+
+          {/* Description */}
+          <p className="text-sm text-orange-800 mb-3">
+            You&apos;re missing {criticalGaps.length} essential skill
+            {criticalGaps.length !== 1 ? "s" : ""} for the{" "}
+            <span className="font-semibold">{targetRole}</span> role. Focus on
+            high-priority projects to address these gaps quickly.
           </p>
+
+          {/* View Critical Projects Link */}
           <button
             onClick={onViewCritical}
-            className="text-sm font-medium text-orange-600 hover:text-orange-700 hover:underline"
+            aria-label={`View ${criticalGaps.length} critical projects`}
+            className="inline-flex items-center gap-2 text-sm font-medium text-orange-700 hover:text-orange-900 transition-colors group"
           >
-            View critical projects →
+            <span>View critical projects</span>
+            <ArrowRight
+              size={16}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

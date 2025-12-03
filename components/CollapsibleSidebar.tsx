@@ -18,23 +18,66 @@ import {
   LogOut,
   User,
   Github,
+  HelpCircle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: Folder, label: "Projects", href: "/projects" },
-  { icon: Globe, label: "Portfolio Website", href: "/portfolio" },
-  { icon: TrendingUp, label: "Skill Gap Analysis", href: "/skill-gap" },
+  {
+    icon: LayoutDashboard,
+    label: "Dashboard",
+    href: "/dashboard",
+    id: "sidebar-dashboard",
+  },
+  {
+    icon: Folder,
+    label: "Projects",
+    href: "/projects",
+    id: "sidebar-projects",
+  },
+  {
+    icon: Globe,
+    label: "Portfolio Website",
+    href: "/portfolio",
+    id: "sidebar-portfolio",
+  },
+  {
+    icon: TrendingUp,
+    label: "Skill Gap Analysis",
+    href: "/skill-gap",
+    id: "sidebar-skill-gap",
+  },
   {
     icon: Lightbulb,
     label: "Project Recommendations",
     href: "/project-recommendations",
+    id: "sidebar-recommendations",
   },
-  { icon: Briefcase, label: "Job Match", href: "/job-match" },
-  { icon: Mic, label: "Mock Interview", href: "/mock-interview" },
-  { icon: FileText, label: "README Generator", href: "/readme-generator" },
-  { icon: Settings, label: "Settings", href: "/settings" },
+  {
+    icon: Briefcase,
+    label: "Job Match",
+    href: "/job-match",
+    id: "sidebar-job-match",
+  },
+  {
+    icon: Mic,
+    label: "Mock Interview",
+    href: "/mock-interview",
+    id: "sidebar-mock-interview",
+  },
+  {
+    icon: FileText,
+    label: "README Generator",
+    href: "/readme-generator",
+    id: "sidebar-readme",
+  },
+  {
+    icon: Settings,
+    label: "Settings",
+    href: "/settings",
+    id: "sidebar-settings",
+  },
+  { icon: HelpCircle, label: "FAQ", href: "/faq", id: "sidebar-faq" },
 ];
 
 export default function CollapsibleSidebar() {
@@ -114,7 +157,7 @@ export default function CollapsibleSidebar() {
     <aside
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
-      className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 flex flex-col p-4 transition-all duration-300 z-50 ${
+      className={`hidden md:flex fixed left-0 top-0 h-screen bg-white border-r border-gray-200 flex-col p-4 transition-all duration-300 z-50 ${
         isExpanded ? "w-64" : "w-20"
       }`}
     >
@@ -147,7 +190,7 @@ export default function CollapsibleSidebar() {
             const isActive = pathname === item.href;
 
             return (
-              <li key={index}>
+              <li key={index} id={item.id}>
                 <Link
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors duration-200 ${

@@ -82,7 +82,7 @@ export default function DetailedPortfolioScorePage() {
       <div className="flex min-h-screen bg-gray-50 ">
         <CollapsibleSidebar />
         <div className="flex-1 flex items-center justify-center">
-          <LoadingSpinner size="lg" text="Analyzing your portfolio..." />
+          <LoadingSpinner size="lg" text="Analysing your portfolio..." />
         </div>
       </div>
     );
@@ -147,7 +147,7 @@ export default function DetailedPortfolioScorePage() {
           {
             name: "Professionalism",
             description:
-              "Community engagement, code organization, and professional presentation.",
+              "Community engagement, code organisation, and professional presentation.",
             score: scoreData.professionalismScore,
             maxScore: 100,
             icon: <Award className="w-6 h-6" />,
