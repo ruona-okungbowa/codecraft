@@ -563,7 +563,7 @@ export default function ProjectsPage() {
                             {project.name}
                           </h3>
                         </Link>
-                        <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-600 mt-1">
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-gray-900 mt-1">
                           <div
                             className="w-2 h-2 rounded-full shrink-0"
                             style={{ backgroundColor: langColor }}
@@ -584,11 +584,11 @@ export default function ProjectsPage() {
                       )}
                     </div>
 
-                    <p className="text-sm text-gray-600 grow mb-4 line-clamp-2">
+                    <p className="text-sm text-gray-900 grow mb-4 line-clamp-2">
                       {project.description || "No description available"}
                     </p>
 
-                    <div className="flex flex-wrap items-center justify-between text-xs sm:text-sm text-gray-600 border-y border-gray-200 py-3 my-3 gap-2">
+                    <div className="flex flex-wrap items-center justify-between text-xs sm:text-sm text-gray-900 border-y border-gray-200 py-3 my-3 gap-2">
                       <div className="flex items-center gap-1.5">
                         <MaterialIcon name="star" />
                         <span className="font-medium">{project.stars}</span>
@@ -704,10 +704,10 @@ export default function ProjectsPage() {
                             </div>
                           )}
                         </div>
-                        <p className="text-xs sm:text-sm text-gray-600 mb-3 line-clamp-2">
+                        <p className="text-xs sm:text-sm text-gray-900 mb-3 line-clamp-2">
                           {project.description || "No description available"}
                         </p>
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-900">
                           <div className="flex items-center gap-1.5">
                             <div
                               className="w-2 h-2 rounded-full shrink-0"
