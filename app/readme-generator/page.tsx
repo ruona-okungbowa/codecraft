@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import ReadmeClient from "./client";
 import AlternativeReadmeClient from "./alternative-client";
 
 function ReadmeLoading() {
