@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Pre-Commit Test Runner",
+  "description": "Automatically runs the test suite before committing code changes to catch bugs and regressions early in the development process",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.js",
+      "**/*.jsx"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "npm run test:run"
+  }
+}
