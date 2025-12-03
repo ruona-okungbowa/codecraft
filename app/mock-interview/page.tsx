@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
-import InterviewStatsCard from "@/components/InterviewStatsCard";
+import MobileNav from "@/components/MobileNav";
 import { InterviewRow } from "@/types/interview";
 import { getScoreColor } from "@/lib/utils/scoring";
 
@@ -14,16 +14,21 @@ interface InterviewWithFeedback extends InterviewRow {
   hasResponses?: boolean;
 }
 
-type FocusArea = "technical" | "behavioral" | "mixed" | "systems";
+type FocusArea = "technical" | "behavioral" | "mixed" | "systems" | "project";
 type Difficulty = "entry" | "mid" | "senior" | "junior";
+
+interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  languages: Record<string, number> | null;
+}
 
 export default function MockInterviewClient() {
   const router = useRouter();
   const [interviews, setInterviews] = useState<InterviewWithFeedback[]>([]);
   const [loading, setLoading] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [stats, setStats] = useState<any>(null);
-  const [loadingStats, setLoadingStats] = useState(true);
 
   // Setup form state
   const [focusArea, setFocusArea] = useState<FocusArea>("technical");
@@ -33,22 +38,28 @@ export default function MockInterviewClient() {
   const [techStack, setTechStack] = useState<string>("");
   const [generating, setGenerating] = useState(false);
 
+  // Project-based interview state
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [loadingProjects, setLoadingProjects] = useState(false);
+
   useEffect(() => {
     fetchInterviews();
-    fetchStats();
+    fetchProjects();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchProjects = async () => {
+    setLoadingProjects(true);
     try {
-      const response = await fetch("/api/interviews/stats");
+      const response = await fetch("/api/projects");
       if (response.ok) {
         const data = await response.json();
-        setStats(data.stats);
+        setProjects(data.projects || []);
       }
     } catch (error) {
-      console.error("Error fetching stats:", error);
+      console.error("Error fetching projects:", error);
     } finally {
-      setLoadingStats(false);
+      setLoadingProjects(false);
     }
   };
 
@@ -105,6 +116,7 @@ export default function MockInterviewClient() {
       else if (focusArea === "behavioral") type = "behavioral";
       else if (focusArea === "systems") type = "system design";
       else if (focusArea === "mixed") type = "mixed";
+      else if (focusArea === "project") type = "project-based";
 
       const requestBody: {
         role: string;
@@ -112,6 +124,7 @@ export default function MockInterviewClient() {
         type: string;
         amount: number;
         techstack?: string;
+        projectId?: string;
       } = {
         role: role || "Software Developer",
         level: difficulty,
@@ -122,6 +135,11 @@ export default function MockInterviewClient() {
       // Only include techstack for technical and mixed interviews
       if (type === "technical" || type === "mixed") {
         requestBody.techstack = techStack || "JavaScript, React, Node.js";
+      }
+
+      // Include project ID for project-based interviews
+      if (type === "project-based" && selectedProject) {
+        requestBody.projectId = selectedProject;
       }
 
       const response = await fetch("/api/vapi/generate", {
@@ -177,8 +195,9 @@ export default function MockInterviewClient() {
 
   return (
     <div className="relative flex w-full min-h-screen bg-white">
+      <MobileNav />
       <CollapsibleSidebar />
-      <main className="flex-1 p-8 ml-20">
+      <main className="pt-16 md:pt-0 flex-1 p-4 sm:p-6 lg:p-8 ml-0 md:ml-20">
         <div className="mx-auto max-w-4xl">
           <div className="space-y-8">
             <div className="flex flex-wrap justify-between gap-3">
@@ -215,38 +234,37 @@ export default function MockInterviewClient() {
                       <h3 className="text-gray-900 text-lg font-bold leading-tight tracking-tight pb-2">
                         Focus Area
                       </h3>
-                      <div className="flex w-full">
-                        <div className="flex h-10 flex-1 items-center justify-center rounded-full bg-slate-200 p-1">
-                          {(
-                            [
-                              { value: "technical", label: "Technical" },
-                              { value: "behavioral", label: "Behavioral" },
-                              {
-                                value: "systems",
-                                label: "System Design",
-                              },
-                              {
-                                value: "mixed",
-                                label: "Mixed",
-                              },
-                            ] as const
-                          ).map((option) => (
-                            <label
-                              key={option.value}
-                              className="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-full px-2 has-[:checked]:bg-white  has-[:checked]:shadow-sm has-[:checked]:text-blue-600 text-blue-600  text-sm font-medium leading-normal transition-colors"
-                            >
-                              <span className="truncate">{option.label}</span>
-                              <input
-                                checked={focusArea === option.value}
-                                className="invisible w-0"
-                                name="focus-area"
-                                type="radio"
-                                value={option.value}
-                                onChange={() => setFocusArea(option.value)}
-                              />
-                            </label>
-                          ))}
-                        </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                        {(
+                          [
+                            { value: "technical", label: "Technical" },
+                            { value: "behavioral", label: "Behavioral" },
+                            { value: "systems", label: "System Design" },
+                            { value: "mixed", label: "Mixed" },
+                            { value: "project", label: "Project-Based" },
+                          ] as const
+                        ).map((option) => (
+                          <label
+                            key={option.value}
+                            className={`flex cursor-pointer h-10 items-center justify-center rounded-lg px-3 border-2 transition-all ${
+                              focusArea === option.value
+                                ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                                : "bg-white border-gray-200 text-black hover:border-blue-300"
+                            }`}
+                          >
+                            <span className="truncate text-sm font-medium">
+                              {option.label}
+                            </span>
+                            <input
+                              checked={focusArea === option.value}
+                              className="sr-only"
+                              name="focus-area"
+                              type="radio"
+                              value={option.value}
+                              onChange={() => setFocusArea(option.value)}
+                            />
+                          </label>
+                        ))}
                       </div>
                     </div>
                     {/* Role Input */}
@@ -318,6 +336,54 @@ export default function MockInterviewClient() {
                       </div>
                     </div>
 
+                    {/* Project Selection - Only show for project-based interviews */}
+                    {focusArea === "project" && (
+                      <div className="col-span-3">
+                        <h3 className="text-black text-lg font-bold leading-tight tracking-tight pb-2">
+                          Select Project
+                        </h3>
+                        {loadingProjects ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          </div>
+                        ) : projects.length === 0 ? (
+                          <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                            <p className="text-black mb-2">No projects found</p>
+                            <p className="text-sm text-gray-500">
+                              Sync your GitHub repositories first
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <select
+                              value={selectedProject}
+                              onChange={(e) =>
+                                setSelectedProject(e.target.value)
+                              }
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                              <option value="">Choose a project...</option>
+                              {projects.map((project) => (
+                                <option key={project.id} value={project.id}>
+                                  {project.name}
+                                </option>
+                              ))}
+                            </select>
+                            {selectedProject && (
+                              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <p className="text-sm text-blue-800">
+                                  <span className="font-semibold">💡 Tip:</span>{" "}
+                                  Questions will be tailored to your selected
+                                  project&apos;s tech stack and implementation
+                                  details.
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+
                     {/* Tech Stack - Only show for technical and mixed interviews */}
                     {(focusArea === "technical" || focusArea === "mixed") && (
                       <div className="col-span-3">
@@ -341,23 +407,26 @@ export default function MockInterviewClient() {
                     <div className="flex justify-end mt-8 col-span-3">
                       <button
                         onClick={handleStartInterview}
-                        disabled={generating}
-                        className="flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-blue-600 text-white font-bold text-base leading-normal shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        disabled={
+                          generating ||
+                          (focusArea === "project" && !selectedProject)
+                        }
+                        className="flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-blue-600 text-white font-bold text-base leading-normal shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {generating ? "Generating..." : "Generate Interview"}
+                        {generating ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Generating...</span>
+                          </>
+                        ) : (
+                          "Generate Interview"
+                        )}
                       </button>
                     </div>
                   </div>
                 </div>
               )}
             </div>
-
-            {/* Stats Card */}
-            {!loadingStats && stats && stats.completedInterviews > 0 && (
-              <div className="mt-8 mb-8">
-                <InterviewStatsCard stats={stats} />
-              </div>
-            )}
 
             <div className="flex flex-wrap justify-between items-center gap-4 mb-8 mt-12">
               <h1 className="text-black text-4xl font-black leading-tight tracking-tight min-w-72">
@@ -417,7 +486,11 @@ export default function MockInterviewClient() {
                             ? "Technical"
                             : interview.type === "behavioral"
                               ? "Behavioral"
-                              : "Mixed"}
+                              : interview.type === "system design"
+                                ? "System Design"
+                                : interview.type === "project-based"
+                                  ? "Project-Based"
+                                  : "Mixed"}
                           : {interview.role}
                         </h3>
                         <div className="flex flex-col gap-1 mt-2">

@@ -106,30 +106,30 @@ export default function SkillGapPage() {
     <div className="flex min-h-screen bg-[#f6f7f8]">
       <CollapsibleSidebar />
 
-      <main className="flex-1 p-8 lg:p-12 ml-20">
+      <main className="flex-1 p-4 sm:p-6 lg:p-12 ml-0 md:ml-20">
         <div className="mx-auto max-w-4xl">
           {/* Page Heading */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-black text-black">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-3xl sm:text-4xl font-black text-black">
               Skill Gap Analysis
             </h1>
-            <p className="text-gray-600 text-base mt-2">
+            <p className="text-gray-600 text-sm sm:text-base mt-2">
               Select your target role to see how your skills stack up against
               the requirements.
             </p>
           </div>
 
           {/* Target Role Selection */}
-          <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-            <div className="flex flex-wrap items-end gap-4">
-              <label className="flex flex-col min-w-40 flex-1">
-                <p className="text-black text-base font-medium pb-2">
+          <div className="mb-6 sm:mb-8 rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-4">
+              <label className="flex flex-col min-w-0 sm:min-w-40 flex-1">
+                <p className="text-black text-sm sm:text-base font-medium pb-2">
                   Target Role
                 </p>
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value as Role)}
-                  className="w-full rounded-xl border border-gray-300 bg-[#f6f7f8] h-14 px-4 text-base text-black focus:outline-none focus:ring-2 focus:ring-[#4c96e1]"
+                  className="w-full rounded-xl border border-gray-300 bg-[#f6f7f8] h-12 sm:h-14 px-4 text-sm sm:text-base text-black focus:outline-none focus:ring-2 focus:ring-[#4c96e1]"
                 >
                   <option value="frontend">Frontend Developer</option>
                   <option value="backend">Backend Developer</option>
@@ -140,7 +140,7 @@ export default function SkillGapPage() {
               <button
                 onClick={handleAnalyze}
                 disabled={loading}
-                className="min-w-[84px] rounded-full h-14 px-6 text-sm font-bold text-white transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto min-w-[84px] rounded-full h-12 sm:h-14 px-6 text-sm font-bold text-white transition-colors disabled:opacity-50"
                 style={{ backgroundColor: "#4c96e1" }}
               >
                 {loading ? "Analysing..." : "Analyse"}
@@ -151,31 +151,31 @@ export default function SkillGapPage() {
           {analysis && (
             <>
               {/* Current Skills */}
-              <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-                <h2 className="text-black text-[22px] font-bold pb-1">
+              <div className="mb-6 sm:mb-8 rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
+                <h2 className="text-black text-lg sm:text-[22px] font-bold pb-1">
                   Your Current Skills
                 </h2>
-                <p className="text-gray-600 text-sm mb-6">
+                <p className="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-6">
                   Detected from your GitHub repositories.
                 </p>
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-2 sm:gap-4">
                   {currentSkills.map((item, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-3 rounded-full border border-gray-200 bg-[#f6f7f8] py-2 px-4"
+                      className="flex items-center gap-2 sm:gap-3 rounded-full border border-gray-200 bg-[#f6f7f8] py-1.5 sm:py-2 px-3 sm:px-4"
                     >
-                      <span className="relative flex h-3 w-3">
+                      <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0">
                         {item.level === "proficient" && (
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         )}
                         <span
-                          className={`relative inline-flex rounded-full h-3 w-3 ${getSkillColor(item.level)}`}
+                          className={`relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 ${getSkillColor(item.level)}`}
                         ></span>
                       </span>
-                      <span className="font-medium text-black">
+                      <span className="font-medium text-black text-xs sm:text-sm">
                         {item.skill}
                       </span>
-                      <span className="text-xs text-gray-500 capitalize">
+                      <span className="text-xs text-gray-500 capitalize hidden sm:inline">
                         {item.level}
                       </span>
                     </div>
@@ -184,13 +184,13 @@ export default function SkillGapPage() {
               </div>
 
               {/* Missing Skills */}
-              <div className="mb-8 rounded-lg border border-gray-200 bg-white p-6">
-                <h2 className="text-black text-[22px] font-bold pb-6">
+              <div className="mb-6 sm:mb-8 rounded-lg border border-gray-200 bg-white p-4 sm:p-6">
+                <h2 className="text-black text-lg sm:text-[22px] font-bold pb-4 sm:pb-6">
                   Missing Skills for{" "}
                   {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)}{" "}
                   Developer
                 </h2>
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {/* Essential Skills */}
                   {analysis.missingSkills.essential.length > 0 && (
                     <div>

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateRecommendations } from "@/lib/recommendations/engine";
+import {
+  generateRecommendations,
+  generateRecommendationsAsync,
+} from "@/lib/recommendations/engine";
 import type { SkillGapAnalysis } from "@/types/skills";
 
 export async function GET(request: NextRequest) {
@@ -48,8 +51,12 @@ export async function GET(request: NextRequest) {
       ),
     };
 
-    // 4. Generate recommendations
-    const recommendations = generateRecommendations(skillGapAnalysis);
+    // 4. Generate recommendations (with optional live data from roadmap.sh)
+    const useLiveData = request.nextUrl.searchParams.get("live") === "true";
+    const recommendations = await generateRecommendationsAsync(
+      skillGapAnalysis,
+      useLiveData
+    );
 
     // 5. Fetch user's saved and started projects
     const { data: userProjects } = await supabase

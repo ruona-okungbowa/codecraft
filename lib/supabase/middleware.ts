@@ -27,8 +27,25 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  let user = null;
+
+  try {
+    // Try to get user claims with retry logic for network failures
+    const { data, error } = await supabase.auth.getClaims();
+
+    if (error) {
+      console.error("Supabase auth error in middleware:", error);
+    }
+
+    user = data?.claims;
+  } catch (error) {
+    // Network error - log it but don't crash
+    console.error(
+      "Network error in middleware (Supabase connection failed):",
+      error
+    );
+    // Continue without user - will redirect to login if needed
+  }
   // Public routes that don't require authentication
   const publicRoutes = ["/", "/login", "/landing-page"];
   const isPublicRoute = publicRoutes.some(

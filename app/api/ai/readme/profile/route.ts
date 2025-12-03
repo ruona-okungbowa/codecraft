@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateProfileReadme } from "@/lib/readme/generation";
 import { researchProfileReadmeBestPracticesWithCache } from "@/lib/readme/mcp-research";
-import { ReadmeTemplate } from "@/lib/readme/types";
+import { ReadmeTemplate, ProfileConfig } from "@/types/readme";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +21,10 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { template = "professional" } = body;
+    const { template = "professional", config } = body as {
+      template?: ReadmeTemplate;
+      config?: ProfileConfig;
+    };
 
     // Validate template
     const validTemplates: ReadmeTemplate[] = [
@@ -35,6 +38,41 @@ export async function POST(request: NextRequest) {
         { error: "Invalid template type" },
         { status: 400 }
       );
+    }
+
+    // Validate config if provided
+    if (config !== undefined) {
+      if (typeof config !== "object" || config === null) {
+        return NextResponse.json(
+          { error: "Invalid config format" },
+          { status: 400 }
+        );
+      }
+
+      // Validate boolean fields
+      const validConfigKeys: (keyof ProfileConfig)[] = [
+        "includeStats",
+        "includeTopLanguages",
+        "includeProjects",
+        "includeSkills",
+        "includeContact",
+        "includeSocials",
+      ];
+
+      for (const key of Object.keys(config)) {
+        if (!validConfigKeys.includes(key as keyof ProfileConfig)) {
+          return NextResponse.json(
+            { error: `Invalid config key: ${key}` },
+            { status: 400 }
+          );
+        }
+        if (typeof config[key as keyof ProfileConfig] !== "boolean") {
+          return NextResponse.json(
+            { error: `Config value for ${key} must be boolean` },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // Fetch user data
@@ -102,7 +140,8 @@ export async function POST(request: NextRequest) {
       },
       typedProjects,
       template,
-      research
+      research,
+      config
     );
 
     // Return response

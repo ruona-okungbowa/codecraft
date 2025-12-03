@@ -41,6 +41,7 @@ export interface FilterState {
   timeCommitment: "all" | "weekend" | "week" | "extended";
   skills: string[];
   sortBy: "priority" | "difficulty" | "time" | "skills";
+  priorityLevel?: "all" | "high" | "medium" | "low";
 }
 
 export interface UserProject {

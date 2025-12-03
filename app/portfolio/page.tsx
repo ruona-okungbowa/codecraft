@@ -169,15 +169,15 @@ export default function PortfolioPage() {
     <div className="flex min-h-screen bg-[#f6f7f8]">
       <CollapsibleSidebar />
 
-      <main className="flex-1 p-8 overflow-y-auto ml-20">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto ml-0 md:ml-20">
         <div className="max-w-7xl mx-auto">
           {/* Page Heading */}
-          <header className="flex flex-wrap justify-between gap-3 mb-8">
-            <div className="flex min-w-72 flex-col gap-2">
-              <h1 className="text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">
+          <header className="flex flex-wrap justify-between gap-3 mb-6 sm:mb-8">
+            <div className="flex min-w-0 sm:min-w-72 flex-col gap-2">
+              <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-[-0.033em] text-slate-900">
                 Your Portfolio Website
               </h1>
-              <p className="text-base font-normal leading-normal text-slate-500">
+              <p className="text-sm sm:text-base font-normal leading-normal text-slate-500">
                 Configure, preview, and deploy your personal portfolio with
                 ease.
               </p>
