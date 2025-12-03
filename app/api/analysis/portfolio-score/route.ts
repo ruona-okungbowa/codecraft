@@ -1,6 +1,7 @@
 import { calculatePortfolioScore } from "@/lib/scoring/portfolio";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { Project, ProjectRow } from "@/types";
 
 export async function GET() {
   try {
@@ -24,7 +25,7 @@ export async function GET() {
       );
     }
 
-    const { data: projects, error: projectsError } = await supabase
+    const { data: projectRows, error: projectsError } = await supabase
       .from("projects")
       .select("*")
       .eq("user_id", user.id);
@@ -39,7 +40,7 @@ export async function GET() {
       );
     }
 
-    if (!projects || projects.length === 0) {
+    if (!projectRows || projectRows.length === 0) {
       return NextResponse.json({
         overallScore: 0,
         rank: "N/A",
@@ -54,6 +55,26 @@ export async function GET() {
           "No projects found. Sync your GitHub repositories to get started.",
       });
     }
+
+    // Transform database rows to Project interface (snake_case to camelCase)
+    const projects: Project[] = projectRows.map((row: ProjectRow) => ({
+      id: row.id,
+      userId: row.user_id,
+      githubRepoId: row.github_repo_id,
+      name: row.name,
+      description: row.description,
+      url: row.url,
+      languages: row.languages || {},
+      stars: row.stars || 0,
+      forks: row.forks || 0,
+      lastCommitDate: row.last_commit_date
+        ? new Date(row.last_commit_date)
+        : undefined,
+      complexityScore: row.complexity_score,
+      analysedAt: row.analysed_at ? new Date(row.analysed_at) : undefined,
+      createdAt: new Date(row.created_at),
+      updatedAt: new Date(row.updated_at),
+    }));
 
     const scoreData = calculatePortfolioScore(projects);
 
