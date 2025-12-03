@@ -276,23 +276,6 @@ export default function FAQPage() {
               ))}
             </div>
           )}
-
-          {/* Contact Support */}
-          <div className="mt-12 sm:mt-16 p-6 sm:p-8 bg-linear-to-r from-[#4c96e1]/10 to-[#4c96e1]/5 rounded-xl border border-[#4c96e1]/20">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2 sm:mb-3">
-              Still have questions?
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 mb-4 sm:mb-6">
-              Our support team is here to help. Get in touch and we&apos;ll
-              respond as soon as possible.
-            </p>
-            <a
-              href="mailto:support@codecraft.app"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#4c96e1] text-white rounded-lg hover:bg-[#3a7bc8] transition-colors font-semibold text-sm sm:text-base"
-            >
-              Contact Support
-            </a>
-          </div>
         </div>
       </main>
     </div>

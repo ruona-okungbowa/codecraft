@@ -43,7 +43,8 @@ async function loadAllProjectTemplates(
 
     return allProjects;
   } catch (error) {
-    console.error("Failed to fetch roadmap projects, using local only:", error);
+    // Silently fall back to local templates - don't propagate error
+    console.warn("Using local project templates only");
     return localTemplates;
   }
 }
