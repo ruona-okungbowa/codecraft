@@ -3,14 +3,14 @@ import { Project } from "@/types";
 // Template types for README styles
 export type ReadmeTemplate = "minimal" | "detailed" | "visual" | "professional";
 
-// Research data from MCP or fallback templates
+// Research data from MCP, web scraping, cache, or fallback templates
 export interface ReadmeResearch {
   sections: string[];
   badgeStyles: string[];
   visualElements: string[];
   trendingFeatures: string[];
   exampleStructures: string[];
-  source: "mcp" | "cache" | "fallback";
+  source: "mcp" | "web" | "cache" | "fallback";
 }
 
 // Validation error types

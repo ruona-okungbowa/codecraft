@@ -88,7 +88,15 @@ export async function generateProfileReadme(
   user: User,
   projects: Project[],
   template: ReadmeTemplate,
-  research: ReadmeResearch
+  research: ReadmeResearch,
+  config?: {
+    includeStats?: boolean;
+    includeTopLanguages?: boolean;
+    includeProjects?: boolean;
+    includeSkills?: boolean;
+    includeContact?: boolean;
+    includeSocials?: boolean;
+  }
 ): Promise<GeneratedReadme> {
   // Select top projects
   const topProjects = selectTopProjects(projects, 6);
@@ -105,8 +113,13 @@ export async function generateProfileReadme(
     },
   };
 
-  // Build the prompt with research context
-  const prompt = buildProfileReadmePrompt(profileData, template, research);
+  // Build the prompt with research context and config
+  const prompt = buildProfileReadmePrompt(
+    profileData,
+    template,
+    research,
+    config
+  );
 
   // Call OpenAI
   const content = await callOpenAI(prompt, "profile");
@@ -581,7 +594,15 @@ IMPORTANT: Return ONLY the Markdown content with proper spacing. Do NOT wrap in 
 function buildProfileReadmePrompt(
   profileData: ProfileReadmeData,
   template: ReadmeTemplate,
-  research: ReadmeResearch
+  research: ReadmeResearch,
+  config?: {
+    includeStats?: boolean;
+    includeTopLanguages?: boolean;
+    includeProjects?: boolean;
+    includeSkills?: boolean;
+    includeContact?: boolean;
+    includeSocials?: boolean;
+  }
 ): string {
   const templateInstructions = getTemplateInstructions(template);
 
@@ -616,16 +637,27 @@ ${research.visualElements.map((v) => `- ${v}`).join("\n")}
 **Trending Features:**
 ${research.trendingFeatures.map((f) => `- ${f}`).join("\n")}
 
+**Configuration (User Preferences):**
+${config?.includeStats !== false ? "✅ Include GitHub Stats widget" : "❌ Skip GitHub Stats"}
+${config?.includeTopLanguages !== false ? "✅ Include Top Languages chart" : "❌ Skip Top Languages"}
+${config?.includeProjects !== false ? "✅ Highlight featured projects" : "❌ Skip featured projects section"}
+${config?.includeSkills !== false ? "✅ Add skill badges and tech stack" : "❌ Skip skills section"}
+${config?.includeContact !== false ? "✅ Include contact information" : "❌ Skip contact info"}
+${config?.includeSocials !== false ? "✅ Add social media links" : "❌ Skip social links"}
+
 **Instructions:**
 1. Create an engaging profile README that showcases the developer
-2. Include GitHub stats widgets using:
-   - \`![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${profileData.username}&show_icons=true&theme=radical)\`
-   - \`![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${profileData.username}&layout=compact&theme=radical)\`
-3. Add skill badges for technologies
-4. Highlight top projects with links
-5. Make it personal and engaging
-6. Use emojis appropriately
-7. Return ONLY the Markdown content, no wrapper code blocks
+${config?.includeStats !== false ? `2. Include GitHub stats widget: \`![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${profileData.username}&show_icons=true&theme=radical)\`` : ""}
+${config?.includeTopLanguages !== false ? `3. Include top languages chart: \`![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${profileData.username}&layout=compact&theme=radical)\`` : ""}
+${config?.includeSkills !== false ? "4. Add skill badges for technologies using shields.io" : ""}
+${config?.includeProjects !== false ? "5. Highlight top projects with links and descriptions" : ""}
+${config?.includeContact !== false ? "6. Add contact information (email, ways to reach)" : ""}
+${config?.includeSocials !== false ? "7. Include social media links (LinkedIn, Twitter, portfolio)" : ""}
+8. Make it personal and engaging
+9. Use emojis appropriately
+10. Return ONLY the Markdown content, no wrapper code blocks
+
+**IMPORTANT:** Only include sections that are enabled in the configuration above. Skip any sections marked with ❌.
 
 Generate the profile README now:`;
 }
