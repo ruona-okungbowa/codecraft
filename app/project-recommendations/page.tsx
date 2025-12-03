@@ -1,22 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RefreshCw, AlertCircle, TrendingUp } from "lucide-react";
+import { RefreshCw, AlertCircle, Loader2, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  RefreshCw,
-  Target,
-  AlertCircle,
-  Loader2,
-  TrendingUp,
-} from "lucide-react";
 import Link from "next/link";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
-import MobileNav from "@/components/MobileNav";
 import FilterBar from "@/components/recommendations/FilterBar";
 import ProjectCard from "@/components/recommendations/ProjectCard";
-import PriorityCallout from "@/components/recommendations/PriorityCallout";
 import type {
   ProjectRecommendation,
   FilterState,
@@ -36,17 +26,6 @@ interface RecommendationsResponse {
   cached: boolean;
   generatedAt: string;
 }
-import FilterBar from "@/components/recommendations/FilterBar";
-import ProjectCard from "@/components/recommendations/ProjectCard";
-import CardSkeleton from "@/components/skeletons/CardSkeleton";
-import { filterAndSortRecommendations } from "@/lib/recommendations/filters";
-import type {
-  ProjectRecommendation,
-  FilterState,
-  UserProject,
-  ProjectProgress,
-} from "@/types/recommendations";
-import type { SkillGapAnalysis } from "@/types/skills";
 
 export default function ProjectRecommendationsPage() {
   // State for recommendations data
@@ -134,7 +113,6 @@ export default function ProjectRecommendationsPage() {
     } finally {
       setLoading(false);
       setRefreshing(false);
-      setRefreshing(false);
     }
   };
 
@@ -143,8 +121,13 @@ export default function ProjectRecommendationsPage() {
     fetchRecommendations(true);
   };
 
+  // Handle filter changes
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
+
   // Handle save/unsave project
-  const handleSaveProject = async (projectId: string) => {
+  const handleSave = async (projectId: string) => {
     const isSaved = savedProjects.has(projectId);
 
     // Optimistic update
@@ -236,20 +219,38 @@ export default function ProjectRecommendationsPage() {
     }
 
     try {
-      // We need the actual user project ID - fetch it first
+      // Fetch user projects to get the database ID
       const response = await fetch("/api/user-projects");
+      if (!response.ok) {
+        throw new Error("Failed to fetch user projects");
+      }
+
       const data = await response.json();
-      const userProject = data.userProjects.find(
+      const userProject = data.userProjects?.find(
         (p: { projectId: string }) => p.projectId === projectId
       );
 
       if (userProject) {
-        // Update progress - this endpoint needs the database ID
-        // For now, we'll skip this as it requires the ID
-        console.log("Progress update:", projectId, progress);
+        // Update progress using the database ID
+        const updateResponse = await fetch(
+          `/api/user-projects/${userProject.id}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ progress }),
+          }
+        );
+
+        if (!updateResponse.ok) {
+          throw new Error("Failed to update progress");
+        }
       }
     } catch (err) {
       console.error("Error updating progress:", err);
+      // Revert optimistic update on error
+      if (current) {
+        setStartedProjects(startedProjects);
+      }
     }
   };
 
@@ -272,17 +273,12 @@ export default function ProjectRecommendationsPage() {
     new Set(recommendations.flatMap((r) => r.skillsTaught))
   ).sort();
 
-  // Check if user has critical skill gaps
-  const hasCriticalGaps =
-    skillGapAnalysis?.missingSkills.essential.length ?? 0 > 0;
-
   // Loading state
   if (loading) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
-        <MobileNav />
         <CollapsibleSidebar />
-        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
           <div className="max-w-7xl mx-auto">
             {/* Header Skeleton */}
             <div className="mb-8">
@@ -330,9 +326,8 @@ export default function ProjectRecommendationsPage() {
   if (error && error.includes("skill gap analysis")) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
-        <MobileNav />
         <CollapsibleSidebar />
-        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-warning-100 rounded-full mb-4">
@@ -364,9 +359,8 @@ export default function ProjectRecommendationsPage() {
   if (error) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
-        <MobileNav />
         <CollapsibleSidebar />
-        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-xl border border-error-200 shadow-sm p-12 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-error-100 rounded-full mb-4">
@@ -395,9 +389,8 @@ export default function ProjectRecommendationsPage() {
   if (filteredRecommendations.length === 0 && recommendations.length > 0) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
-        <MobileNav />
         <CollapsibleSidebar />
-        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -409,33 +402,17 @@ export default function ProjectRecommendationsPage() {
                   Personalised projects to fill your skill gaps
                 </p>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {error.includes("No skill gap analysis")
-                  ? "No Skill Gap Analysis Found"
-                  : "Something went wrong"}
-              </h3>
-              <p className="text-gray-600 mb-6">
-                {error.includes("No skill gap analysis")
-                  ? "Complete a skill gap analysis first to get personalized project recommendations."
-                  : error}
-              </p>
-              {error.includes("No skill gap analysis") ? (
-                <a
-                  href="/skill-gap"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
-                >
-                  <TrendingUp size={20} />
-                  Analyze Skill Gaps
-                </a>
-              ) : (
-                <button
-                  onClick={() => fetchRecommendations()}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
-                >
-                  <RefreshCw size={20} />
-                  Try Again
-                </button>
-              )}
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw
+                  size={18}
+                  className={refreshing ? "animate-spin" : ""}
+                />
+                Refresh Recommendations
+              </button>
             </div>
 
             {/* Filter Bar */}
@@ -449,7 +426,85 @@ export default function ProjectRecommendationsPage() {
             {/* Empty State */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-                <Target size={32} className="text-gray-400" />
+                🔍
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {filters.priorityLevel === "high"
+                  ? "No High Priority Projects Found"
+                  : "No Projects Match Your Filters"}
+              </h2>
+              <p className="text-gray-600 mb-6">
+                {filters.priorityLevel === "high"
+                  ? "Great news! You don't have any critical skill gaps that require immediate attention. Try viewing all projects to continue building your skills."
+                  : "Try adjusting your filters to see more project recommendations."}
+              </p>
+              <button
+                onClick={() =>
+                  setFilters({
+                    difficulty: "all",
+                    category: "all",
+                    timeCommitment: "all",
+                    skills: [],
+                    sortBy: "priority",
+                    priorityLevel: "all",
+                  })
+                }
+                className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-lg font-medium hover:opacity-90 transition-all"
+                style={{ backgroundColor: "#4c96e1" }}
+              >
+                {filters.priorityLevel === "high"
+                  ? "View All Projects"
+                  : "Clear All Filters"}
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Empty state - no matching projects
+  if (filteredRecommendations.length === 0 && recommendations.length > 0) {
+    return (
+      <div className="flex min-h-screen bg-[#f6f7f8]">
+        <CollapsibleSidebar />
+        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                  Project Recommendations
+                </h1>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Personalised projects to fill your skill gaps
+                </p>
+              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw
+                  size={18}
+                  className={refreshing ? "animate-spin" : ""}
+                />
+                Refresh Recommendations
+              </button>
+            </div>
+
+            {/* Filter Bar */}
+            <FilterBar
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              availableSkills={availableSkills}
+              activeFilterCount={activeFilterCount}
+            />
+
+            {/* Empty State */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+                🔍
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 {filters.priorityLevel === "high"
@@ -489,9 +544,8 @@ export default function ProjectRecommendationsPage() {
   // Main content
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
-      <MobileNav />
       <CollapsibleSidebar />
-      <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+      <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -531,7 +585,7 @@ export default function ProjectRecommendationsPage() {
           {filters.priorityLevel === "high" && (
             <div className="mb-6 p-4 bg-error-50 border border-error-200 rounded-lg flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Target size={20} className="text-error-600" />
+                <AlertCircle size={20} className="text-error-600" />
                 <div>
                   <p className="font-semibold text-error-900 text-sm">
                     Showing High Priority Projects Only
@@ -548,15 +602,6 @@ export default function ProjectRecommendationsPage() {
                 Show All Projects
               </button>
             </div>
-          )}
-
-          {/* Priority Callout */}
-          {hasCriticalGaps && filters.priorityLevel !== "high" && (
-            <PriorityCallout
-              criticalGaps={skillGapAnalysis?.missingSkills.essential || []}
-              targetRole={skillGapAnalysis?.role || "your target role"}
-              onViewCritical={handleViewCritical}
-            />
           )}
 
           {/* Project Grid */}
@@ -578,14 +623,6 @@ export default function ProjectRecommendationsPage() {
                 >
                   <ProjectCard
                     project={project}
-                    userSkills={skillGapAnalysis?.presentSkills || []}
-                    missingSkills={
-                      skillGapAnalysis?.missingSkills || {
-                        essential: [],
-                        preferred: [],
-                        niceToHave: [],
-                      }
-                    }
                     isSaved={savedProjects.has(project.id)}
                     progress={startedProjects.get(project.id) || null}
                     onSave={() => handleSave(project.id)}

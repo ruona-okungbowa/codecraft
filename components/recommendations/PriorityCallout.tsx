@@ -14,17 +14,6 @@ export default function PriorityCallout({
   onViewCritical,
 }: PriorityCalloutProps) {
   return (
-    <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-5 mb-6 shadow-sm">
-      <div className="flex items-start gap-4">
-        {/* Alert Icon */}
-        <div className="shrink-0 mt-0.5">
-          <AlertCircle size={24} className="text-orange-600" />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1">
-          {/* Title */}
-          <h3 className="text-lg font-semibold text-orange-900 mb-2">
     <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
       <div className="flex items-start gap-3 sm:gap-4">
         {/* Alert Icon */}
@@ -38,16 +27,6 @@ export default function PriorityCallout({
           <h3 className="text-base sm:text-lg font-semibold text-orange-900 mb-2">
             Critical skill gaps detected
           </h3>
-
-          {/* Description */}
-          <p className="text-sm text-orange-800 mb-3">
-            You&apos;re missing {criticalGaps.length} essential skill
-            {criticalGaps.length !== 1 ? "s" : ""} for the{" "}
-            <span className="font-semibold">{targetRole}</span> role. Focus on
-            high-priority projects to address these gaps quickly.
-          </p>
-
-          {/* View Critical Projects Link */}
 
           {/* Description */}
           <p className="text-sm text-orange-800 mb-3">

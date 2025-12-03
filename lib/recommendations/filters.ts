@@ -114,46 +114,6 @@ function matchesPriority(
  * Uses AND logic - projects must match ALL active filters
  */
 /**
- * Maps time estimate strings to standardized categories
- */
-function categorizeTimeEstimate(timeEstimate: string): string {
-  const normalized = timeEstimate.toLowerCase();
-
-  // Weekend projects (1-2 days, few hours)
-  if (
-    normalized.includes("weekend") ||
-    normalized.includes("1-2 days") ||
-    normalized.includes("few hours") ||
-    normalized.includes("4-8 hours")
-  ) {
-    return "weekend";
-  }
-
-  // Week-long projects (3-7 days, 1 week)
-  if (
-    normalized.includes("week") ||
-    normalized.includes("3-7 days") ||
-    normalized.includes("5-10 days") ||
-    normalized.includes("1-2 weeks")
-  ) {
-    return "week";
-  }
-
-  // Extended projects (2+ weeks, month)
-  if (
-    normalized.includes("extended") ||
-    normalized.includes("2+ weeks") ||
-    normalized.includes("month") ||
-    normalized.includes("3+ weeks")
-  ) {
-    return "extended";
-  }
-
-  // Default to week if unclear
-  return "week";
-}
-
-/**
  * Apply filters to project recommendations using AND logic
  * All active filters must match for a project to be included
  */

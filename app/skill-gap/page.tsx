@@ -38,8 +38,7 @@ export default function SkillGapPage() {
   useEffect(() => {
     // Load any existing analysis on mount
     loadExistingAnalysis();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadExistingAnalysis, selectedRole]);
 
   async function loadExistingAnalysis() {
     try {
@@ -70,11 +69,15 @@ export default function SkillGapPage() {
         setAnalysis(data.analysis);
         setCurrentSkills(mapSkillsToLevels(data.analysis.presentSkills));
       } else {
-        alert("Failed to analyze skills");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Failed to analyze skills:", errorData);
+        // TODO: Replace with toast notification
+        alert(errorData.error || "Failed to analyze skills");
       }
     } catch (error) {
       console.error("Error analysing:", error);
-      alert("An error occurred");
+      // TODO: Replace with toast notification
+      alert("An error occurred while analyzing your skills");
     } finally {
       setLoading(false);
     }
@@ -92,13 +95,13 @@ export default function SkillGapPage() {
     });
   }
 
-  function getSkillColor(level: string) {
+  function getSkillColor(level: "proficient" | "intermediate" | "beginner") {
     switch (level) {
       case "proficient":
         return "bg-green-500";
       case "intermediate":
         return "bg-sky-500";
-      default:
+      case "beginner":
         return "bg-slate-400";
     }
   }
@@ -131,6 +134,7 @@ export default function SkillGapPage() {
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value as Role)}
+                  aria-label="Select target role"
                   className="w-full rounded-xl border border-gray-300 bg-[#f6f7f8] h-12 sm:h-14 px-4 text-sm sm:text-base text-black focus:outline-none focus:ring-2 focus:ring-[#4c96e1]"
                 >
                   <option value="frontend">Frontend Developer</option>
@@ -142,6 +146,7 @@ export default function SkillGapPage() {
               <button
                 onClick={handleAnalyze}
                 disabled={loading}
+                aria-busy={loading}
                 className="w-full sm:w-auto min-w-[84px] rounded-full h-12 sm:h-14 px-6 text-sm font-bold text-white transition-colors disabled:opacity-50"
                 style={{ backgroundColor: "#4c96e1" }}
               >
