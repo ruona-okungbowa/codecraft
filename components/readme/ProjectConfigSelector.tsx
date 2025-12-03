@@ -120,7 +120,7 @@ export default function ProjectConfigSelector({
           >
             <div className="flex items-start space-x-3">
               <div
-                className={`p-2 rounded-lg shrink-0 ${
+                className={`p-2 rounded-lg flex-shrink-0 ${
                   config[option.key]
                     ? "bg-blue-500 text-white"
                     : "bg-gray-100 text-gray-600"

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import Link from "next/link";
 
 type Role = "frontend" | "backend" | "fullstack" | "devops";
@@ -104,9 +105,10 @@ export default function SkillGapPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
+      <MobileNav />
       <CollapsibleSidebar />
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-12 ml-0 md:ml-20">
+      <main className="pt-16 md:pt-0 flex-1 p-4 sm:p-6 lg:p-12 ml-0 md:ml-20">
         <div className="mx-auto max-w-4xl">
           {/* Page Heading */}
           <div className="mb-6 sm:mb-8">

@@ -28,23 +28,23 @@ export default function LoginPage() {
 
       <div
         aria-hidden="true"
-        className="absolute top-[10%] left-[5%] text-[8rem] opacity-50 select-none animate-float-1 transform-gpu"
+        className="hidden sm:block absolute top-[10%] left-[5%] text-[8rem] opacity-50 select-none animate-float-1 transform-gpu"
         style={{ color: "rgba(76, 150, 225, 0.1)" }}
       >
-        <Code className="w-32 h-32 -rotate-12" />
+        <Code className="w-24 h-24 sm:w-32 sm:h-32 -rotate-12" />
       </div>
 
       <div
         aria-hidden="true"
-        className="absolute bottom-[5%] right-[-2%] text-[10rem] opacity-50 select-none animate-float-2 transform-gpu"
+        className="hidden sm:block absolute bottom-[5%] right-[-2%] text-[10rem] opacity-50 select-none animate-float-2 transform-gpu"
         style={{ color: "rgba(249, 115, 22, 0.1)" }}
       >
-        <Rocket className="w-40 h-40 rotate-6" />
+        <Rocket className="w-32 h-32 sm:w-40 sm:h-40 rotate-6" />
       </div>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md px-4">
         {/* Header */}
-        <header className="text-center mb-10">
+        <header className="text-center mb-8 sm:mb-10">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-gray-900 transition-transform duration-300 hover:scale-105"
@@ -54,20 +54,20 @@ export default function LoginPage() {
               alt="CodeCraft"
               width={40}
               height={40}
-              className="h-10 w-10"
+              className="h-8 w-8 sm:h-10 sm:w-10"
             />
-            <h1 className="text-3xl font-bold">CodeCraft</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">CodeCraft</h1>
           </Link>
-          <h2 className="mt-4 text-4xl font-extrabold tracking-tight text-gray-800">
+          <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-800">
             Welcome!
           </h2>
-          <p className="mt-2 text-lg text-gray-600">
+          <p className="mt-2 text-base sm:text-lg text-gray-600">
             Sign in with your GitHub account to continue.
           </p>
         </header>
 
         {/* Main login card */}
-        <main className="w-full bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-lg shadow-2xl p-8 sm:p-10">
+        <main className="w-full bg-white/70 backdrop-blur-xl border border-gray-200/50 rounded-lg shadow-2xl p-6 sm:p-8 md:p-10">
           <div className="space-y-6">
             <Link
               href="/api/auth/github"
@@ -107,8 +107,8 @@ export default function LoginPage() {
           </div>
         </main>
 
-        <footer className="mt-8 text-center">
-          <p className="text-base text-gray-600">
+        <footer className="mt-6 sm:mt-8 text-center">
+          <p className="text-sm sm:text-base text-gray-600">
             Don&apos;t have an account?{" "}
             <span
               className="font-bold transition-colors"

@@ -1,5 +1,3 @@
-import type { Role } from "./skills";
-
 export interface SkillMatch {
   skill: string;
   type: "new" | "fills_gap" | "reinforces";

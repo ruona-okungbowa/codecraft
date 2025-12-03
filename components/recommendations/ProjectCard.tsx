@@ -5,16 +5,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Bookmark,
   BookmarkCheck,
-  Play,
   ChevronDown,
   Clock,
-  Target,
-  Code2,
+  Code,
   Layers,
+  Play,
+  Target,
   ExternalLink,
-  CheckCircle2,
+  BookOpen,
+  Video,
+  FileText,
   Sparkles,
-  AlertCircle,
 } from "lucide-react";
 import type {
   ProjectRecommendation,
@@ -40,104 +41,99 @@ interface ProjectCardProps {
 
 export default function ProjectCard({
   project,
-  userSkills,
-  missingSkills,
+  userSkills: _userSkills,
+  missingSkills: _missingSkills,
   isSaved,
   progress,
   onSave,
   onStart,
-  onProgressUpdate,
+  onProgressUpdate: _onProgressUpdate,
 }: ProjectCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [showResources, setShowResources] = useState(false);
 
-  // Get difficulty icon and color
-  const getDifficultyConfig = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner":
+  // Get priority badge styling
+  const getPriorityBadge = () => {
+    switch (project.priority) {
+      case "high":
         return {
-          color: "text-green-700 bg-green-100 border-green-200",
-          label: "Beginner",
+          label: "High Priority",
+          className: "bg-error-100 text-error-700 border-error-200",
         };
-      case "intermediate":
+      case "medium":
         return {
-          color: "text-yellow-700 bg-yellow-100 border-yellow-200",
-          label: "Intermediate",
+          label: "Recommended",
+          className: "bg-warning-100 text-warning-700 border-warning-200",
         };
-      case "advanced":
+      case "low":
         return {
-          color: "text-red-700 bg-red-100 border-red-200",
-          label: "Advanced",
-        };
-      default:
-        return {
-          color: "text-gray-700 bg-gray-100 border-gray-200",
-          label: difficulty,
+          label: "Good to Have",
+          className: "bg-info-100 text-info-700 border-info-200",
         };
     }
   };
 
-  // Get priority badge config
-  const getPriorityConfig = (priority: string) => {
-    switch (priority) {
-      case "high":
+  // Get difficulty badge styling
+  const getDifficultyBadge = () => {
+    switch (project.difficulty) {
+      case "beginner":
         return {
-          color: "text-red-700 bg-red-100 border-red-200",
-          label: "High Priority",
-          icon: <AlertCircle size={14} />,
+          label: "Beginner",
+          icon: <Layers size={14} />,
+          className: "bg-success-100 text-success-700",
         };
-      case "medium":
+      case "intermediate":
         return {
-          color: "text-blue-700 bg-blue-100 border-blue-200",
-          label: "Recommended",
-          icon: <Target size={14} />,
+          label: "Intermediate",
+          icon: <Layers size={14} />,
+          className: "bg-warning-100 text-warning-700",
         };
-      case "low":
+      case "advanced":
         return {
-          color: "text-gray-700 bg-gray-100 border-gray-200",
-          label: "Good to Have",
-          icon: <Sparkles size={14} />,
-        };
-      default:
-        return {
-          color: "text-gray-700 bg-gray-100 border-gray-200",
-          label: priority,
-          icon: <Target size={14} />,
+          label: "Advanced",
+          icon: <Layers size={14} />,
+          className: "bg-error-100 text-error-700",
         };
     }
   };
 
   // Get category icon
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
+  const getCategoryIcon = () => {
+    switch (project.category) {
       case "frontend":
-        return <Code2 size={14} />;
+        return <Code size={14} />;
       case "backend":
         return <Layers size={14} />;
       case "fullstack":
-        return <Code2 size={14} />;
+        return <Sparkles size={14} />;
       case "devops":
-        return <Layers size={14} />;
+        return <Target size={14} />;
       case "mobile":
-        return <Code2 size={14} />;
+        return <Code size={14} />;
       default:
-        return <Code2 size={14} />;
+        return <Code size={14} />;
     }
   };
 
-  const difficultyConfig = getDifficultyConfig(project.difficulty);
-  const priorityConfig = getPriorityConfig(project.priority);
+  const priorityBadge = getPriorityBadge();
+  const difficultyBadge = getDifficultyBadge();
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg hover:border-primary-300 hover:-translate-y-1 transition-all duration-200 ease-out overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ y: -4 }}
+      className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200"
+    >
       {/* Card Header */}
-      <div className="p-4 sm:p-6">
+      <div className="p-6">
         {/* Priority Badge */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center justify-between mb-3">
           <span
-            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${priorityConfig.color}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${priorityBadge.className}`}
           >
-            {priorityConfig.icon}
-            {priorityConfig.label}
+            <Target size={12} />
+            {priorityBadge.label}
           </span>
         </div>
 
@@ -145,39 +141,40 @@ export default function ProjectCard({
         <h3 className="text-xl font-bold text-gray-900 mb-2">{project.name}</h3>
 
         {/* Project Description */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
           {project.description}
         </p>
 
         {/* Badges Row */}
-        <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           {/* Difficulty Badge */}
           <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${difficultyConfig.color}`}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium ${difficultyBadge.className}`}
           >
-            <Target size={14} />
-            {difficultyConfig.label}
+            {difficultyBadge.icon}
+            {difficultyBadge.label}
           </span>
 
           {/* Time Estimate Badge */}
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
             <Clock size={14} />
             {project.timeEstimate}
           </span>
 
           {/* Category Badge */}
           {project.category && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium text-purple-700 bg-purple-100 border border-purple-200 capitalize">
-              {getCategoryIcon(project.category)}
-              {project.category}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary-100 text-primary-700">
+              {getCategoryIcon()}
+              {project.category.charAt(0).toUpperCase() +
+                project.category.slice(1)}
             </span>
           )}
         </div>
 
-        {/* Skill Tags with Type Indicators */}
+        {/* Skill Tags */}
         <div className="mb-4">
-          <p className="text-xs font-medium text-gray-700 mb-2">
-            Skills you&apos;ll learn:
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Skills You&apos;ll Learn
           </p>
           <div className="flex flex-wrap gap-2">
             {project.skillMatches.map((skillMatch) => (
@@ -188,36 +185,24 @@ export default function ProjectCard({
 
         {/* Critical Gaps Callout */}
         {project.criticalGapsAddressed > 0 && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-            <div className="flex items-start gap-3">
-              <CheckCircle2
-                size={20}
-                className="text-green-600 shrink-0 mt-0.5"
+          <div className="mb-4 p-3 bg-success-50 border border-success-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <Sparkles
+                size={16}
+                className="text-success-600 mt-0.5 shrink-0"
               />
               <div>
-                <h4 className="text-sm font-semibold text-green-900 mb-1">
-                  Addresses Critical Gaps
-                </h4>
-                <p className="text-xs text-green-800 mb-2">
-                  This project fills {project.criticalGapsAddressed} essential
-                  skill
-                  {project.criticalGapsAddressed !== 1 ? "s" : ""} for your
-                  target role:
+                <p className="text-sm font-semibold text-success-800 mb-1">
+                  Addresses Critical Skill Gaps
                 </p>
-                <ul className="space-y-1">
+                <ul className="text-xs text-success-700 space-y-0.5">
                   {project.skillMatches
                     .filter(
                       (sm) =>
                         sm.type === "fills_gap" && sm.priority === "essential"
                     )
                     .map((sm) => (
-                      <li
-                        key={sm.skill}
-                        className="text-xs text-green-800 flex items-center gap-2"
-                      >
-                        <span className="w-1 h-1 bg-green-600 rounded-full"></span>
-                        {sm.skill}
-                      </li>
+                      <li key={sm.skill}>• {sm.skill}</li>
                     ))}
                 </ul>
               </div>
@@ -230,29 +215,22 @@ export default function ProjectCard({
       {project.learningResources && project.learningResources.length > 0 && (
         <div className="border-t border-gray-200">
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full px-4 sm:px-6 py-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors min-h-[44px]"
-            aria-expanded={isExpanded}
-            aria-label={
-              isExpanded
-                ? "Collapse learning resources"
-                : "Expand learning resources"
-            }
+            onClick={() => setShowResources(!showResources)}
+            className="w-full px-6 py-3 flex items-center justify-between text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="flex items-center gap-2">
+              <BookOpen size={16} />
               Learning Resources ({project.learningResources.length})
             </span>
-            <motion.div
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <ChevronDown size={20} className="text-gray-500" />
-            </motion.div>
+            {showResources ? (
+              <ChevronUp size={16} />
+            ) : (
+              <ChevronDown size={16} />
+            )}
           </button>
 
-          {/* Resources Content */}
-          <AnimatePresence initial={false}>
-            {isExpanded && (
+          <AnimatePresence>
+            {showResources && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
@@ -260,42 +238,10 @@ export default function ProjectCard({
                 transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-4">
-                  {/* Organize resources by category */}
-                  {(() => {
-                    const gettingStarted = project.learningResources.filter(
-                      (r) => r.type === "tutorial" || r.type === "article"
-                    );
-                    const documentation = project.learningResources.filter(
-                      (r) => r.type === "docs"
-                    );
-                    const examples = project.learningResources.filter(
-                      (r) => r.type === "example" || r.type === "video"
-                    );
-
-                    return (
-                      <>
-                        {gettingStarted.length > 0 && (
-                          <ResourceSection
-                            title="Getting Started"
-                            resources={gettingStarted}
-                          />
-                        )}
-                        {documentation.length > 0 && (
-                          <ResourceSection
-                            title="Documentation"
-                            resources={documentation}
-                          />
-                        )}
-                        {examples.length > 0 && (
-                          <ResourceSection
-                            title="Examples & Videos"
-                            resources={examples}
-                          />
-                        )}
-                      </>
-                    );
-                  })()}
+                <div className="px-6 pb-4">
+                  <LearningResourcesSection
+                    resources={project.learningResources}
+                  />
                 </div>
               </motion.div>
             )}
@@ -304,69 +250,71 @@ export default function ProjectCard({
       )}
 
       {/* Card Footer */}
-      <div className="px-4 sm:px-6 py-4 bg-gray-50 border-t border-gray-200">
-        {/* Progress Indicator (when in progress) */}
-        {progress && progress.status === "in_progress" && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-700">
-                Progress
-              </span>
-              <span className="text-xs font-semibold text-primary-700">
-                {progress.progress}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-              <div
-                className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress.progress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+        <div className="flex items-center justify-between">
           {/* Gaps Filled Count */}
           <div className="text-sm text-gray-600">
-            <span className="font-semibold text-gray-900">
-              {project.gapsFilled.length}
-            </span>{" "}
-            gap{project.gapsFilled.length !== 1 ? "s" : ""} filled
+            {project.gapsFilled.length > 0 ? (
+              <span className="font-medium">
+                Fills {project.gapsFilled.length} skill gap
+                {project.gapsFilled.length !== 1 ? "s" : ""}
+              </span>
+            ) : (
+              <span>Teaches new skills</span>
+            )}
           </div>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
-            {/* Save Button */}
+            {/* Save/Unsave Button - will be implemented in 8.6 */}
             <button
               onClick={onSave}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] sm:min-h-0 flex-1 sm:flex-initial ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 isSaved
-                  ? "text-primary-700 bg-primary-100 hover:bg-primary-200"
-                  : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+                  ? "bg-success-100 text-success-700 hover:bg-success-200"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
-              aria-label={isSaved ? "Remove from saved" : "Save for later"}
             >
               {isSaved ? (
                 <>
                   <BookmarkCheck size={16} />
-                  <span>Saved</span>
+                  Saved ✓
                 </>
               ) : (
                 <>
                   <Bookmark size={16} />
-                  <span>Save</span>
+                  Save
                 </>
               )}
             </button>
 
+            {/* Progress Indicator (when in progress) */}
+            {progress?.status === "in_progress" && (
+              <div className="flex items-center gap-2 mr-2">
+                <div className="min-w-[80px]">
+                  <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                    <span>Progress</span>
+                    <span className="font-medium">{progress.progress}%</span>
+                  </div>
+                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary-600 transition-all duration-300"
+                      style={{ width: `${progress.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Start/Continue Button */}
             <button
               onClick={onStart}
-              className="inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors min-h-[44px] sm:min-h-0 flex-1 sm:flex-initial"
-              aria-label={progress ? "Continue project" : "Start project"}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
             >
               <Play size={16} />
-              <span>{progress ? "Continue" : "Start Project"}</span>
+              {progress?.status === "in_progress"
+                ? "Continue"
+                : "Start Project"}
             </button>
           </div>
         </div>
@@ -377,87 +325,95 @@ export default function ProjectCard({
 
 // SkillTag Component
 function SkillTag({ skillMatch }: { skillMatch: SkillMatch }) {
-  const getSkillTagConfig = (type: SkillMatch["type"]) => {
-    switch (type) {
+  const getSkillTagStyle = () => {
+    switch (skillMatch.type) {
       case "new":
         return {
-          color: "text-blue-700 bg-blue-50 border-blue-200",
           label: "NEW",
-          glow: false,
+          className: "bg-info-100 text-info-700 border border-info-200",
+          glowClass: "",
         };
       case "fills_gap":
         return {
-          color: "text-green-700 bg-green-50 border-green-200",
           label: "FILLS GAP",
-          glow: true,
+          className:
+            "bg-success-100 text-success-700 border border-success-300 shadow-success-200",
+          glowClass: "shadow-lg",
         };
       case "reinforces":
         return {
-          color: "text-purple-700 bg-purple-50 border-purple-200",
           label: "REINFORCES",
-          glow: false,
-        };
-      default:
-        return {
-          color: "text-gray-700 bg-gray-50 border-gray-200",
-          label: "",
-          glow: false,
+          className: "bg-gray-100 text-gray-700 border border-gray-200",
+          glowClass: "",
         };
     }
   };
 
-  const config = getSkillTagConfig(skillMatch.type);
+  const style = getSkillTagStyle();
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${config.color} ${
-        config.glow ? "ring-2 ring-green-200 ring-opacity-50 shadow-sm" : ""
-      }`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${style.className} ${style.glowClass}`}
     >
-      <span>{skillMatch.skill}</span>
-      {config.label && (
-        <span className="text-[10px] font-bold opacity-75">{config.label}</span>
-      )}
+      <span className="font-semibold">{skillMatch.skill}</span>
+      <span className="text-[10px] opacity-75">• {style.label}</span>
     </span>
   );
 }
 
-// ResourceSection Component
-function ResourceSection({
-  title,
+// LearningResourcesSection Component
+function LearningResourcesSection({
   resources,
 }: {
-  title: string;
   resources: LearningResource[];
 }) {
+  // Organise resources by category
+  const gettingStarted = resources.filter((r) => r.type === "tutorial");
+  const documentation = resources.filter((r) => r.type === "docs");
+  const templates = resources.filter((r) => r.type === "example");
+  const videos = resources.filter((r) => r.type === "video");
+  const articles = resources.filter((r) => r.type === "article");
+
+  const sections = [
+    { title: "Getting Started", resources: gettingStarted },
+    { title: "Documentation", resources: documentation },
+    { title: "Templates & Examples", resources: templates },
+    { title: "Video Tutorials", resources: videos },
+    { title: "Articles", resources: articles },
+  ].filter((section) => section.resources.length > 0);
+
   return (
-    <div>
-      <h5 className="text-xs font-semibold text-gray-700 mb-2">{title}</h5>
-      <div className="space-y-2">
-        {resources.map((resource, index) => (
-          <ResourceItem key={index} resource={resource} />
-        ))}
-      </div>
+    <div className="space-y-4">
+      {sections.map((section) => (
+        <div key={section.title}>
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            {section.title}
+          </h4>
+          <div className="space-y-2">
+            {section.resources.map((resource, index) => (
+              <ResourceItem key={index} resource={resource} />
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
 
 // ResourceItem Component
 function ResourceItem({ resource }: { resource: LearningResource }) {
-  const getResourceIcon = (type: LearningResource["type"]) => {
-    switch (type) {
-      case "video":
-        return <Play size={14} className="text-red-600" />;
-      case "article":
-        return <Code2 size={14} className="text-blue-600" />;
-      case "docs":
-        return <Layers size={14} className="text-green-600" />;
+  const getResourceIcon = () => {
+    switch (resource.type) {
       case "tutorial":
-        return <Target size={14} className="text-purple-600" />;
+        return <BookOpen size={14} className="text-primary-600" />;
+      case "docs":
+        return <FileText size={14} className="text-info-600" />;
+      case "video":
+        return <Video size={14} className="text-error-600" />;
+      case "article":
+        return <FileText size={14} className="text-warning-600" />;
       case "example":
-        return <Sparkles size={14} className="text-yellow-600" />;
-      default:
-        return <ExternalLink size={14} className="text-gray-600" />;
+        return <Code size={14} className="text-success-600" />;
     }
   };
 
@@ -466,33 +422,30 @@ function ResourceItem({ resource }: { resource: LearningResource }) {
       href={resource.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors group"
+      className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
     >
-      <div className="shrink-0 mt-0.5">{getResourceIcon(resource.type)}</div>
+      <div className="mt-0.5">{getResourceIcon()}</div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <h6 className="text-sm font-medium text-gray-900 group-hover:text-primary-700 transition-colors">
+          <p className="text-sm font-medium text-gray-900 group-hover:text-primary-600 transition-colors">
             {resource.title}
-          </h6>
+          </p>
           <ExternalLink
             size={14}
             className="text-gray-400 group-hover:text-primary-600 shrink-0"
           />
         </div>
-        <div className="flex items-center gap-2 mt-1">
-          {resource.provider && (
-            <span className="text-xs text-gray-600">{resource.provider}</span>
-          )}
+        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+          {resource.provider && <span>{resource.provider}</span>}
           {resource.duration && (
             <>
-              <span className="text-xs text-gray-400">•</span>
-              <span className="text-xs text-gray-600">{resource.duration}</span>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Clock size={12} />
+                {resource.duration}
+              </span>
             </>
           )}
-          <span className="text-xs text-gray-400">•</span>
-          <span className="text-xs text-gray-600 capitalize">
-            {resource.type}
-          </span>
         </div>
       </div>
     </a>

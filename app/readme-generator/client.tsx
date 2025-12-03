@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Project } from "@/types";
-import { ReadmeTemplate, ProfileConfig } from "@/types/readme";
+import { ReadmeTemplate } from "@/types/readme";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 import { marked } from "marked";
 
@@ -15,6 +15,15 @@ export interface ProjectConfig {
   license: boolean;
   badges: boolean;
   demo: boolean;
+}
+
+export interface ProfileConfig {
+  includeStats: boolean;
+  includeTopLanguages: boolean;
+  includeProjects: boolean;
+  includeSkills: boolean;
+  includeContact: boolean;
+  includeSocials: boolean;
 }
 
 export default function ReadmeClient() {

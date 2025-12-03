@@ -90,17 +90,11 @@ export async function generateProfileReadme(
   template: ReadmeTemplate,
   research: ReadmeResearch,
   config?: {
-    /** Include GitHub Stats widget (default: true) */
     includeStats?: boolean;
-    /** Include Top Languages chart (default: true) */
     includeTopLanguages?: boolean;
-    /** Highlight featured projects (default: true) */
     includeProjects?: boolean;
-    /** Add skill badges and tech stack (default: true) */
     includeSkills?: boolean;
-    /** Include contact information (default: true) */
     includeContact?: boolean;
-    /** Add social media links (default: true) */
     includeSocials?: boolean;
   }
 ): Promise<GeneratedReadme> {
@@ -602,17 +596,11 @@ function buildProfileReadmePrompt(
   template: ReadmeTemplate,
   research: ReadmeResearch,
   config?: {
-    /** Include GitHub Stats widget (default: true) */
     includeStats?: boolean;
-    /** Include Top Languages chart (default: true) */
     includeTopLanguages?: boolean;
-    /** Highlight featured projects (default: true) */
     includeProjects?: boolean;
-    /** Add skill badges and tech stack (default: true) */
     includeSkills?: boolean;
-    /** Include contact information (default: true) */
     includeContact?: boolean;
-    /** Add social media links (default: true) */
     includeSocials?: boolean;
   }
 ): string {
@@ -658,16 +646,16 @@ ${config?.includeContact !== false ? "✅ Include contact information" : "❌ Sk
 ${config?.includeSocials !== false ? "✅ Add social media links" : "❌ Skip social links"}
 
 **Instructions:**
-- Create an engaging profile README that showcases the developer
-${config?.includeStats !== false ? `- Include GitHub stats widget: \`![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${profileData.username}&show_icons=true&theme=radical)\`` : ""}
-${config?.includeTopLanguages !== false ? `- Include top languages chart: \`![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${profileData.username}&layout=compact&theme=radical)\`` : ""}
-${config?.includeSkills !== false ? "- Add skill badges for technologies using shields.io" : ""}
-${config?.includeProjects !== false ? "- Highlight top projects with links and descriptions" : ""}
-${config?.includeContact !== false ? "- Add contact information (email, ways to reach)" : ""}
-${config?.includeSocials !== false ? "- Include social media links (LinkedIn, Twitter, portfolio)" : ""}
-- Make it personal and engaging
-- Use emojis appropriately
-- Return ONLY the Markdown content, no wrapper code blocks
+1. Create an engaging profile README that showcases the developer
+${config?.includeStats !== false ? `2. Include GitHub stats widget: \`![GitHub Stats](https://github-readme-stats.vercel.app/api?username=${profileData.username}&show_icons=true&theme=radical)\`` : ""}
+${config?.includeTopLanguages !== false ? `3. Include top languages chart: \`![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=${profileData.username}&layout=compact&theme=radical)\`` : ""}
+${config?.includeSkills !== false ? "4. Add skill badges for technologies using shields.io" : ""}
+${config?.includeProjects !== false ? "5. Highlight top projects with links and descriptions" : ""}
+${config?.includeContact !== false ? "6. Add contact information (email, ways to reach)" : ""}
+${config?.includeSocials !== false ? "7. Include social media links (LinkedIn, Twitter, portfolio)" : ""}
+8. Make it personal and engaging
+9. Use emojis appropriately
+10. Return ONLY the Markdown content, no wrapper code blocks
 
 **IMPORTANT:** Only include sections that are enabled in the configuration above. Skip any sections marked with ❌.
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import { createClient } from "@/lib/supabase/client";
 import { Upload } from "lucide-react";
 
@@ -203,9 +204,10 @@ export default function SettingsPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
+      <MobileNav />
       <CollapsibleSidebar />
 
-      <main className="flex-1 p-8 md:p-12 ml-20">
+      <main className="pt-16 md:pt-0 flex-1 p-4 sm:p-8 md:p-12 ml-0 md:ml-20">
         <div className="max-w-4xl mx-auto">
           {/* Page Heading */}
           <div className="flex flex-wrap justify-between gap-3 pb-8">

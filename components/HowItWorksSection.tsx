@@ -33,23 +33,23 @@ export default function HowItWorksSection() {
   return (
     <section
       id="how-it-works"
-      className="py-24 md:py-40 bg-white relative overflow-hidden"
+      className="py-16 sm:py-24 md:py-40 bg-white relative overflow-hidden"
     >
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-240 h-240 rounded-full bg-gradient-to-tr from-[#4c96e1] to-orange-500/10 blur-3xl opacity-50 -z-10"></div>
+      <div className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-240 h-240 rounded-full bg-gradient-to-tr from-[#4c96e1] to-orange-500/10 blur-3xl opacity-50 -z-10"></div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
-          <div className="md:col-span-4 lg:col-span-5 md:sticky top-32">
-            <div className="flex flex-col gap-6 relative">
-              <h2 className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight text-gray-900">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 sm:gap-12 items-start">
+          <div className="md:col-span-4 lg:col-span-5 md:sticky md:top-32">
+            <div className="flex flex-col gap-4 sm:gap-6 relative">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-gray-900">
                 So simple, it feels like magic.
               </h2>
-              <p className="text-lg font-normal leading-relaxed text-gray-600 max-w-sm">
+              <p className="text-base sm:text-lg font-normal leading-relaxed text-gray-600 max-w-sm">
                 Our platform provides you with the tools to highlight your
                 skills and ace technical interviews in just three steps.
               </p>
               <div
-                className="mt-8 p-6 rounded-lg border transform hover:rotate-0 transition-transform duration-300"
+                className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-lg border transform hover:rotate-0 transition-transform duration-300"
                 style={{
                   backgroundColor: "rgba(255, 255, 255, 0.5)",
                   borderColor: "rgba(229, 231, 235, 0.5)",
@@ -63,14 +63,14 @@ export default function HowItWorksSection() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p className="text-sm text-gray-600 mt-3 font-medium text-center">
+                <p className="text-xs sm:text-sm text-gray-600 mt-2 sm:mt-3 font-medium text-center">
                   A glimpse of your future portfolio.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="md:col-span-8 lg:col-span-7 grid grid-cols-1 gap-12">
+          <div className="md:col-span-8 lg:col-span-7 grid grid-cols-1 gap-8 sm:gap-12">
             {steps.map((step, index) => {
               const Icon = step.icon;
               const colorMap = {
@@ -95,7 +95,7 @@ export default function HowItWorksSection() {
               return (
                 <div
                   key={index}
-                  className="group flex flex-col sm:flex-row items-start gap-8 p-8 rounded-lg backdrop-blur-sm transition-all duration-300 transform hover:-translate-y-1"
+                  className="group flex flex-col sm:flex-row items-start gap-6 sm:gap-8 p-6 sm:p-8 rounded-lg backdrop-blur-sm transition-all duration-300 transform hover:-translate-y-1"
                   style={{
                     backgroundColor: "rgba(255, 255, 255, 0.5)",
                     boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
@@ -113,11 +113,11 @@ export default function HowItWorksSection() {
                   }}
                 >
                   <div
-                    className="flex items-center justify-center size-20 rounded-full shrink-0 relative"
+                    className="flex items-center justify-center size-16 sm:size-20 rounded-full shrink-0 relative"
                     style={{ backgroundColor: colors.bg, color: colors.text }}
                   >
                     <Icon
-                      className={`w-10 h-10 transition-all duration-500 ${
+                      className={`w-8 h-8 sm:w-10 sm:h-10 transition-all duration-500 ${
                         step.number === 1
                           ? "group-hover:rotate-180"
                           : step.number === 2
@@ -127,21 +127,21 @@ export default function HowItWorksSection() {
                     />
                     {index === 0 && (
                       <div className="absolute -top-2 -right-2 bg-white p-1 rounded-full shadow-md">
-                        <Github className="w-5 h-5 text-gray-800" />
+                        <Github className="w-4 h-4 sm:w-5 sm:h-5 text-gray-800" />
                       </div>
                     )}
                   </div>
                   <div className="flex flex-col gap-2">
                     <p
-                      className="text-sm font-bold uppercase tracking-wider"
+                      className="text-xs sm:text-sm font-bold uppercase tracking-wider"
                       style={{ color: colors.text }}
                     >
                       Step {step.number}
                     </p>
-                    <h3 className="text-2xl font-bold text-gray-900">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
                       {step.title}
                     </h3>
-                    <p className="text-base text-gray-600 mt-1 max-w-md leading-relaxed">
+                    <p className="text-sm sm:text-base text-gray-600 mt-1 max-w-md leading-relaxed">
                       {step.description}
                     </p>
                   </div>

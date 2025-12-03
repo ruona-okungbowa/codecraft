@@ -1,6 +1,5 @@
 import { Suspense } from "react";
-import AlternativeReadmeClient from "./alternative-client";
-
+import ReadmeClient from "./client";
 function ReadmeLoading() {
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -15,7 +14,7 @@ function ReadmeLoading() {
 export default function ReadmeGeneratorPage() {
   return (
     <Suspense fallback={<ReadmeLoading />}>
-      <AlternativeReadmeClient />
+      <ReadmeClient />
     </Suspense>
   );
 }

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   generateRecommendations,
@@ -6,7 +6,7 @@ import {
 } from "@/lib/recommendations/engine";
 import type { SkillGapAnalysis } from "@/types/skills";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 1. Authenticate user
     const supabase = await createClient();

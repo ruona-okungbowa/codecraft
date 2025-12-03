@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { ProjectRow } from "@/types";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import OnboardingTour from "@/components/OnboardingTour";
 
 interface PortfolioScore {
@@ -122,8 +123,9 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
+        <MobileNav />
         <CollapsibleSidebar />
-        <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
           <div className="max-w-7xl mx-auto">
             <div className="mb-6 sm:mb-8 lg:mb-10">
               <div className="h-10 bg-gray-200 rounded w-64 mb-2 animate-pulse"></div>
@@ -190,8 +192,9 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="flex min-h-screen bg-[#f6f7f8]">
+        <MobileNav />
         <CollapsibleSidebar />
-        <main className="ml-0 md:ml-20 flex-1 flex items-center justify-center p-4">
+        <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 flex items-center justify-center p-4">
           <div className="text-center max-w-md mx-auto">
             <div className="text-red-500 text-4xl sm:text-5xl mb-4">⚠️</div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
@@ -212,11 +215,12 @@ export default function DashboardPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
+      <MobileNav />
       <OnboardingTour />
       <CollapsibleSidebar />
 
       {/* Main Content */}
-      <main className="ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
+      <main className="pt-16 md:pt-0 ml-0 md:ml-20 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
         <div className="max-w-7xl mx-auto">
           {/* Welcome */}
           <div className="mb-6 sm:mb-8 lg:mb-10">

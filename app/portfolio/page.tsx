@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
+import MobileNav from "@/components/MobileNav";
 import { ProjectRow } from "@/types";
 
 interface PortfolioConfig {
@@ -167,6 +168,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f6f7f8]">
+      <MobileNav />
       <CollapsibleSidebar />
 
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto ml-0 md:ml-20">

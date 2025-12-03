@@ -87,7 +87,9 @@
     - Test response includes user project state
     - _Requirements: 1.1, 1.2_
 
-- [ ] 5. Checkpoint - Ensure all tests pass
+-
+
+- [x] 5. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 6. Create filter logic and utilities
@@ -115,8 +117,6 @@
     - _Requirements: 2.4_
 
 - [x] 7. Build FilterBar component
-
-- [ ] 7. Build FilterBar component
   - [x] 7.1 Create FilterBar component
     - Create `components/recommendations/FilterBar.tsx`
     - Implement difficulty dropdown
@@ -205,8 +205,6 @@
   - [ ]\* 9.2 Write property test for callout visibility
     - **Property 9: Critical gaps callout visibility**
     - **Validates: Requirements 7.1, 7.4**
-
--
 
 - [x] 10. Build main ProjectRecommendationsPage
   - [x] 10.1 Create page component structure

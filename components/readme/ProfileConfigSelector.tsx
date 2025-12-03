@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, Trophy, Code2, Mail, LinkedinIcon } from "lucide-react";
+import { BarChart3, Trophy, Code2, Mail, Linkedin } from "lucide-react";
 
 export interface ProfileConfig {
   includeStats: boolean;
@@ -51,7 +51,7 @@ const configOptions = [
     key: "includeSocials" as keyof ProfileConfig,
     label: "Social Links",
     description: "Link to LinkedIn, Twitter, portfolio",
-    icon: <LinkedinIcon className="w-5 h-5" />,
+    icon: <Linkedin className="w-5 h-5" />,
   },
 ];
 
