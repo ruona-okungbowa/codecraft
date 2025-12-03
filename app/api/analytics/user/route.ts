@@ -45,9 +45,9 @@ export async function GET() {
         .eq("user_id", user.id),
       supabase
         .from("skill_gaps")
-        .select("coverage_percentage, analyzed_at")
+        .select("coverage_percentage, analysed_at")
         .eq("user_id", user.id)
-        .order("analyzed_at", { ascending: false })
+        .order("analysed_at", { ascending: false })
         .limit(2),
       supabase.from("users").select("created_at").eq("id", user.id).single(),
     ]);

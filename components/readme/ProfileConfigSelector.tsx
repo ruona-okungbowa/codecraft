@@ -1,15 +1,7 @@
 "use client";
 
 import { BarChart3, Trophy, Code2, Mail, Linkedin } from "lucide-react";
-
-export interface ProfileConfig {
-  includeStats: boolean;
-  includeTopLanguages: boolean;
-  includeProjects: boolean;
-  includeSkills: boolean;
-  includeContact: boolean;
-  includeSocials: boolean;
-}
+import { ProfileConfig } from "@/types/readme";
 
 interface ProfileConfigSelectorProps {
   config: ProfileConfig;

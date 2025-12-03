@@ -129,13 +129,66 @@ export interface JobMatch {
   id: string;
   userId: string;
   jobTitle: string;
+  companyName?: string;
   jobDescription: string;
-  requiredSkills: string[];
   matchPercentage: number;
   matchedSkills: string[];
-  missingSkills: string[];
-  recommendedProjects: string[];
+  missingSkills: Array<{
+    skill: string;
+    priority: "high" | "medium" | "low";
+  }>;
+  bonusSkills: string[];
+  recommendations: Array<{
+    title: string;
+    description: string;
+  }>;
+  summary: string;
+  projectMappings: Array<{
+    projectId: string;
+    projectName: string;
+    matchedSkills: string[];
+    relevanceScore: number;
+  }>;
+  interviewQuestions?: Array<{
+    question: string;
+    category: string;
+    difficulty: string;
+  }>;
   createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface JobMatchRow {
+  id: string;
+  user_id: string;
+  job_title: string;
+  company_name?: string;
+  job_description: string;
+  match_percentage: number;
+  matched_skills: string[];
+  missing_skills: Array<{
+    skill: string;
+    priority: "high" | "medium" | "low";
+  }>;
+  bonus_skills: string[];
+  recommendations: Array<{
+    title: string;
+    description: string;
+  }>;
+  summary: string;
+  project_mappings: Array<{
+    projectId: string;
+    projectName: string;
+    matchedSkills: string[];
+    relevanceScore: number;
+  }>;
+  interview_questions?: Array<{
+    question: string;
+    category: string;
+    difficulty: string;
+  }>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ErrorResponse {

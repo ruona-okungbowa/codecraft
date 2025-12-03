@@ -97,6 +97,7 @@ export default function FilterBar({
       timeCommitment: "all",
       skills: [],
       sortBy: "priority",
+      priorityLevel: "all",
     });
   };
 
@@ -418,9 +419,11 @@ function DropdownItem({
 
 function FilterChip({
   label,
+  icon,
   onRemove,
 }: {
   label: string;
+  icon?: React.ReactNode;
   onRemove: () => void;
 }) {
   return (

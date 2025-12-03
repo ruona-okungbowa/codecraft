@@ -169,7 +169,7 @@ export default function PortfolioScorePage() {
                 className="p-4 bg-blue-50 rounded-lg"
               >
                 <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-sm text-gray-600">Projects Analyzed</div>
+                <div className="text-sm text-gray-600">Projects Analysed</div>
                 <div className="text-2xl font-bold text-gray-900">12</div>
               </motion.div>
 

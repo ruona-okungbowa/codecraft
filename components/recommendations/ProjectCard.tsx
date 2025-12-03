@@ -24,12 +24,15 @@ import type {
   ProjectProgress,
   LearningResource,
 } from "@/types/recommendations";
-import type { MissingSkills } from "@/types/skills";
 
 interface ProjectCardProps {
   project: ProjectRecommendation;
   userSkills: string[];
-  missingSkills: MissingSkills;
+  missingSkills: {
+    essential: string[];
+    preferred: string[];
+    niceToHave: string[];
+  };
   isSaved: boolean;
   progress: ProjectProgress | null;
   onSave: () => void;
@@ -39,14 +42,12 @@ interface ProjectCardProps {
 
 export default function ProjectCard({
   project,
-  userSkills: _userSkills,
-  missingSkills: _missingSkills,
   isSaved,
   progress,
   onSave,
   onStart,
-  onProgressUpdate: _onProgressUpdate,
-}: ProjectCardProps) {
+  onProgressUpdate,
+}: Omit<ProjectCardProps, "userSkills" | "missingSkills">) {
   const [showResources, setShowResources] = useState(false);
 
   // Get priority badge styling
@@ -233,7 +234,7 @@ export default function ProjectCard({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
                 <div className="px-6 pb-4">
@@ -286,34 +287,45 @@ export default function ProjectCard({
               )}
             </button>
 
+            {/* Completed Badge */}
+            {progress?.status === "completed" && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-success-100 text-success-700">
+                <Sparkles size={16} />
+                Completed ✓
+              </div>
+            )}
+
             {/* Progress Indicator (when in progress) */}
             {progress?.status === "in_progress" && (
-              <div className="flex items-center gap-2 mr-2">
-                <div className="min-w-[80px]">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="flex-1 min-w-[120px]">
                   <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
                     <span>Progress</span>
                     <span className="font-medium">{progress.progress}%</span>
                   </div>
-                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary-600 transition-all duration-300"
-                      style={{ width: `${progress.progress}%` }}
-                    />
-                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="5"
+                    value={progress.progress}
+                    onChange={(e) => onProgressUpdate(parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                  />
                 </div>
               </div>
             )}
 
-            {/* Start/Continue Button */}
-            <button
-              onClick={onStart}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
-            >
-              <Play size={16} />
-              {progress?.status === "in_progress"
-                ? "Continue"
-                : "Start Project"}
-            </button>
+            {/* Start Button (when not started) */}
+            {!progress?.status && (
+              <button
+                onClick={onStart}
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+              >
+                <Play size={16} />
+                Start Project
+              </button>
+            )}
           </div>
         </div>
       </div>

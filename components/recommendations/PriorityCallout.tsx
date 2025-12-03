@@ -13,20 +13,18 @@ export default function PriorityCallout({
   targetRole,
   onViewCritical,
 }: PriorityCalloutProps) {
-  if (criticalGaps.length === 0) return null;
-
   return (
-    <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-5 mb-6 shadow-sm">
-      <div className="flex items-start gap-4">
+    <div className="bg-orange-50 border-l-4 border-orange-500 rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Alert Icon */}
-        <div className="shrink-0 mt-0.5">
-          <AlertCircle size={24} className="text-orange-600" />
+        <div className="shrink-0">
+          <AlertCircle size={20} className="text-orange-600 sm:w-6 sm:h-6" />
         </div>
 
         {/* Content */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Title */}
-          <h3 className="text-lg font-semibold text-orange-900 mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-orange-900 mb-2">
             Critical skill gaps detected
           </h3>
 

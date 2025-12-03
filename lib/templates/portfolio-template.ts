@@ -13,8 +13,22 @@ export function generatePortfolioHTML(
     projects?: boolean;
     skills?: boolean;
     contact?: boolean;
-  }
+  },
+  colorMode?: "light" | "dark",
+  accentColor?: "blue" | "purple" | "green" | "orange" | "pink" | "red"
 ): string {
+  // Color mappings
+  const colors = {
+    blue: { primary: "#4c96e1", hover: "#3a7bc8", light: "#e3f2fd" },
+    purple: { primary: "#9333ea", hover: "#7e22ce", light: "#f3e8ff" },
+    green: { primary: "#10b981", hover: "#059669", light: "#d1fae5" },
+    orange: { primary: "#f97316", hover: "#ea580c", light: "#ffedd5" },
+    pink: { primary: "#ec4899", hover: "#db2777", light: "#fce7f3" },
+    red: { primary: "#ef4444", hover: "#dc2626", light: "#fee2e2" },
+  };
+
+  const selectedColor = colors[accentColor || "blue"];
+  const isDark = colorMode === "dark";
   // Default all sections to true if not provided
   const showSections = {
     about: sections?.about !== false,
@@ -72,14 +86,23 @@ export function generatePortfolioHTML(
     <title>${name} — Software Engineer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      :root {
+        --accent-primary: ${selectedColor.primary};
+        --accent-hover: ${selectedColor.hover};
+        --accent-light: ${selectedColor.light};
+        --bg-primary: ${isDark ? "#0f172a" : "#ffffff"};
+        --bg-secondary: ${isDark ? "#1e293b" : "#f8fafc"};
+        --text-primary: ${isDark ? "#f1f5f9" : "#0f172a"};
+        --text-secondary: ${isDark ? "#cbd5e1" : "#475569"};
+        --border-color: ${isDark ? "#334155" : "#e2e8f0"};
+      }
+
       /* ============================================
-         EDIT HERE: Background Colors & Gradients
+         Background Colors & Gradients
          ============================================ */
       body {
-        background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-        /* Change these hex colors to customize your background:
-           #0f172a = Dark blue-gray (top)
-           #1e293b = Slightly lighter blue-gray (bottom) */
+        background: ${isDark ? "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)" : "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)"};
+        color: var(--text-primary);
         position: relative;
         overflow-x: hidden;
       }
@@ -99,7 +122,7 @@ export function generatePortfolioHTML(
         position: absolute;
         width: 4px;
         height: 4px;
-        background: rgba(59, 130, 246, 0.3);
+        background: ${isDark ? `rgba(${parseInt(selectedColor.primary.slice(1, 3), 16)}, ${parseInt(selectedColor.primary.slice(3, 5), 16)}, ${parseInt(selectedColor.primary.slice(5, 7), 16)}, 0.3)` : `rgba(${parseInt(selectedColor.primary.slice(1, 3), 16)}, ${parseInt(selectedColor.primary.slice(3, 5), 16)}, ${parseInt(selectedColor.primary.slice(5, 7), 16)}, 0.2)`};
         border-radius: 50%;
         animation: float 20s infinite;
       }
@@ -163,6 +186,11 @@ export function generatePortfolioHTML(
         transform: translateY(0);
       }
 
+      /* Navigation links */
+      .nav-link:hover {
+        color: ${isDark ? "#f1f5f9" : "#0f172a"} !important;
+      }
+
       /* Mobile menu */
       .mobile-menu {
         max-height: 0;
@@ -176,45 +204,29 @@ export function generatePortfolioHTML(
 
       /* Project card enhancements */
       .project-card {
-        background: 
-          linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%),
-          repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(59, 130, 246, 0.03) 10px, rgba(59, 130, 246, 0.03) 20px);
-        box-shadow: 
-          0 4px 6px -1px rgba(0, 0, 0, 0.3),
-          0 2px 4px -1px rgba(0, 0, 0, 0.2),
-          inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+        background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)"};
+        border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(203, 213, 225, 1)"};
+        box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};
         transition: all 0.3s ease;
       }
 
       .project-card:hover {
-        background: 
-          linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%),
-          repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(59, 130, 246, 0.05) 10px, rgba(59, 130, 246, 0.05) 20px);
-        box-shadow: 
-          0 20px 25px -5px rgba(59, 130, 246, 0.2),
-          0 10px 10px -5px rgba(59, 130, 246, 0.1),
-          inset 0 1px 0 0 rgba(59, 130, 246, 0.1);
-        border-color: rgba(59, 130, 246, 0.5) !important;
+        background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 1) 100%)"};
+        box-shadow: ${isDark ? `0 20px 25px -5px ${selectedColor.primary}33, 0 10px 10px -5px ${selectedColor.primary}1a, inset 0 1px 0 0 ${selectedColor.primary}1a` : `0 20px 25px -5px ${selectedColor.primary}1a, 0 10px 10px -5px ${selectedColor.primary}0d`};
+        border-color: ${selectedColor.primary}80 !important;
       }
 
       /* Skill badge enhancements */
       .skill-badge {
-        background: 
-          linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
-        box-shadow: 
-          0 4px 6px -1px rgba(0, 0, 0, 0.3),
-          0 2px 4px -1px rgba(0, 0, 0, 0.2),
-          inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+        background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)"};
+        border: 1px solid ${isDark ? "rgba(51, 65, 85, 0.5)" : "rgba(203, 213, 225, 1)"};
+        box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};
         transition: all 0.3s ease;
         position: relative;
       }
 
       .skill-badge:hover {
-        box-shadow: 
-          0 0 20px rgba(59, 130, 246, 0.4),
-          0 0 40px rgba(59, 130, 246, 0.2),
-          0 4px 6px -1px rgba(0, 0, 0, 0.3),
-          inset 0 1px 0 0 rgba(59, 130, 246, 0.2);
+        box-shadow: ${isDark ? `0 0 20px ${selectedColor.primary}66, 0 0 40px ${selectedColor.primary}33, 0 4px 6px -1px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 ${selectedColor.primary}33` : `0 0 20px ${selectedColor.primary}33, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`};
         transform: translateY(-4px) scale(1.05);
       }
 
@@ -228,8 +240,9 @@ export function generatePortfolioHTML(
         bottom: 100%;
         left: 50%;
         transform: translateX(-50%) translateY(-10px);
-        background: rgba(15, 23, 42, 0.95);
-        border: 1px solid rgba(59, 130, 246, 0.3);
+        background: ${isDark ? "rgba(15, 23, 42, 0.95)" : "rgba(255, 255, 255, 0.95)"};
+        border: 1px solid ${selectedColor.primary}4d;
+        color: ${isDark ? "#f1f5f9" : "#0f172a"};
         padding: 8px 12px;
         border-radius: 8px;
         font-size: 0.875rem;
@@ -238,7 +251,7 @@ export function generatePortfolioHTML(
         pointer-events: none;
         transition: opacity 0.3s ease, transform 0.3s ease;
         z-index: 10;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1)"};
       }
 
       .skill-badge:hover .skill-tooltip {
@@ -268,12 +281,13 @@ export function generatePortfolioHTML(
 
     <!-- Navigation -->
     <nav
-      class="fixed top-0 w-full z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-700"
+      class="fixed top-0 w-full z-50 backdrop-blur-md"
+      style="background: ${isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(255, 255, 255, 0.9)"}; border-bottom: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(226, 232, 240, 1)"};"
     >
       <div
         class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center"
       >
-        <p class="text-sm text-gray-400 font-medium">
+        <p class="text-sm font-medium" style="color: ${isDark ? "#94a3b8" : "#64748b"};">
           ${name}
         </p>
 
@@ -281,17 +295,20 @@ export function generatePortfolioHTML(
         <div class="hidden md:flex gap-6">
           <a
             href="#home"
-            class="text-sm text-gray-400 hover:text-white transition-all"
+            class="text-sm transition-all nav-link"
+            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
             >Home</a
           >
           <a
             href="#projects"
-            class="text-sm text-gray-400 hover:text-white transition-all"
+            class="text-sm transition-all nav-link"
+            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
             >Projects</a
           >
           <a
             href="#about"
-            class="text-sm text-gray-400 hover:text-white transition-all"
+            class="text-sm transition-all nav-link"
+            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
             >About</a
           >
         </div>
@@ -299,7 +316,8 @@ export function generatePortfolioHTML(
         <!-- Mobile Menu Button -->
         <button
           id="mobile-menu-btn"
-          class="md:hidden text-gray-400 hover:text-white transition"
+          class="md:hidden transition"
+          style="color: ${isDark ? "#94a3b8" : "#64748b"};"
         >
           <svg
             class="w-6 h-6"
@@ -320,22 +338,26 @@ export function generatePortfolioHTML(
       <!-- Mobile Menu -->
       <div
         id="mobile-menu"
-        class="mobile-menu md:hidden bg-slate-800/95 backdrop-blur-md border-t border-slate-700"
+        class="mobile-menu md:hidden backdrop-blur-md"
+        style="background: ${isDark ? "rgba(30, 41, 59, 0.95)" : "rgba(248, 250, 252, 0.95)"}; border-top: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(226, 232, 240, 1)"};"
       >
         <div class="max-w-4xl mx-auto px-6 py-4 flex flex-col gap-4">
           <a
             href="#home"
-            class="text-sm text-gray-400 hover:text-white transition-all mobile-menu-link"
+            class="text-sm transition-all mobile-menu-link"
+            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
             >Home</a
           >
           <a
             href="#projects"
-            class="text-sm text-gray-400 hover:text-white transition-all mobile-menu-link"
+            class="text-sm transition-all mobile-menu-link"
+            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
             >Projects</a
           >
           <a
             href="#about"
-            class="text-sm text-gray-400 hover:text-white transition-all mobile-menu-link"
+            class="text-sm transition-all mobile-menu-link"
+            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
             >About</a
           >
         </div>
@@ -555,14 +577,15 @@ export function generatePortfolioHTML(
         About Me
       </h2>
       <div
-        class="bg-slate-800 border border-slate-700 rounded-2xl p-8 md:p-12 animate-on-scroll"
+        class="rounded-2xl p-8 md:p-12 animate-on-scroll"
+        style="background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)"}; border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(203, 213, 225, 1)"}; box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};"
       >
-        <p class="text-lg text-gray-300 leading-relaxed mb-8">
-          Hi, I'm <span class="text-white font-semibold">${name}</span>, a
+        <p class="text-lg leading-relaxed mb-8" style="color: ${isDark ? "#cbd5e1" : "#475569"}">
+          Hi, I'm <span style="color: ${isDark ? "#f1f5f9" : "#0f172a"}; font-weight: 600;">${name}</span>, a
           passionate Software Engineer with a knack for crafting seamless
           digital experiences.
         </p>
-        <p class="text-lg text-gray-300 leading-relaxed mb-10">
+        <p class="text-lg leading-relaxed mb-10" style="color: ${isDark ? "#cbd5e1" : "#475569"}">
           Over the years, I've honed my skills in building robust, user-friendly
           applications that not only meet the needs of users but also push the
           boundaries of what's possible.
@@ -591,10 +614,10 @@ export function generatePortfolioHTML(
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-700 mt-20 bg-slate-900/50">
+    <footer class="mt-20" style="border-top: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(226, 232, 240, 1)"}; background: ${isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(248, 250, 252, 0.5)"};">
       <div class="max-w-4xl mx-auto px-6 py-10 text-center">
-        <p class="text-gray-400 mb-2"> © ${new Date().getFullYear()} ${name}. All rights reserved.</p>
-        <p class="text-sm text-gray-500">Generated with ❤️ CodeCraft </p>
+        <p class="mb-2" style="color: ${isDark ? "#94a3b8" : "#64748b"};"> © ${new Date().getFullYear()} ${name}. All rights reserved.</p>
+        <p class="text-sm" style="color: ${isDark ? "#64748b" : "#94a3b8"};">Generated with ❤️ CodeCraft </p>
       </div>
     </footer>
 

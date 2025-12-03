@@ -73,6 +73,16 @@ export interface ReadmeGenerationResponse {
   generatedAt: string;
 }
 
+// Profile README configuration options
+export interface ProfileConfig {
+  includeStats: boolean;
+  includeTopLanguages: boolean;
+  includeProjects: boolean;
+  includeSkills: boolean;
+  includeContact: boolean;
+  includeSocials: boolean;
+}
+
 // Profile README specific data
 export interface ProfileReadmeData {
   username: string;

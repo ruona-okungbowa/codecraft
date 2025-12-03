@@ -113,6 +113,10 @@ function matchesPriority(
  * Applies all active filters to the recommendations list
  * Uses AND logic - projects must match ALL active filters
  */
+/**
+ * Apply filters to project recommendations using AND logic
+ * All active filters must match for a project to be included
+ */
 export function applyFilters(
   recommendations: ProjectRecommendation[],
   filters: FilterState

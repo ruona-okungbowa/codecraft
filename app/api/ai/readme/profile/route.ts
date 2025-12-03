@@ -4,8 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateProfileReadme } from "@/lib/readme/generation";
 import { researchProfileReadmeBestPracticesWithCache } from "@/lib/readme/mcp-research";
-import { ReadmeTemplate } from "@/types/readme";
-import { ProfileConfig } from "@/components/readme/ProfileConfigSelector";
+import { ReadmeTemplate, ProfileConfig } from "@/types/readme";
 
 export async function POST(request: NextRequest) {
   try {

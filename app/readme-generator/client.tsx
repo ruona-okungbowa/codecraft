@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Project } from "@/types";
-import { ReadmeTemplate } from "@/types/readme";
+import { ReadmeTemplate, ProfileConfig } from "@/types/readme";
 import CollapsibleSidebar from "@/components/CollapsibleSidebar";
 import { marked } from "marked";
 
@@ -15,15 +15,6 @@ export interface ProjectConfig {
   license: boolean;
   badges: boolean;
   demo: boolean;
-}
-
-export interface ProfileConfig {
-  includeStats: boolean;
-  includeTopLanguages: boolean;
-  includeProjects: boolean;
-  includeSkills: boolean;
-  includeContact: boolean;
-  includeSocials: boolean;
 }
 
 export default function ReadmeClient() {
@@ -335,12 +326,8 @@ export default function ReadmeClient() {
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="font-semibold text-red-900">Error</h4>
-                    <p className="text-sm text-red-700 mt-1">{error}</p>
-                  </div>
+                <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700">
+                  {error}
                 </div>
               )}
             </div>

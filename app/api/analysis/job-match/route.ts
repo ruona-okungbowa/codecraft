@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { jobDescription } = body;
+    const { jobDescription, jobTitle, companyName, saveMatch = true } = body;
 
     if (!jobDescription) {
       return NextResponse.json(
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            "You are an expert career advisor analyzing job matches. Return your response as valid JSON only.",
+            "You are an expert career advisor analysing job matches. Return your response as valid JSON only.",
         },
         {
           role: "user",
@@ -58,10 +58,11 @@ Candidate's Skills:
 ${userSkills.join(", ")}
 
 Candidate's Projects:
-${projects.map((p) => `- ${p.name}: ${p.description || "No description"}`).join("\n")}
+${projects.map((p) => `- ${p.id}: ${p.name} - ${p.description || "No description"}`).join("\n")}
 
 Provide a detailed match analysis in JSON format:
 {
+  "jobTitle": "extracted job title from description",
   "matchPercentage": number (0-100),
   "matchedSkills": ["skill1", "skill2"],
   "missingSkills": [
@@ -72,7 +73,22 @@ Provide a detailed match analysis in JSON format:
   "recommendations": [
     {"title": "Title", "description": "Description"}
   ],
-  "summary": "brief summary of the match"
+  "summary": "brief summary of the match",
+  "projectMappings": [
+    {
+      "projectId": "project-uuid",
+      "projectName": "project name",
+      "matchedSkills": ["skill1", "skill2"],
+      "relevanceScore": number (0-100)
+    }
+  ],
+  "interviewQuestions": [
+    {
+      "question": "Sample interview question",
+      "category": "technical|behavioral|system-design",
+      "difficulty": "easy|medium|hard"
+    }
+  ]
 }
 
 Be honest and accurate. Consider:
@@ -81,11 +97,13 @@ Be honest and accurate. Consider:
 - Project complexity and relevance
 - Technology stack alignment
 - Identify bonus skills the candidate has that aren't required but add value
-- Prioritize missing skills as high, medium, or low based on job requirements`,
+- Prioritise missing skills as high, medium, or low based on job requirements
+- Map each project to relevant skills and score its relevance (0-100)
+- Generate 5-8 interview questions based on the job requirements and candidate's background`,
         },
       ],
       temperature: 0.7,
-      max_tokens: 1500,
+      max_tokens: 2500,
       response_format: { type: "json_object" },
     });
 
@@ -97,9 +115,37 @@ Be honest and accurate. Consider:
 
     const result = JSON.parse(responseText);
 
+    // Save to database if requested
+    if (saveMatch) {
+      const { data: savedMatch, error: saveError } = await supabase
+        .from("job_matches")
+        .insert({
+          user_id: user.id,
+          job_title: jobTitle || result.jobTitle || "Untitled Position",
+          company_name: companyName,
+          job_description: jobDescription,
+          match_percentage: result.matchPercentage,
+          matched_skills: result.matchedSkills,
+          missing_skills: result.missingSkills,
+          bonus_skills: result.bonusSkills,
+          recommendations: result.recommendations,
+          summary: result.summary,
+          project_mappings: result.projectMappings || [],
+          interview_questions: result.interviewQuestions || [],
+        })
+        .select()
+        .single();
+
+      if (saveError) {
+        console.error("Error saving job match:", saveError);
+      } else {
+        result.matchId = savedMatch.id;
+      }
+    }
+
     return NextResponse.json(result);
   } catch (error) {
-    console.error("Error analyzing job match:", error);
+    console.error("Error analysing job match:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
