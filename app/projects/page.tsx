@@ -566,7 +566,7 @@ export default function ProjectsPage() {
                     {/* Actions */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4">
                       <Link
-                        href={`/projects/${project.id}?tab=story`}
+                        href={`/projects/${project.id}`}
                         className="flex-1 text-xs sm:text-sm text-center font-semibold py-2.5 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 min-w-0"
                         style={{
                           backgroundColor: "rgba(76, 150, 225, 0.1)",
@@ -576,7 +576,7 @@ export default function ProjectsPage() {
                         Generate STAR
                       </Link>
                       <Link
-                        href={`/projects/${project.id}?tab=readme`}
+                        href={`/projects/${project.id}`}
                         className="flex-1 text-xs sm:text-sm text-center font-semibold py-2.5 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 min-w-0"
                         style={{
                           backgroundColor: "rgba(76, 150, 225, 0.1)",

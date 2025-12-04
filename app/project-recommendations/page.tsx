@@ -522,6 +522,92 @@ export default function ProjectRecommendationsPage() {
             </button>
           </div>
 
+          {/* Saved Projects Section */}
+          {savedProjects.size > 0 && (
+            <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Saved Projects
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    {savedProjects.size} project
+                    {savedProjects.size !== 1 ? "s" : ""} saved for later
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Array.from(savedProjects).map((projectId) => {
+                  const project = recommendations.find(
+                    (r) => r.id === projectId
+                  );
+                  if (!project) return null;
+
+                  return (
+                    <div
+                      key={projectId}
+                      className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                          {project.name}
+                        </h3>
+                        <button
+                          onClick={() => handleSave(projectId)}
+                          className="text-gray-400 hover:text-error-600 transition-colors"
+                          title="Remove from saved"
+                        >
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                          </svg>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                        {project.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span
+                          className="text-xs px-2 py-1 rounded-full font-medium"
+                          style={{
+                            backgroundColor:
+                              project.priority === "high"
+                                ? "#fee2e2"
+                                : project.priority === "medium"
+                                  ? "#fef3c7"
+                                  : "#dbeafe",
+                            color:
+                              project.priority === "high"
+                                ? "#991b1b"
+                                : project.priority === "medium"
+                                  ? "#92400e"
+                                  : "#1e40af",
+                          }}
+                        >
+                          {project.priority}
+                        </span>
+                        <button
+                          onClick={() => handleStart(projectId)}
+                          className="text-xs font-medium px-3 py-1 rounded-lg transition-colors"
+                          style={{
+                            backgroundColor: "#4c96e1",
+                            color: "white",
+                          }}
+                        >
+                          Start
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Filter Bar */}
           <FilterBar
             filters={filters}

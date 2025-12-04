@@ -187,6 +187,11 @@ export function generatePortfolioHTML(
         }
       }
 
+      /* Smooth Scroll */
+      html {
+        scroll-behavior: smooth;
+      }
+
       /* Animations */
       @keyframes fadeInUp {
         from {
@@ -209,19 +214,19 @@ export function generatePortfolioHTML(
       }
 
       .fade-in-up {
-        animation: fadeInUp 0.6s ease-out forwards;
+        animation: fadeInUp 0.8s ease-out forwards;
       }
 
       .fade-in {
-        animation: fadeIn 0.6s ease-out forwards;
+        animation: fadeIn 0.8s ease-out forwards;
       }
 
       .animate-on-scroll {
         opacity: 0;
         transform: translateY(30px);
         transition:
-          opacity 0.6s ease-out,
-          transform 0.6s ease-out;
+          opacity 0.8s ease-out,
+          transform 0.8s ease-out;
       }
 
       .animate-on-scroll.visible {
@@ -413,47 +418,80 @@ export function generatePortfolioHTML(
          ============================================ -->
     <section
       id="home"
-      class="max-w-4xl mx-auto px-6 py-32 pt-40 min-h-screen flex flex-col justify-center"
+      class="max-w-6xl mx-auto px-6 py-20 pt-32 min-h-screen flex items-center"
     >
-      <!-- EDIT HERE: Your name -->
-      <h1
-        class="text-5xl md:text-7xl font-bold mb-6 fade-in-up"
-        style="animation-delay: 0.1s; ${isDark ? "background: linear-gradient(to right, #f1f5f9, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" : "color: #050815;"}"
-      >
-        ${name}
-      </h1>
-      <!-- EDIT HERE: Your job title -->
-      <p
-        class="text-xl md:text-3xl mb-8 font-semibold fade-in-up"
-        style="animation-delay: 0.3s; color: ${selectedColor.primary};"
-      >
-        Software Engineer
-      </p>
-      <!-- EDIT HERE: Your bio/introduction -->
-      <p
-        class="text-base md:text-lg leading-relaxed mb-10 max-w-2xl fade-in-up"
-        style="animation-delay: 0.5s; color: ${isDark ? "#cbd5e1" : "#1e293b"};"
-      >
-        ${bio}
-      </p>
-      <div class="flex flex-col sm:flex-row gap-4 items-center justify-center sm:justify-start">
-      <a
-        href="#projects"
-        class="inline-block text-white px-8 py-4 rounded-lg font-semibold transition-all hover:scale-105 w-fit fade-in-up"
-        style="animation-delay: 0.7s; background-color: ${selectedColor.primary};"
-        onmouseover="this.style.backgroundColor='${selectedColor.hover}'"
-        onmouseout="this.style.backgroundColor='${selectedColor.primary}'"
-      >
-        View my Work
-      </a>
-      <a href="https://github.com/${githubUsername}" 
-               target="_blank"
-               class="inline-block px-8 py-4 rounded-lg font-semibold transition-all hover:scale-105 w-fit fade-in-up"
-               style="background-color: ${isDark ? `${selectedColor.primary}33` : `${selectedColor.primary}1a`}; color: ${isDark ? selectedColor.light : selectedColor.primary}; border: 2px solid ${selectedColor.primary}4d;"
-               onmouseover="this.style.backgroundColor='${isDark ? `${selectedColor.primary}4d` : `${selectedColor.primary}33`}'"
-               onmouseout="this.style.backgroundColor='${isDark ? `${selectedColor.primary}33` : `${selectedColor.primary}1a`}'">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
+        <!-- Left Column: Content -->
+        <div>
+          <!-- EDIT HERE: Your name -->
+          <h1
+            class="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 fade-in-up leading-tight"
+            style="animation-delay: 0.1s; ${isDark ? "background: linear-gradient(to right, #f1f5f9, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" : "color: #050815;"}"
+          >
+            ${name}
+          </h1>
+          <!-- EDIT HERE: Your job title -->
+          <p
+            class="text-2xl md:text-3xl mb-6 font-semibold fade-in-up"
+            style="animation-delay: 0.3s; color: ${selectedColor.primary};"
+          >
+            Software Engineer
+          </p>
+          <!-- EDIT HERE: Your bio/introduction -->
+          <p
+            class="text-lg md:text-xl leading-relaxed mb-10 fade-in-up"
+            style="animation-delay: 0.5s; color: ${isDark ? "#cbd5e1" : "#4a5568"}; line-height: 1.8;"
+          >
+            ${bio}
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 fade-in-up" style="animation-delay: 0.7s;">
+            <a
+              href="#projects"
+              class="inline-flex items-center justify-center text-white px-8 py-4 rounded-lg font-semibold transition-all hover:scale-105 shadow-lg"
+              style="background-color: ${selectedColor.primary}; box-shadow: 0 10px 25px ${selectedColor.primary}40;"
+              onmouseover="this.style.backgroundColor='${selectedColor.hover}'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 35px ${selectedColor.primary}50';"
+              onmouseout="this.style.backgroundColor='${selectedColor.primary}'; this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px ${selectedColor.primary}40';"
+            >
+              View My Work
+            </a>
+            <a href="https://github.com/${githubUsername}" 
+              target="_blank"
+              class="inline-flex items-center justify-center px-8 py-4 rounded-lg font-semibold transition-all hover:scale-105"
+              style="background-color: ${isDark ? `${selectedColor.primary}33` : `${selectedColor.primary}1a`}; color: ${isDark ? selectedColor.light : selectedColor.primary}; border: 2px solid ${selectedColor.primary};"
+              onmouseover="this.style.backgroundColor='${selectedColor.primary}'; this.style.color='white';"
+              onmouseout="this.style.backgroundColor='${isDark ? `${selectedColor.primary}33` : `${selectedColor.primary}1a`}'; this.style.color='${isDark ? selectedColor.light : selectedColor.primary}';">
               GitHub Profile
             </a>
+          </div>
+        </div>
+
+        <!-- Right Column: Visual Element -->
+        <div class="hidden lg:block fade-in-up" style="animation-delay: 0.9s;">
+          <div class="relative">
+            <div class="absolute inset-0 rounded-2xl" style="background: linear-gradient(135deg, ${selectedColor.primary}40 0%, ${selectedColor.hover}40 100%); filter: blur(40px); opacity: 0.6;"></div>
+            <div class="relative rounded-2xl p-8 backdrop-blur-sm" style="background: ${isDark ? "rgba(30, 41, 59, 0.5)" : "rgba(255, 255, 255, 0.8)"}; border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : selectedColor.borderLight};">
+              <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-3 h-3 rounded-full" style="background-color: #10b981;"></div>
+                  <div class="h-4 rounded" style="background: ${isDark ? "rgba(203, 213, 225, 0.3)" : "rgba(148, 163, 184, 0.3)"}; width: 60%;"></div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-3 h-3 rounded-full" style="background-color: ${selectedColor.primary};"></div>
+                  <div class="h-4 rounded" style="background: ${isDark ? "rgba(203, 213, 225, 0.3)" : "rgba(148, 163, 184, 0.3)"}; width: 80%;"></div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-3 h-3 rounded-full" style="background-color: #f59e0b;"></div>
+                  <div class="h-4 rounded" style="background: ${isDark ? "rgba(203, 213, 225, 0.3)" : "rgba(148, 163, 184, 0.3)"}; width: 45%;"></div>
+                </div>
+                <div class="mt-8 p-6 rounded-xl" style="background: ${isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(248, 250, 252, 0.8)"}; border: 1px solid ${isDark ? "rgba(51, 65, 85, 0.5)" : selectedColor.borderLight};">
+                  <div class="text-4xl mb-4">💻</div>
+                  <div class="h-3 rounded mb-3" style="background: ${isDark ? "rgba(203, 213, 225, 0.2)" : "rgba(148, 163, 184, 0.2)"}; width: 90%;"></div>
+                  <div class="h-3 rounded" style="background: ${isDark ? "rgba(203, 213, 225, 0.2)" : "rgba(148, 163, 184, 0.2)"}; width: 70%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -462,11 +500,14 @@ export function generatePortfolioHTML(
          PROJECTS SECTION - Showcase Your Work
          EDIT HERE: Add, remove, or modify projects
          ============================================ -->
-    ${showSections.projects ? `<section id="projects" class="py-16">` : "<!-- Projects section hidden -->"}
-      <div class="max-w-4xl mx-auto px-6 mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold animate-on-scroll">
+    ${showSections.projects ? `<section id="projects" class="py-20">` : "<!-- Projects section hidden -->"}
+      <div class="max-w-4xl mx-auto px-6 mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold animate-on-scroll mb-4" style="color: ${isDark ? "#f1f5f9" : "#000000"};">
           Featured Projects
         </h2>
+        <p class="text-lg animate-on-scroll" style="color: ${isDark ? "#94a3b8" : "#6b7280"}; animation-delay: 0.2s;">
+          A selection of my recent work
+        </p>
       </div>
 
       <div class="relative">
@@ -578,10 +619,15 @@ export function generatePortfolioHTML(
          To add a skill: Copy a skill-badge div and change the skill name
          Icons are from devicon.dev - find your skill's icon class there
          ============================================ -->
-    <section id="skills" class="max-w-4xl mx-auto px-6 py-20 relative z-10">
-      <h2 class="text-4xl md:text-5xl font-bold mb-12 animate-on-scroll">
-        Skills & Technologies
-      </h2>
+    <section id="skills" class="max-w-4xl mx-auto px-6 py-24 relative z-10">
+      <div class="mb-16">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 animate-on-scroll" style="color: ${isDark ? "#f1f5f9" : "#000000"};">
+          Skills & Technologies
+        </h2>
+        <p class="text-lg animate-on-scroll" style="color: ${isDark ? "#94a3b8" : "#6b7280"}; animation-delay: 0.2s;">
+          Tools and technologies I work with
+        </p>
+      </div>
     
       <!-- Skills Grid -->
       <div class="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
@@ -620,10 +666,15 @@ export function generatePortfolioHTML(
          ABOUT SECTION - Tell Your Story
          EDIT HERE: Update your about text and social links
          ============================================ -->
-    <section id="about" class="max-w-4xl mx-auto px-6 py-20">
-      <h2 class="text-4xl md:text-5xl font-bold mb-12 animate-on-scroll">
-        About Me
-      </h2>
+    <section id="about" class="max-w-4xl mx-auto px-6 py-24">
+      <div class="mb-12">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 animate-on-scroll" style="color: ${isDark ? "#f1f5f9" : "#000000"};">
+          About Me
+        </h2>
+        <p class="text-lg animate-on-scroll" style="color: ${isDark ? "#94a3b8" : "#6b7280"}; animation-delay: 0.2s;">
+          Get to know me better
+        </p>
+      </div>
       <div
         class="rounded-2xl p-8 md:p-12 animate-on-scroll"
         style="background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%)"}; border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : selectedColor.borderLight}; box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};"
