@@ -22,12 +22,28 @@ export function calculateJobMatch(
   // Extract all skills from user's projects
   const userSkills = new Set<string>();
 
+  // Auto-add Git since users have GitHub accounts
+  userSkills.add("git");
+  userSkills.add("version control");
+  userSkills.add("github");
+
   userProjects.forEach((project) => {
     // Add languages from project
     if (project.languages) {
       Object.keys(project.languages).forEach((lang) => {
         userSkills.add(lang.toLowerCase());
       });
+    }
+
+    // Detect frameworks, tools, and responsive design from project description
+    if (project.description) {
+      const { skills: detectedSkills, hasResponsive } =
+        detectSkillsInDescription(project.description);
+      detectedSkills.forEach((skill) => userSkills.add(skill));
+
+      if (hasResponsive) {
+        userSkills.add("responsive design");
+      }
     }
   });
 
@@ -98,4 +114,86 @@ export function calculateJobMatch(
       totalMatched: matchedSkills.length,
     },
   };
+}
+
+/**
+ * Detect frameworks, tools, and responsive design from project description
+ */
+function detectSkillsInDescription(description: string): {
+  skills: string[];
+  hasResponsive: boolean;
+} {
+  // Validate input
+  if (!description || typeof description !== "string") {
+    return { skills: [], hasResponsive: false };
+  }
+
+  const skills: string[] = [];
+  const lowerText = description.toLowerCase();
+
+  // Framework patterns to detect
+  const frameworkPatterns: Record<string, string[]> = {
+    react: ["react", "reactjs", "react.js"],
+    "next.js": ["next.js", "nextjs"],
+    vue: ["vue", "vuejs", "vue.js"],
+    angular: ["angular"],
+    svelte: ["svelte"],
+    "node.js": ["node", "nodejs", "node.js"],
+    express: ["express", "expressjs"],
+    django: ["django"],
+    flask: ["flask"],
+    fastapi: ["fastapi"],
+    spring: ["spring", "spring boot"],
+    laravel: ["laravel"],
+    rails: ["rails", "ruby on rails"],
+    tailwind: ["tailwind", "tailwindcss"],
+    bootstrap: ["bootstrap"],
+    mongodb: ["mongodb", "mongo"],
+    postgresql: ["postgresql", "postgres"],
+    mysql: ["mysql"],
+    redis: ["redis"],
+    firebase: ["firebase"],
+    supabase: ["supabase"],
+    docker: ["docker"],
+    kubernetes: ["kubernetes", "k8s"],
+    aws: ["aws", "amazon web services"],
+    azure: ["azure"],
+    gcp: ["gcp", "google cloud"],
+    redux: ["redux"],
+    graphql: ["graphql"],
+    "rest api": ["rest api", "restful api", "restful"],
+    typescript: ["typescript"],
+    "react native": ["react native"],
+  };
+
+  // Check for each framework pattern
+  Object.entries(frameworkPatterns).forEach(([skill, patterns]) => {
+    for (const pattern of patterns) {
+      if (lowerText.includes(pattern)) {
+        skills.push(skill);
+        break;
+      }
+    }
+  });
+
+  // Detect responsive design
+  const responsiveKeywords = [
+    "responsive",
+    "mobile-friendly",
+    "mobile friendly",
+    "mobile responsive",
+    "adaptive design",
+    "media queries",
+    "mobile-first",
+    "mobile first",
+    "cross-device",
+    "multi-device",
+    "tablet",
+    "smartphone",
+  ];
+  const hasResponsive = responsiveKeywords.some((keyword) =>
+    lowerText.includes(keyword)
+  );
+
+  return { skills, hasResponsive };
 }

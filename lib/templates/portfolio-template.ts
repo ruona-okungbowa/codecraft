@@ -17,14 +17,56 @@ export function generatePortfolioHTML(
   colorMode?: "light" | "dark",
   accentColor?: "blue" | "purple" | "green" | "orange" | "pink" | "red"
 ): string {
-  // Color mappings
+  // Color mappings with light mode backgrounds
   const colors = {
-    blue: { primary: "#4c96e1", hover: "#3a7bc8", light: "#e3f2fd" },
-    purple: { primary: "#9333ea", hover: "#7e22ce", light: "#f3e8ff" },
-    green: { primary: "#10b981", hover: "#059669", light: "#d1fae5" },
-    orange: { primary: "#f97316", hover: "#ea580c", light: "#ffedd5" },
-    pink: { primary: "#ec4899", hover: "#db2777", light: "#fce7f3" },
-    red: { primary: "#ef4444", hover: "#dc2626", light: "#fee2e2" },
+    blue: {
+      primary: "#4c96e1",
+      hover: "#3a7bc8",
+      light: "#e3f2fd",
+      bgLight: "#eaedfb",
+      bgLightGradient: "#d6daf5",
+      borderLight: "#c5cae9",
+    },
+    purple: {
+      primary: "#9333ea",
+      hover: "#7e22ce",
+      light: "#f3e8ff",
+      bgLight: "#f3e8ff",
+      bgLightGradient: "#e9d5ff",
+      borderLight: "#d8b4fe",
+    },
+    green: {
+      primary: "#10b981",
+      hover: "#059669",
+      light: "#d1fae5",
+      bgLight: "#ecfdf5",
+      bgLightGradient: "#d1fae5",
+      borderLight: "#a7f3d0",
+    },
+    orange: {
+      primary: "#f97316",
+      hover: "#ea580c",
+      light: "#ffedd5",
+      bgLight: "#fff7ed",
+      bgLightGradient: "#ffedd5",
+      borderLight: "#fed7aa",
+    },
+    pink: {
+      primary: "#ec4899",
+      hover: "#db2777",
+      light: "#fce7f3",
+      bgLight: "#fdf2f8",
+      bgLightGradient: "#fce7f3",
+      borderLight: "#fbcfe8",
+    },
+    red: {
+      primary: "#ef4444",
+      hover: "#dc2626",
+      light: "#fee2e2",
+      bgLight: "#fef2f2",
+      bgLightGradient: "#fee2e2",
+      borderLight: "#fecaca",
+    },
   };
 
   const selectedColor = colors[accentColor || "blue"];
@@ -90,10 +132,10 @@ export function generatePortfolioHTML(
         --accent-primary: ${selectedColor.primary};
         --accent-hover: ${selectedColor.hover};
         --accent-light: ${selectedColor.light};
-        --bg-primary: ${isDark ? "#0f172a" : "#ffffff"};
-        --bg-secondary: ${isDark ? "#1e293b" : "#f8fafc"};
+        --bg-primary: ${isDark ? "#0f172a" : "#f1f1f1"};
+        --bg-secondary: ${isDark ? "#1e293b" : "#2d3748"};
         --text-primary: ${isDark ? "#f1f5f9" : "#0f172a"};
-        --text-secondary: ${isDark ? "#cbd5e1" : "#475569"};
+        --text-secondary: ${isDark ? "#cbd5e1" : "#1f242b"};
         --border-color: ${isDark ? "#334155" : "#e2e8f0"};
       }
 
@@ -101,7 +143,8 @@ export function generatePortfolioHTML(
          Background Colors & Gradients
          ============================================ */
       body {
-        background: ${isDark ? "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)" : "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)"};
+        /* Dynamic background based on accent color */
+        background: ${isDark ? "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)" : `linear-gradient(180deg, ${selectedColor.bgLight} 0%, ${selectedColor.bgLightGradient} 100%)`};
         color: var(--text-primary);
         position: relative;
         overflow-x: hidden;
@@ -188,7 +231,7 @@ export function generatePortfolioHTML(
 
       /* Navigation links */
       .nav-link:hover {
-        color: ${isDark ? "#f1f5f9" : "#0f172a"} !important;
+        color: ${isDark ? "#f1f5f9" : "#050815"} !important;
       }
 
       /* Mobile menu */
@@ -204,8 +247,8 @@ export function generatePortfolioHTML(
 
       /* Project card enhancements */
       .project-card {
-        background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)"};
-        border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(203, 213, 225, 1)"};
+        background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%)"};
+        border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : selectedColor.borderLight};
         box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};
         transition: all 0.3s ease;
       }
@@ -218,8 +261,8 @@ export function generatePortfolioHTML(
 
       /* Skill badge enhancements */
       .skill-badge {
-        background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)"};
-        border: 1px solid ${isDark ? "rgba(51, 65, 85, 0.5)" : "rgba(203, 213, 225, 1)"};
+        background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%)"};
+        border: 1px solid ${isDark ? "rgba(51, 65, 85, 0.5)" : selectedColor.borderLight};
         box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.05)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};
         transition: all 0.3s ease;
         position: relative;
@@ -282,12 +325,12 @@ export function generatePortfolioHTML(
     <!-- Navigation -->
     <nav
       class="fixed top-0 w-full z-50 backdrop-blur-md"
-      style="background: ${isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(255, 255, 255, 0.9)"}; border-bottom: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(226, 232, 240, 1)"};"
+      style="background: ${isDark ? "rgba(15, 23, 42, 0.9)" : `rgba(${parseInt(selectedColor.bgLight.slice(1, 3), 16)}, ${parseInt(selectedColor.bgLight.slice(3, 5), 16)}, ${parseInt(selectedColor.bgLight.slice(5, 7), 16)}, 0.95)`}; border-bottom: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : selectedColor.borderLight};"
     >
       <div
         class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center"
       >
-        <p class="text-sm font-medium" style="color: ${isDark ? "#94a3b8" : "#64748b"};">
+        <p class="text-sm font-medium" style="color: ${isDark ? "#94a3b8" : "#050815"};">
           ${name}
         </p>
 
@@ -296,19 +339,19 @@ export function generatePortfolioHTML(
           <a
             href="#home"
             class="text-sm transition-all nav-link"
-            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
+            style="color: ${isDark ? "#94a3b8" : "#1e293b"};"
             >Home</a
           >
           <a
             href="#projects"
             class="text-sm transition-all nav-link"
-            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
+            style="color: ${isDark ? "#94a3b8" : "#1e293b"};"
             >Projects</a
           >
           <a
             href="#about"
             class="text-sm transition-all nav-link"
-            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
+            style="color: ${isDark ? "#94a3b8" : "#1e293b"};"
             >About</a
           >
         </div>
@@ -317,7 +360,7 @@ export function generatePortfolioHTML(
         <button
           id="mobile-menu-btn"
           class="md:hidden transition"
-          style="color: ${isDark ? "#94a3b8" : "#64748b"};"
+          style="color: ${isDark ? "#94a3b8" : "#1e293b"};"
         >
           <svg
             class="w-6 h-6"
@@ -339,25 +382,25 @@ export function generatePortfolioHTML(
       <div
         id="mobile-menu"
         class="mobile-menu md:hidden backdrop-blur-md"
-        style="background: ${isDark ? "rgba(30, 41, 59, 0.95)" : "rgba(248, 250, 252, 0.95)"}; border-top: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(226, 232, 240, 1)"};"
+        style="background: ${isDark ? "rgba(30, 41, 59, 0.95)" : `rgba(${parseInt(selectedColor.bgLightGradient.slice(1, 3), 16)}, ${parseInt(selectedColor.bgLightGradient.slice(3, 5), 16)}, ${parseInt(selectedColor.bgLightGradient.slice(5, 7), 16)}, 0.95)`}; border-top: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : selectedColor.borderLight};"
       >
         <div class="max-w-4xl mx-auto px-6 py-4 flex flex-col gap-4">
           <a
             href="#home"
             class="text-sm transition-all mobile-menu-link"
-            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
+            style="color: ${isDark ? "#94a3b8" : "#1e293b"};"
             >Home</a
           >
           <a
             href="#projects"
             class="text-sm transition-all mobile-menu-link"
-            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
+            style="color: ${isDark ? "#94a3b8" : "#1e293b"};"
             >Projects</a
           >
           <a
             href="#about"
             class="text-sm transition-all mobile-menu-link"
-            style="color: ${isDark ? "#94a3b8" : "#64748b"};"
+            style="color: ${isDark ? "#94a3b8" : "#1e293b"};"
             >About</a
           >
         </div>
@@ -374,36 +417,41 @@ export function generatePortfolioHTML(
     >
       <!-- EDIT HERE: Your name -->
       <h1
-        class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent fade-in-up"
-        style="animation-delay: 0.1s"
+        class="text-5xl md:text-7xl font-bold mb-6 fade-in-up"
+        style="animation-delay: 0.1s; ${isDark ? "background: linear-gradient(to right, #f1f5f9, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" : "color: #050815;"}"
       >
         ${name}
       </h1>
       <!-- EDIT HERE: Your job title -->
       <p
-        class="text-xl md:text-3xl text-blue-400 mb-8 font-semibold fade-in-up"
-        style="animation-delay: 0.3s"
+        class="text-xl md:text-3xl mb-8 font-semibold fade-in-up"
+        style="animation-delay: 0.3s; color: ${selectedColor.primary};"
       >
         Software Engineer
       </p>
       <!-- EDIT HERE: Your bio/introduction -->
       <p
-        class="text-base md:text-lg text-gray-300 leading-relaxed mb-10 max-w-2xl fade-in-up"
-        style="animation-delay: 0.5s"
+        class="text-base md:text-lg leading-relaxed mb-10 max-w-2xl fade-in-up"
+        style="animation-delay: 0.5s; color: ${isDark ? "#cbd5e1" : "#1e293b"};"
       >
         ${bio}
       </p>
       <div class="flex flex-col sm:flex-row gap-4 items-center justify-center sm:justify-start">
       <a
         href="#projects"
-        class="inline-block bg-blue-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-600 transition-all hover:scale-105 w-fit fade-in-up"
-        style="animation-delay: 0.7s"
+        class="inline-block text-white px-8 py-4 rounded-lg font-semibold transition-all hover:scale-105 w-fit fade-in-up"
+        style="animation-delay: 0.7s; background-color: ${selectedColor.primary};"
+        onmouseover="this.style.backgroundColor='${selectedColor.hover}'"
+        onmouseout="this.style.backgroundColor='${selectedColor.primary}'"
       >
         View my Work
       </a>
       <a href="https://github.com/${githubUsername}" 
                target="_blank"
-               class="inline-block bg-blue-200 text-black px-8 py-4 rounded-lg font-semibold hover:bg-blue-100 transition-all hover:scale-105 w-fit fade-in-up">
+               class="inline-block px-8 py-4 rounded-lg font-semibold transition-all hover:scale-105 w-fit fade-in-up"
+               style="background-color: ${isDark ? `${selectedColor.primary}33` : `${selectedColor.primary}1a`}; color: ${isDark ? selectedColor.light : selectedColor.primary}; border: 2px solid ${selectedColor.primary}4d;"
+               onmouseover="this.style.backgroundColor='${isDark ? `${selectedColor.primary}4d` : `${selectedColor.primary}33`}'"
+               onmouseout="this.style.backgroundColor='${isDark ? `${selectedColor.primary}33` : `${selectedColor.primary}1a`}'">
               GitHub Profile
             </a>
       </div>
@@ -445,10 +493,10 @@ export function generatePortfolioHTML(
                   <div class="flex flex-col md:flex-row gap-8">
                     <!-- Main Content -->
                     <div class="flex-1">
-                      <h3 class="text-3xl md:text-4xl font-bold text-blue-400 mb-4">${project.name}</h3>
-                      <p class="text-gray-300 leading-relaxed mb-6">${project.description}</p>
+                      <h3 class="text-3xl md:text-4xl font-bold mb-4" style="color: ${selectedColor.primary};">${project.name}</h3>
+                      <p class="leading-relaxed mb-6" style="color: ${isDark ? "#cbd5e1" : "#1e293b"};">${project.description}</p>
                       <div class="flex gap-4 mb-6">
-                        <a href="${project.url}" target="_blank" class="flex items-center gap-2 text-gray-300 hover:text-blue-400 transition">
+                        <a href="${project.url}" target="_blank" class="flex items-center gap-2 transition" style="color: ${isDark ? "#cbd5e1" : "#1e293b"};" onmouseover="this.style.color='${selectedColor.primary}'" onmouseout="this.style.color='${isDark ? "#cbd5e1" : "#1e293b"}'">
                           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                           </svg>
@@ -465,9 +513,9 @@ export function generatePortfolioHTML(
                           <svg class="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                           </svg>
-                          <span class="text-3xl font-bold text-white">${project.stars || 0}</span>
+                          <span class="text-3xl font-bold" style="color: ${isDark ? "#f1f5f9" : "#050815"};">${project.stars || 0}</span>
                         </div>
-                        <p class="text-sm text-gray-400">Stars</p>
+                        <p class="text-sm" style="color: ${isDark ? "#94a3b8" : "#1e293b"};">Stars</p>
                       </div>
 
                       <!-- Forks -->
@@ -476,9 +524,9 @@ export function generatePortfolioHTML(
                           <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 16 16">
                             <path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/>
                           </svg>
-                          <span class="text-2xl font-bold text-white">${project.forks || 0}</span>
+                          <span class="text-2xl font-bold" style="color: ${isDark ? "#f1f5f9" : "#050815"};">${project.forks || 0}</span>
                         </div>
-                        <p class="text-sm text-gray-400">Forks</p>
+                        <p class="text-sm" style="color: ${isDark ? "#94a3b8" : "#1e293b"};">Forks</p>
                       </div>
 
                       <!-- Last Updated -->
@@ -488,21 +536,21 @@ export function generatePortfolioHTML(
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                           </svg>
                         </div>
-                        <p class="text-sm font-medium text-white">${lastUpdate}</p>
-                        <p class="text-xs text-gray-400">Updated</p>
+                        <p class="text-sm font-medium" style="color: ${isDark ? "#f1f5f9" : "#050815"};">${lastUpdate}</p>
+                        <p class="text-xs" style="color: ${isDark ? "#94a3b8" : "#1e293b"};">Updated</p>
                       </div>
 
                       <!-- Language Breakdown -->
                       <div>
-                        <p class="text-sm text-gray-400 mb-3 text-center">Languages</p>
+                        <p class="text-sm mb-3 text-center" style="color: ${isDark ? "#94a3b8" : "#1e293b"};">Languages</p>
                         <div class="space-y-2">
                           ${topLangs
                             .map(
                               ([lang, percent]) => `
                             <div>
                               <div class="flex justify-between text-xs mb-1">
-                                <span class="text-gray-300">${lang}</span>
-                                <span class="text-gray-400">${Math.round(percent)}%</span>
+                                <span style="color: ${isDark ? "#cbd5e1" : "#1e293b"};">${lang}</span>
+                                <span style="color: ${isDark ? "#94a3b8" : "#1e293b"};">${Math.round(percent)}%</span>
                               </div>
                               <div class="lang-bar">
                                 <div class="lang-bar-fill" style="width: ${percent}%"></div>
@@ -578,14 +626,14 @@ export function generatePortfolioHTML(
       </h2>
       <div
         class="rounded-2xl p-8 md:p-12 animate-on-scroll"
-        style="background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 100%)"}; border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(203, 213, 225, 1)"}; box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};"
+        style="background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 1) 0%, rgba(15, 23, 42, 1) 100%)" : "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%)"}; border: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : selectedColor.borderLight}; box-shadow: ${isDark ? "0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)" : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.1)"};"
       >
-        <p class="text-lg leading-relaxed mb-8" style="color: ${isDark ? "#cbd5e1" : "#475569"}">
-          Hi, I'm <span style="color: ${isDark ? "#f1f5f9" : "#0f172a"}; font-weight: 600;">${name}</span>, a
+        <p class="text-lg leading-relaxed mb-8" style="color: ${isDark ? "#cbd5e1" : "#1e293b"}">
+          Hi, I'm <span style="color: ${isDark ? "#f1f5f9" : "#050815"}; font-weight: 600;">${name}</span>, a
           passionate Software Engineer with a knack for crafting seamless
           digital experiences.
         </p>
-        <p class="text-lg leading-relaxed mb-10" style="color: ${isDark ? "#cbd5e1" : "#475569"}">
+        <p class="text-lg leading-relaxed mb-10" style="color: ${isDark ? "#cbd5e1" : "#1e293b"}">
           Over the years, I've honed my skills in building robust, user-friendly
           applications that not only meet the needs of users but also push the
           boundaries of what's possible.
@@ -602,7 +650,7 @@ export function generatePortfolioHTML(
           </a>
           ${
             email
-              ? `<a href="mailto:{email}"  class="text-gray-400 hover:text-white transition">
+              ? `<a href="mailto:${email}" class="text-gray-400 hover:text-white transition">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
@@ -614,10 +662,10 @@ export function generatePortfolioHTML(
     </section>
 
     <!-- Footer -->
-    <footer class="mt-20" style="border-top: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : "rgba(226, 232, 240, 1)"}; background: ${isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(248, 250, 252, 0.5)"};">
+    <footer class="mt-20" style="border-top: 1px solid ${isDark ? "rgba(51, 65, 85, 1)" : selectedColor.borderLight}; background: ${isDark ? "rgba(15, 23, 42, 0.5)" : `rgba(${parseInt(selectedColor.bgLightGradient.slice(1, 3), 16)}, ${parseInt(selectedColor.bgLightGradient.slice(3, 5), 16)}, ${parseInt(selectedColor.bgLightGradient.slice(5, 7), 16)}, 0.5)`};">
       <div class="max-w-4xl mx-auto px-6 py-10 text-center">
-        <p class="mb-2" style="color: ${isDark ? "#94a3b8" : "#64748b"};"> © ${new Date().getFullYear()} ${name}. All rights reserved.</p>
-        <p class="text-sm" style="color: ${isDark ? "#64748b" : "#94a3b8"};">Generated with ❤️ CodeCraft </p>
+        <p class="mb-2" style="color: ${isDark ? "#94a3b8" : "#1e293b"};"> © ${new Date().getFullYear()} ${name}. All rights reserved.</p>
+        <p class="text-sm" style="color: ${isDark ? "#64748b" : "#475569"};">Generated with ❤️ CodeCraft </p>
       </div>
     </footer>
 

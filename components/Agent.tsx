@@ -369,8 +369,8 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
         return;
       }
 
-      // Wait for final responses to be saved
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait longer for final responses to be saved (increased from 1s to 3s)
+      await new Promise((resolve) => setTimeout(resolve, 3000));
 
       if (!isMountedRef.current) return;
 
@@ -380,15 +380,27 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
       const toast = (await import("react-hot-toast")).default;
 
       try {
-        // Retry logic for feedback generation (max 3 attempts)
+        // Verify responses are saved before generating feedback
+        const supabase = createClient();
+        const { data: interview } = await supabase
+          .from("interviews")
+          .select("responses, questions")
+          .eq("id", interviewId)
+          .single();
+
+        console.log(
+          `Interview has ${interview?.responses?.length || 0} responses saved`
+        );
+
+        // Retry logic for feedback generation (max 5 attempts with longer waits)
         let attempts = 0;
         let response;
         let lastError;
 
-        while (attempts < 3 && isMountedRef.current) {
+        while (attempts < 5 && isMountedRef.current) {
           attempts++;
           console.log(
-            `Attempting to generate feedback (attempt ${attempts}/3)...`
+            `Attempting to generate feedback (attempt ${attempts}/5)...`
           );
 
           response = await fetch("/api/feedback/generate", {
@@ -404,15 +416,16 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
           const errorData = await response.json();
           lastError = errorData;
 
-          // If responses aren't ready yet, wait and retry
+          // If responses aren't ready yet, wait longer and retry
           if (
             response.status === 400 &&
-            errorData.error?.includes("no responses")
+            (errorData.error?.toLowerCase().includes("no responses") ||
+              errorData.error?.toLowerCase().includes("responses found"))
           ) {
             console.log(
-              `Responses not ready yet, waiting 2 seconds before retry...`
+              `Responses not ready yet (${errorData.details || "no details"}), waiting 3 seconds before retry...`
             );
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 3000));
             continue;
           }
 
@@ -433,9 +446,14 @@ const Agent = ({ userName, interviewId }: AgentProps) => {
                 "Rate limit exceeded. Please try again later."
             );
           }
-          throw new Error(
-            lastError?.error || "Failed to generate feedback after 3 attempts"
-          );
+
+          // Provide more detailed error message
+          const errorMsg =
+            lastError?.error || "Failed to generate feedback after 5 attempts";
+          const errorDetails = lastError?.details
+            ? ` Details: ${lastError.details}`
+            : "";
+          throw new Error(errorMsg + errorDetails);
         }
 
         const data = await response.json();
