@@ -522,6 +522,116 @@ export default function ProjectRecommendationsPage() {
             </button>
           </div>
 
+          {/* Completed Projects Section */}
+          {Array.from(startedProjects.values()).filter(
+            (p) => p.status === "completed"
+          ).length > 0 && (
+            <div className="mb-6 bg-white rounded-xl border border-success-200 shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <span className="text-2xl">🎉</span>
+                    Completed Projects
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    {
+                      Array.from(startedProjects.values()).filter(
+                        (p) => p.status === "completed"
+                      ).length
+                    }{" "}
+                    project
+                    {Array.from(startedProjects.values()).filter(
+                      (p) => p.status === "completed"
+                    ).length !== 1
+                      ? "s"
+                      : ""}{" "}
+                    completed
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Array.from(startedProjects.entries())
+                  .filter(([, progress]) => progress.status === "completed")
+                  .map(([projectId]) => {
+                    const project = recommendations.find(
+                      (r) => r.id === projectId
+                    );
+                    if (!project) return null;
+
+                    return (
+                      <div
+                        key={projectId}
+                        className="p-4 border border-success-200 rounded-lg bg-success-50 hover:border-success-300 transition-colors relative overflow-hidden"
+                      >
+                        {/* Completion Badge */}
+                        <div className="absolute top-2 right-2">
+                          <div className="bg-success-600 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            100%
+                          </div>
+                        </div>
+
+                        <div className="mb-2 pr-16">
+                          <h3 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                            {project.name}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                          {project.description}
+                        </p>
+
+                        {/* Skills Learned */}
+                        <div className="mb-3">
+                          <p className="text-xs font-medium text-gray-700 mb-1">
+                            Skills Learned:
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {project.skillsTaught.slice(0, 3).map((skill) => (
+                              <span
+                                key={skill}
+                                className="text-xs px-2 py-0.5 bg-success-100 text-success-800 rounded-full"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                            {project.skillsTaught.length > 3 && (
+                              <span className="text-xs px-2 py-0.5 bg-success-100 text-success-800 rounded-full">
+                                +{project.skillsTaught.length - 3} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-success-200">
+                          <span className="text-xs text-success-700 font-medium">
+                            Completed ✓
+                          </span>
+                          <button
+                            onClick={() => {
+                              // Navigate to project detail page
+                              window.location.href = `/projects?project=${projectId}&tab=details`;
+                            }}
+                            className="text-xs font-medium text-success-700 hover:text-success-900 underline"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
           {/* Saved Projects Section */}
           {savedProjects.size > 0 && (
             <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
