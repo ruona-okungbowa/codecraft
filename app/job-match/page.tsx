@@ -69,6 +69,7 @@ export default function JobMatchPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [showLearningPaths, setShowLearningPaths] = useState(false);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [creatingInterview, setCreatingInterview] = useState(false);
 
   useEffect(() => {
     fetchMatchHistory();
@@ -211,6 +212,49 @@ export default function JobMatchPage() {
       summary: result.summary,
       projectMappings: result.projectMappings,
     });
+  }
+
+  async function handleCreateMockInterview() {
+    if (!result?.interviewQuestions || result.interviewQuestions.length === 0) {
+      return;
+    }
+
+    setCreatingInterview(true);
+    try {
+      const questions = result.interviewQuestions.map(
+        (q, idx) =>
+          `Question ${idx + 1} of ${result.interviewQuestions!.length}: ${q.question}`
+      );
+
+      const response = await fetch("/api/interviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: jobTitle || result.jobTitle || "Job Position",
+          type: "mixed",
+          level: "mid",
+          questions: questions,
+          techstack: result.matchedSkills,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.interview?.id) {
+          alert(
+            "Mock interview created successfully! Check the Mock Interview page."
+          );
+          window.location.href = "/mock-interview";
+        }
+      } else {
+        alert("Failed to create interview. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating interview:", error);
+      alert("An error occurred. Please try again.");
+    } finally {
+      setCreatingInterview(false);
+    }
   }
 
   function getMatchLabel(percentage: number) {
@@ -764,13 +808,23 @@ export default function JobMatchPage() {
                           Practice these questions based on the job requirements
                         </p>
                       </div>
-                      <Link
-                        href="/mock-interview"
-                        className="flex items-center gap-2 px-4 py-2 bg-[#4c96e1] text-white rounded-lg hover:bg-[#3a7bc8] transition-colors text-sm font-semibold"
+                      <button
+                        onClick={handleCreateMockInterview}
+                        disabled={creatingInterview}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#4c96e1] text-white rounded-lg hover:bg-[#3a7bc8] transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Briefcase className="w-4 h-4" />
-                        Start Mock Interview
-                      </Link>
+                        {creatingInterview ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Creating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Briefcase className="w-4 h-4" />
+                            <span>Create Mock Interview</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                     <div className="space-y-3">
                       {result.interviewQuestions.map((q, index) => (
