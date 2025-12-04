@@ -29,7 +29,7 @@ export default function PortfolioPage() {
 
   const [config, setConfig] = useState<PortfolioConfig>({
     selectedProjects: [],
-    colorMode: "dark",
+    colorMode: "dark", // Always dark mode
     accentColor: "blue",
     name: "John Doe",
     bio: "Full-stack developer passionate about building innovative web applications and solving complex problems.",
@@ -420,55 +420,6 @@ export default function PortfolioPage() {
                     </span>
                   </summary>
                   <div className="pt-4 pb-2 border-t border-slate-200 space-y-4">
-                    {/* Color Mode */}
-                    <div>
-                      <label className="block text-sm font-medium text-black mb-2">
-                        Color Mode
-                      </label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() =>
-                            setConfig((prev) => ({
-                              ...prev,
-                              colorMode: "light",
-                            }))
-                          }
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            config.colorMode === "light"
-                              ? "border-[#4c96e1] bg-[#4c96e1]/10"
-                              : "border-slate-200 hover:border-slate-300"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-yellow-500">
-                              light_mode
-                            </span>
-                            <span className="text-sm font-medium">Light</span>
-                          </div>
-                        </button>
-                        <button
-                          onClick={() =>
-                            setConfig((prev) => ({
-                              ...prev,
-                              colorMode: "dark",
-                            }))
-                          }
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            config.colorMode === "dark"
-                              ? "border-[#4c96e1] bg-[#4c96e1]/10"
-                              : "border-slate-200 hover:border-slate-300"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined text-black">
-                              dark_mode
-                            </span>
-                            <span className="text-sm font-medium">Dark</span>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-
                     {/* Accent Color */}
                     <div>
                       <label className="block text-sm font-medium text-black mb-2">
@@ -549,7 +500,7 @@ export default function PortfolioPage() {
                     </button>
                   </div>
                   <div
-                    className={`${previewMode === "mobile" ? "max-w-sm mx-auto" : ""} aspect-[16/10] rounded border overflow-hidden shadow-2xl`}
+                    className={`${previewMode === "mobile" ? "max-w-sm mx-auto" : ""} aspect-16/10 rounded border overflow-hidden shadow-2xl`}
                     style={{
                       background: isDarkMode
                         ? "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)"
@@ -589,38 +540,61 @@ export default function PortfolioPage() {
                       </div>
 
                       {/* Hero Section */}
-                      <div className="px-6 py-12 text-center">
-                        <h1
-                          className="text-3xl font-bold mb-2"
-                          style={{
-                            color: isDarkMode ? "#f1f5f9" : "#0f172a",
-                          }}
-                        >
-                          {config.name || "Your Name"}
-                        </h1>
-                        <p
-                          className="text-sm mb-3 font-semibold"
-                          style={{ color: currentColor.primary }}
-                        >
-                          Software Engineer
-                        </p>
-                        <p
-                          className="text-xs leading-relaxed mb-4 max-w-md mx-auto"
-                          style={{
-                            color: isDarkMode ? "#cbd5e1" : "#64748b",
-                          }}
-                        >
-                          {config.bio ||
-                            "Your bio will appear here. Add a compelling description about yourself."}
-                        </p>
-                        <button
-                          className="text-white px-4 py-2 rounded text-xs font-semibold transition-all"
-                          style={{
-                            backgroundColor: currentColor.primary,
-                          }}
-                        >
-                          View my Work
-                        </button>
+                      <div className="px-6 py-12">
+                        <div className="max-w-2xl">
+                          <h1
+                            className="text-3xl font-bold mb-2"
+                            style={{
+                              color: "#f1f5f9",
+                            }}
+                          >
+                            {config.name || "YOUR NAME"}
+                          </h1>
+                          <p
+                            className="text-sm mb-3 font-light"
+                            style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                          >
+                            Full-Stack Software Engineer | Creative Technologist
+                          </p>
+                          <p
+                            className="text-xs leading-relaxed mb-4"
+                            style={{
+                              color: "rgba(255, 255, 255, 0.85)",
+                            }}
+                          >
+                            {config.bio ||
+                              "I build scalable web applications and interactive experiences with a passion for clean code and user-centric design."}
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              className="text-xs font-semibold px-4 py-2 rounded transition-all"
+                              style={{
+                                backgroundColor: "white",
+                                color: "#1e3a8a",
+                              }}
+                            >
+                              VIEW MY WORK
+                            </button>
+                            <button
+                              className="text-xs font-semibold px-4 py-2 rounded transition-all flex items-center gap-1"
+                              style={{
+                                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                color: "white",
+                                border: "1px solid rgba(255, 255, 255, 0.3)",
+                              }}
+                            >
+                              <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                              </svg>
+                              GITHUB
+                            </button>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Projects Section */}
@@ -693,45 +667,192 @@ export default function PortfolioPage() {
 
                       {/* Skills Section */}
                       {config.sections.skills && (
-                        <div className="px-6 py-4">
+                        <div className="px-6 py-6">
                           <h2
-                            className="text-lg font-bold mb-3"
+                            className="text-lg font-bold mb-4 text-center"
                             style={{
-                              color: isDarkMode ? "#f1f5f9" : "#0f172a",
+                              color: "#f1f5f9",
                             }}
                           >
                             Skills & Technologies
                           </h2>
-                          <div className="flex flex-wrap gap-2">
-                            {[
-                              "JavaScript",
-                              "React",
-                              "Node.js",
-                              "TypeScript",
-                              "Python",
-                            ].map((skill) => (
+                          <div className="relative flex justify-center items-center gap-8 py-4">
+                            {/* Frontend Group */}
+                            <div className="relative flex flex-col items-center">
                               <div
-                                key={skill}
-                                className="border rounded-lg px-3 py-2"
+                                className="w-16 h-16 rounded-full flex items-center justify-center text-[8px] font-bold"
                                 style={{
-                                  backgroundColor: isDarkMode
-                                    ? "#1e293b"
-                                    : "#ffffff",
-                                  borderColor: isDarkMode
-                                    ? "#334155"
-                                    : "#cbd5e1",
+                                  background:
+                                    "linear-gradient(135deg, #667eea, #764ba2)",
+                                  boxShadow:
+                                    "0 0 20px rgba(102, 126, 234, 0.5)",
                                 }}
                               >
-                                <span
-                                  className="text-xs font-medium"
+                                FRONTEND
+                              </div>
+                              {/* Skill nodes around frontend */}
+                              <div className="absolute w-32 h-32 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
                                   style={{
-                                    color: isDarkMode ? "#e2e8f0" : "#334155",
+                                    top: "-10px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
                                   }}
                                 >
-                                  {skill}
-                                </span>
+                                  ⚛️
+                                </div>
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    top: "20%",
+                                    right: "0",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  🟨
+                                </div>
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    bottom: "20%",
+                                    right: "0",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  🎨
+                                </div>
                               </div>
-                            ))}
+                            </div>
+
+                            {/* Backend Group */}
+                            <div className="relative flex flex-col items-center">
+                              <div
+                                className="w-16 h-16 rounded-full flex items-center justify-center text-[8px] font-bold"
+                                style={{
+                                  background:
+                                    "linear-gradient(135deg, #a855f7, #ec4899)",
+                                  boxShadow: "0 0 20px rgba(168, 85, 247, 0.5)",
+                                }}
+                              >
+                                BACKEND
+                              </div>
+                              {/* Skill nodes around backend */}
+                              <div className="absolute w-32 h-32 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    top: "-10px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  🟢
+                                </div>
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    top: "20%",
+                                    right: "0",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  🐍
+                                </div>
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    bottom: "20%",
+                                    right: "0",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  🐘
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* DevTools Group */}
+                            <div className="relative flex flex-col items-center">
+                              <div
+                                className="w-16 h-16 rounded-full flex items-center justify-center text-[7px] font-bold"
+                                style={{
+                                  background:
+                                    "linear-gradient(135deg, #14b8a6, #06b6d4)",
+                                  boxShadow: "0 0 20px rgba(20, 184, 166, 0.5)",
+                                }}
+                              >
+                                DEVOPS
+                              </div>
+                              {/* Skill nodes around devtools */}
+                              <div className="absolute w-32 h-32 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    top: "-10px",
+                                    left: "50%",
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  🐳
+                                </div>
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    top: "20%",
+                                    right: "0",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  ☁️
+                                </div>
+                                <div
+                                  className="absolute w-8 h-8 rounded-full flex items-center justify-center text-[6px] border"
+                                  style={{
+                                    bottom: "20%",
+                                    right: "0",
+                                    backgroundColor: "rgba(15, 30, 50, 0.9)",
+                                    borderColor: "rgba(66, 153, 225, 0.3)",
+                                  }}
+                                >
+                                  🔧
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Connection lines between groups */}
+                            <svg
+                              className="absolute inset-0 w-full h-full pointer-events-none"
+                              style={{ zIndex: 0 }}
+                            >
+                              <line
+                                x1="33%"
+                                y1="50%"
+                                x2="50%"
+                                y2="50%"
+                                stroke="rgba(66, 153, 225, 0.2)"
+                                strokeWidth="1"
+                              />
+                              <line
+                                x1="50%"
+                                y1="50%"
+                                x2="67%"
+                                y2="50%"
+                                stroke="rgba(66, 153, 225, 0.2)"
+                                strokeWidth="1"
+                              />
+                            </svg>
                           </div>
                         </div>
                       )}
