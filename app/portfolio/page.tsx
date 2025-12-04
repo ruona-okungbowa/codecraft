@@ -551,19 +551,11 @@ export default function PortfolioPage() {
                             {config.name || "YOUR NAME"}
                           </h1>
                           <p
-                            className="text-sm mb-3 font-light"
+                            className="text-sm mb-4 font-light leading-relaxed"
                             style={{ color: "rgba(255, 255, 255, 0.9)" }}
                           >
-                            Full-Stack Software Engineer | Creative Technologist
-                          </p>
-                          <p
-                            className="text-xs leading-relaxed mb-4"
-                            style={{
-                              color: "rgba(255, 255, 255, 0.85)",
-                            }}
-                          >
                             {config.bio ||
-                              "I build scalable web applications and interactive experiences with a passion for clean code and user-centric design."}
+                              "Full-stack developer passionate about building innovative web applications and solving complex problems."}
                           </p>
                           <div className="flex gap-2">
                             <button
