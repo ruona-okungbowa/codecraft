@@ -126,7 +126,6 @@ export default function ProjectsPage() {
   const [languageFilter, setLanguageFilter] = useState("all");
   const [sortBy, setSortBy] = useState<SortOption>("updated");
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [generatingReadme, setGeneratingReadme] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -243,44 +242,6 @@ export default function ProjectsPage() {
           ? error.message
           : "Failed to update portfolio status.";
       showError(message);
-    }
-  }
-
-  async function handleGenerateReadme(projectId: string) {
-    setGeneratingReadme(projectId);
-    const { showSuccess, showError, showLoading, dismissToast } = await import(
-      "@/lib/utils/toast"
-    );
-    const toastId = showLoading("Generating README with AI...");
-
-    try {
-      const response = await fetch("/api/ai/readme", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, enhance: false }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to generate README");
-      }
-
-      await response.json();
-      setProjects((prev) =>
-        prev.map((p) => (p.id === projectId ? { ...p, has_readme: true } : p))
-      );
-
-      dismissToast(toastId);
-      showSuccess("README generated successfully!");
-    } catch (error) {
-      dismissToast(toastId);
-      const message =
-        error instanceof Error
-          ? error.message
-          : "An error occurred while generating README";
-      showError(message);
-    } finally {
-      setGeneratingReadme(null);
     }
   }
 
@@ -604,7 +565,8 @@ export default function ProjectsPage() {
 
                     {/* Actions */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-4">
-                      <button
+                      <Link
+                        href={`/projects/${project.id}?tab=story`}
                         className="flex-1 text-xs sm:text-sm text-center font-semibold py-2.5 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 min-w-0"
                         style={{
                           backgroundColor: "rgba(76, 150, 225, 0.1)",
@@ -612,20 +574,17 @@ export default function ProjectsPage() {
                         }}
                       >
                         Generate STAR
-                      </button>
-                      <button
-                        onClick={() => handleGenerateReadme(project.id)}
-                        disabled={generatingReadme === project.id}
-                        className="flex-1 text-xs sm:text-sm text-center font-semibold py-2.5 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 disabled:opacity-50 disabled:cursor-not-allowed min-w-0"
+                      </Link>
+                      <Link
+                        href={`/projects/${project.id}?tab=readme`}
+                        className="flex-1 text-xs sm:text-sm text-center font-semibold py-2.5 px-3 rounded-lg transition-colors hover:bg-[#4c96e1]/20 min-w-0"
                         style={{
                           backgroundColor: "rgba(76, 150, 225, 0.1)",
                           color: "#4c96e1",
                         }}
                       >
-                        {generatingReadme === project.id
-                          ? "Generating..."
-                          : "README"}
-                      </button>
+                        README
+                      </Link>
                       <div className="relative sm:flex-shrink-0">
                         <button
                           onClick={(e) => {
@@ -735,28 +694,26 @@ export default function ProjectsPage() {
 
                       {/* Right: Actions */}
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                        <button
-                          className="text-xs sm:text-sm font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap"
+                        <Link
+                          href={`/projects/${project.id}?tab=story`}
+                          className="text-xs sm:text-sm font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap text-center"
                           style={{
                             backgroundColor: "rgba(76, 150, 225, 0.1)",
                             color: "#4c96e1",
                           }}
                         >
                           Generate STAR
-                        </button>
-                        <button
-                          onClick={() => handleGenerateReadme(project.id)}
-                          disabled={generatingReadme === project.id}
-                          className="text-xs sm:text-sm font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        </Link>
+                        <Link
+                          href={`/projects/${project.id}?tab=readme`}
+                          className="text-xs sm:text-sm font-semibold py-2 px-3 sm:px-4 rounded-lg transition-colors hover:bg-[#4c96e1]/20 whitespace-nowrap text-center"
                           style={{
                             backgroundColor: "rgba(76, 150, 225, 0.1)",
                             color: "#4c96e1",
                           }}
                         >
-                          {generatingReadme === project.id
-                            ? "Generating..."
-                            : "Generate README"}
-                        </button>
+                          README
+                        </Link>
                         <div className="relative">
                           <button
                             onClick={(e) => {
