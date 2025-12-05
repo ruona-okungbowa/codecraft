@@ -1,12 +1,5 @@
-/**
- * Fetches project recommendations from roadmap.sh using MCP
- */
-
 import { ProjectTemplate } from "@/types/recommendations";
 
-/**
- * Fetch projects from roadmap.sh for a specific role
- */
 export async function fetchRoadmapProjects(
   role: string
 ): Promise<ProjectTemplate[]> {
@@ -24,7 +17,6 @@ export async function fetchRoadmapProjects(
       rolePathMap[role.toLowerCase()] || "software-design-architecture";
     const projectsUrl = `https://roadmap.sh/${roadmapPath}/projects`;
 
-    // Use MCP fetch to get the projects page
     const response = await fetch("/api/mcp/fetch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
